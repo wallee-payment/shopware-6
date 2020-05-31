@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xmlns="http://symfony.com/schema/dic/services"
+		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+	<services>
+		<service id="WalleePayment\Storefront\Checkout\Subscriber\CheckoutSubscriber">
+			<argument id="WalleePayment\Core\Settings\Service\SettingsService" type="service"/>
+			<argument id="WalleePayment\Util\PaymentMethodUtil" type="service"/>
+			<argument type="service" id="WalleePayment\Util\Logger"/>
+			<tag name="kernel.event_subscriber"/>
+		</service>
+		<service id="WalleePayment\Storefront\Checkout\Controller\PaymentController" public="true">
+			<argument type="service" id="WalleePayment\Core\Settings\Service\SettingsService"/>
+			<argument type="service" id="WalleePayment\Core\Api\Transaction\Service\TransactionService"/>
+			<argument type="service" id="Shopware\Storefront\Page\GenericPageLoader"/>
+			<argument type="service" id="WalleePayment\Util\Logger"/>
+			<call method="setContainer">
+				<argument type="service" id="service_container"/>
+			</call>
+		</service>
+	</services>
+
+</container>

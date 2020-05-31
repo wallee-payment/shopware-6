@@ -1,0 +1,60 @@
+{
+  "wallee-settings": {
+	"general": {
+	  "descriptionTextModule": "Wallee settings",
+	  "mainMenuItemGeneral": "Wallee"
+	},
+	"header": "Wallee",
+	"messageNotBlank": "This value should not be blank.",
+	"salesChannelCard": {
+	  "button": {
+		"description": "Click this button to enable Wallee and select it as default in the selected SalesChannel",
+		"label": "Set Wallee as default"
+	  }
+	},
+	"settingForm": {
+	  "credentials": {
+		"applicationKey": {
+		  "label": "Application Key",
+		  "tooltipText": "The Application Key is used to authenticate this plugin with the Wallee API."
+		},
+		"cardTitle": "Credentials",
+		"spaceId": {
+		  "label": "Space ID",
+		  "tooltipText": "The space ID is used to authenticate this plugin with the Wallee API."
+		},
+		"userId": {
+		  "label": "User ID",
+		  "tooltipText": "The user ID is used to authenticate this plugin with the Wallee API."
+		}
+	  },
+	  "messageSaveSuccess": "Wallee settings have been saved.",
+	  "messagePaymentMethodConfigurationError": "Wallee PaymentMethodConfiguration could not be saved. Please check your credentials.",
+	  "messagePaymentMethodConfigurationUpdated": "Wallee PaymentMethodConfiguration has been registered.",
+	  "messageWebHookError": "Wallee WebHook could not be saved. Please check your credentials.",
+	  "messageWebHookUpdated": "Wallee WebHook has been updated.",
+	  "options": {
+		"cardTitle": "Options",
+		"integration": {
+		  "label": "Integration",
+		  "options": {
+			"iframe": "Iframe",
+			"payment_page": "Payment Page"
+		  },
+		  "tooltipText": "Integration"
+		},
+		"lineItemConsistencyEnabled": {
+		  "label": "Line item consistency",
+		  "tooltipText": "Line item consistency"
+		},
+		"spaceViewId": {
+		  "label": "Space View ID",
+		  "tooltipText": "Space View ID"
+		}
+	  },
+	  "save": "Save",
+	  "titleError": "Error",
+	  "titleSuccess": "Success"
+	}
+  }
+}

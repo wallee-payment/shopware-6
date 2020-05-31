@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xmlns="http://symfony.com/schema/dic/services"
+		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+	<services>
+		<service id="WalleePayment\Util\LocaleCodeProvider">
+			<argument type="service" id="language.repository"/>
+			<argument type="service" id="WalleePayment\Util\Logger"/>
+		</service>
+
+		<service id="WalleePayment\Util\PaymentMethodUtil">
+			<argument type="service" id="payment_method.repository"/>
+			<argument type="service" id="sales_channel.repository"/>
+			<argument type="service" id="WalleePayment\Util\Logger"/>
+		</service>
+
+		<service id="WalleePayment\Util\Logger" class="Monolog\Logger">
+			<factory service="Shopware\Core\Framework\Log\LoggerFactory" method="createRotating"/>
+			<argument type="string">wallee_payment</argument>
+		</service>
+	</services>
+</container>

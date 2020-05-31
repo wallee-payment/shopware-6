@@ -1,0 +1,121 @@
+{% block wallee_order_detail %}
+<div class="wallee-order-detail">
+	<div v-if="!isLoading">
+		<sw-card :title="$tc('wallee-order.paymentDetails.cardTitle')">
+			<template #grid>
+				{% block wallee_order_actions_section %}
+				<sw-card-section secondary slim>
+					{% block wallee_order_transaction_refunds_action_button %}
+					<sw-button variant="primary"
+							   size="small"
+							   :disabled="transaction.state != 'FULFILL'"
+							   @click="spawnModal('refund')">
+						{{ $tc('wallee-order.buttons.label.refund') }}
+					</sw-button>
+					{% endblock %}
+					{% block wallee_order_transaction_completion_action_button %}
+					<sw-button variant="primary"
+							   size="small"
+							   :disabled="transaction.state != 'AUTHORIZED'"
+							   @click="spawnModal('completion')">
+						{{ $tc('wallee-order.buttons.label.completion') }}
+					</sw-button>
+					{% endblock %}
+					{% block wallee_order_transaction_void_action_button %}
+					<sw-button variant="primary"
+							   size="small"
+							   :disabled="transaction.state != 'AUTHORIZED'"
+							   @click="spawnModal('void')">
+						{{ $tc('wallee-order.buttons.label.void') }}
+					</sw-button>
+					{% endblock %}
+					{% block wallee_order_transaction_download_invoice_action_button %}
+					<sw-button variant="primary"
+							   size="small"
+							   @click="downloadInvoice()">
+						{{ $tc('wallee-order.buttons.label.download-invoice') }}
+					</sw-button>
+					{% endblock %}
+					{% block wallee_order_transaction_download_packing_slip_action_button %}
+					<sw-button variant="primary"
+							   size="small"
+							   @click="downloadPackingSlip()">
+						{{ $tc('wallee-order.buttons.label.download-packing-slip') }}
+					</sw-button>
+					{% endblock %}
+				</sw-card-section>
+				{% endblock %}
+			</template>
+		</sw-card>
+		{% block wallee_order_transaction_history_card %}
+		<sw-card :title="$tc('wallee-order.transactionHistory.cardTitle')">
+			<template #grid>
+
+				{% block wallee_order_transaction_history_grid %}
+				<sw-data-grid :dataSource="transactionData.transactions"
+							  :columns="relatedResourceColumns"
+							  :showActions="false"
+							  :showSelection="false">
+				</sw-data-grid>
+				{% endblock %}
+			</template>
+
+		</sw-card>
+		{% endblock %}
+		{% block wallee_order_transaction_line_items_card %}
+		<sw-card :title="$tc('wallee-order.lineItem.cardTitle')">
+			<template #grid>
+
+				{% block wallee_order_transaction_line_items_grid %}
+				<sw-data-grid :dataSource="lineItems"
+							  :columns="lineItemColumns"
+							  :showActions="false"
+							  :showSelection="false">
+				</sw-data-grid>
+				{% endblock %}
+			</template>
+		</sw-card>
+		{% endblock %}
+		{% block wallee_order_transaction_refunds_card %}
+		<sw-card :title="$tc('wallee-order.refund.cardTitle')">
+			<template #grid>
+
+				{% block wallee_order_transaction_refunds_grid %}
+				<sw-data-grid :dataSource="transactionData.refunds"
+							  :columns="refundColumns"
+							  :showActions="false"
+							  :showSelection="false">
+				</sw-data-grid>
+				{% endblock %}
+			</template>
+
+		</sw-card>
+		{% endblock %}
+		{% block wallee_order_actions_modal_refund %}
+		<wallee-order-action-refund v-if="modalType === 'refund'"
+												   :orderId="orderId"
+												   :transactionData="transactionData"
+												   :lineItems="lineItems"
+												   @modal-close="closeModal">
+		</wallee-order-action-refund>
+		{% endblock %}
+		{% block wallee_order_actions_modal_completion%}
+		<wallee-order-action-completion v-if="modalType === 'completion'"
+													   :orderId="orderId"
+													   :transactionData="transactionData"
+													   :lineItems="lineItems"
+													   @modal-close="closeModal">
+		</wallee-order-action-completion>
+		{% endblock %}
+		{% block wallee_order_actions_modal_void %}
+		<wallee-order-action-void v-if="modalType === 'void'"
+												 :orderId="orderId"
+												 :transactionData="transactionData"
+												 :lineItems="lineItems"
+												 @modal-close="closeModal">
+		</wallee-order-action-void>
+		{% endblock %}
+	</div>
+	<sw-loader v-if="isLoading"></sw-loader>
+</div>
+{% endblock %}

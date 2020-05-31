@@ -1,0 +1,40 @@
+ul.wallee-payment-panel {
+  display: block;
+  list-style-type: none;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding-inline-start: 0px;
+}
+
+ul.wallee-payment-panel li {
+  box-sizing: border-box;
+  font-weight: bold;
+  cursor: pointer;
+  list-style-position: outside;
+  border: 1px solid #f5f5f5;
+  padding: 5px;
+  margin: 5px 0;
+}
+
+ul.wallee-payment-panel li > label {
+  display: block;
+  cursor: pointer;
+  margin-bottom: .5rem;
+  margin-top: .5rem;
+  margin-left: .25rem;
+}
+
+ul.wallee-payment-panel li > label > img {
+  height: 1rem;
+  float: right;
+}
+
+.header-minimal-contact, .header-minimal-home {
+  display: none;
+}
+
+.finish-order-details {
+  margin-top: 2em;
+}

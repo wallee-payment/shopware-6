@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xmlns="http://symfony.com/schema/dic/services"
+		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+	<services>
+		<service id="WalleePayment\Core\Api\WebHooks\Controller\WebHookController" public="true">
+			<argument type="service" id="Shopware\Storefront\Page\GenericPageLoader"/>
+			<argument type="service"
+					  id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+			<argument type="service"
+					  id="WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService"/>
+			<argument type="service" id="WalleePayment\Core\Settings\Service\SettingsService"/>
+			<argument type="service" id="WalleePayment\Core\Api\Transaction\Service\TransactionService"/>
+			<argument type="service" id="WalleePayment\Util\Logger"/>
+			<call method="setContainer">
+				<argument type="service" id="service_container"/>
+			</call>
+		</service>
+		<service id="WalleePayment\Core\Api\WebHooks\Service\WebHooksService">
+			<argument type="service" id="WalleePayment\Core\Settings\Service\SettingsService"/>
+			<argument type="service" id="router.default"/>
+			<argument type="service" id="WalleePayment\Util\Logger"/>
+		</service>
+	</services>
+
+</container>

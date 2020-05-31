@@ -1,0 +1,60 @@
+{
+  "wallee-settings": {
+	"general": {
+	  "descriptionTextModule": "Wallee-Einstellungen",
+	  "mainMenuItemGeneral": "Wallee"
+	},
+	"header": "Wallee",
+	"messageNotBlank": "Dieser Wert sollte nicht leer sein.",
+	"salesChannelCard": {
+	  "button": {
+		"description": "Klicken Sie auf diese Schaltfläche, um Wallee zu aktivieren und ihn als Standard im ausgewählten Vertriebskanal auszuwählen.",
+		"label": "Wallee als Standard festlegen"
+	  }
+	},
+	"settingForm": {
+	  "credentials": {
+		"applicationKey": {
+		  "label": "Anwendungsschlüssel",
+		  "tooltipText": "Der Anwendungsschlüssel wird verwendet, um dieses Plugin mit der API Wallee zu authentifizieren."
+		},
+		"cardTitle": "Empfehlungsschreiben",
+		"spaceId": {
+		  "label": "Leerzeichen-ID",
+		  "tooltipText": "Die Leerzeichen-ID wird verwendet, um dieses Plugin mit der API Wallee zu authentifizieren."
+		},
+		"userId": {
+		  "label": "Benutzer-ID",
+		  "tooltipText": "Die Benutzer-ID wird verwendet, um dieses Plugin mit der Wallee-API zu authentifizieren."
+		}
+	  },
+	  "messageSaveSuccess": "Wallee-Einstellungen wurden gespeichert.",
+	  "messagePaymentMethodConfigurationError": "Wallee PaymentMethodConfiguration konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Anmeldedaten.",
+	  "messagePaymentMethodConfigurationUpdated": "Wallee PaymentMethodConfiguration wurde registriert.",
+	  "messageWebHookError": "Wallee WebHook konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Zugangsdaten.",
+	  "messageWebHookUpdated": "Wallee WebHook wurde aktualisiert.",
+	  "options": {
+		"cardTitle": "Optionen",
+		"integration": {
+		  "label": "Integration",
+		  "options": {
+			"iframe": "Iframe",
+			"payment_page": "Payment Page"
+		  },
+		  "tooltipText": "Integration"
+		},
+		"lineItemConsistencyEnabled": {
+		  "label": "Konsistenz der Einzelposteny",
+		  "tooltipText": "Line item consistency"
+		},
+		"spaceViewId": {
+		  "label": "Space View ID",
+		  "tooltipText": "Space View ID"
+		}
+	  },
+	  "save": "Speichern",
+	  "titleError": "Fehler",
+	  "titleSuccess": "Erfolg"
+	}
+  }
+}
