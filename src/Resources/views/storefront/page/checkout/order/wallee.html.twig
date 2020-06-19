@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block base_navigation %}{% endblock %}
+{% block base_body_classes %}wallee-payment{% endblock %}
 
 {% block page_checkout_main_content %}
 	{% block page_checkout_finish %}
@@ -45,7 +46,6 @@
 		{% if page.extensions.walleeData.javascriptUrl %}
 			<script src="{{ page.extensions.walleeData.javascriptUrl }}"></script>
 		{% endif %}
-		<script type="text/javascript"
-				src="{{ asset('bundles/walleepayment/storefront/js/app.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('bundles/walleepayment/storefront/js/app.js') }}"></script>
 	{% endif %}
 {% endblock %}

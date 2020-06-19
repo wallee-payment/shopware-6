@@ -5,6 +5,8 @@ namespace WalleePayment\Core\Api\Transaction\Service;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
+	Checkout\Cart\Exception\OrderNotFoundException,
+	Checkout\Order\OrderEntity,
 	Checkout\Payment\Cart\AsyncPaymentTransactionStruct,
 	Framework\Context,
 	Framework\DataAbstractionLayer\Search\Criteria,
@@ -14,12 +16,13 @@ use Wallee\Sdk\{
 	Model\Transaction,
 	Model\TransactionPending};
 use WalleePayment\Core\{
+	Api\OrderDeliveryState\Handler\OrderDeliveryStateHandler,
+	Api\Refund\Entity\RefundEntityCollection,
 	Api\Transaction\Entity\TransactionEntity,
 	Settings\Options\Integration,
-	Settings\Service\SettingsService};
-use WalleePayment\Util\{
-	LocaleCodeProvider,
-	Payload\TransactionPayload};
+	Settings\Service\SettingsService,
+	Util\LocaleCodeProvider,
+	Util\Payload\TransactionPayload};
 
 /**
  * Class TransactionService
@@ -33,7 +36,7 @@ class TransactionService {
 	protected $container;
 
 	/**
-	 * @var \WalleePayment\Util\LocaleCodeProvider
+	 * @var \WalleePayment\Core\Util\LocaleCodeProvider
 	 */
 	private $localeCodeProvider;
 
@@ -50,7 +53,7 @@ class TransactionService {
 	/**
 	 * TransactionService constructor.
 	 * @param \Psr\Container\ContainerInterface                                   $container
-	 * @param \WalleePayment\Util\LocaleCodeProvider               $localeCodeProvider
+	 * @param \WalleePayment\Core\Util\LocaleCodeProvider          $localeCodeProvider
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
 	 * @param \Psr\Log\LoggerInterface                                            $logger
 	 */
@@ -84,7 +87,7 @@ class TransactionService {
 	public function create(
 		AsyncPaymentTransactionStruct $transaction,
 		SalesChannelContext $salesChannelContext
-	): String
+	): string
 	{
 		$settings  = $this->settingsService->getSettings($salesChannelContext->getSalesChannel()->getId());
 		$apiClient = $settings->getApiClient();
@@ -108,7 +111,7 @@ class TransactionService {
 		);
 
 		$redirectUrl = $this->container->get('router')->generate(
-			'wallee.order',
+			'frontend.wallee.checkout.pay',
 			['orderId' => $transaction->getOrder()->getId(),],
 			UrlGeneratorInterface::ABSOLUTE_URL
 		);
@@ -126,13 +129,57 @@ class TransactionService {
 		}
 
 		$this->upsert(
-			$salesChannelContext->getContext(),
 			$createdTransaction,
+			$salesChannelContext->getContext(),
 			$transaction->getOrderTransaction()->getPaymentMethodId(),
 			$transaction->getOrder()->getSalesChannelId()
 		);
 
+		$this->holdDelivery($transaction->getOrder()->getId(), $salesChannelContext->getContext());
+
 		return $redirectUrl;
+	}
+
+	/**
+	 * Hold delivery
+	 *
+	 * @param string                           $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	private function holdDelivery(string $orderId, Context $context){
+		try {
+			/**
+			 * @var OrderDeliveryStateHandler $orderDeliveryStateHandler
+			 */
+			$orderEntity               = $this->getOrderEntity($orderId, $context);
+			$orderDeliveryStateHandler = $this->container->get(OrderDeliveryStateHandler::class);
+			$orderDeliveryStateHandler->hold($orderEntity->getDeliveries()->last()->getId(), $context);
+		}catch (\Exception $exception){
+			$this->logger->critical($exception->getTraceAsString());
+		}
+	}
+
+	/**
+	 * Get order
+	 *
+	 * @param String                           $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \Shopware\Core\Checkout\Order\OrderEntity
+	 */
+	private function getOrderEntity(string $orderId, Context $context): OrderEntity
+	{
+
+			$criteria = (new Criteria([$orderId]))->addAssociations(['deliveries']);
+
+			try {
+				return $this->container->get('order.repository')->search(
+					$criteria,
+					$context
+				)->first();
+			} catch (\Exception $e) {
+				throw new OrderNotFoundException($orderId);
+			}
+
 	}
 
 	/**
@@ -161,23 +208,23 @@ class TransactionService {
 	/**
 	 * Persist Wallee transaction
 	 *
-	 * @param \Shopware\Core\Framework\Context             $context
 	 * @param \Wallee\Sdk\Model\Transaction $transaction
+	 * @param \Shopware\Core\Framework\Context             $context
 	 * @param string|null                                  $paymentMethodId
 	 * @param string|null                                  $salesChannelId
 	 */
 	public function upsert(
-		Context $context,
 		Transaction $transaction,
+		Context $context,
 		string $paymentMethodId = null,
 		string $salesChannelId = null
-	)
+	): void
 	{
 		try {
 
 			$transactionMetaData = $transaction->getMetaData();
-			$orderId             = $transactionMetaData['orderId'];
-			$orderTransactionId  = $transactionMetaData['orderTransactionId'];
+			$orderId             = $transactionMetaData[TransactionPayload::WALLEE_METADATA_ORDER_ID];
+			$orderTransactionId  = $transactionMetaData[TransactionPayload::WALLEE_METADATA_ORDER_TRANSACTION_ID];
 
 			$data = [
 				'id'                 => $orderId,
@@ -208,9 +255,25 @@ class TransactionService {
 	 */
 	public function getByOrderId(string $orderId, Context $context): TransactionEntity
 	{
-		$transactionEntity = $this->container->get('wallee_transaction.repository')
-											 ->search(new Criteria([$orderId]), $context)->get($orderId);
-		return $transactionEntity;
+		return $this->container->get('wallee_transaction.repository')
+							   ->search(new Criteria([$orderId]), $context)
+							   ->get($orderId);
+	}
+
+	/**
+	 * Read transaction from Wallee API
+	 *
+	 * @param int    $transactionId
+	 * @param string $salesChannelId
+	 * @return \Wallee\Sdk\Model\Transaction
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
+	 */
+	public function read(int $transactionId, string $salesChannelId): Transaction
+	{
+		$settings = $this->settingsService->getSettings($salesChannelId);
+		return $settings->getApiClient()->getTransactionService()->read($settings->getSpaceId(), $transactionId);
 	}
 
 	/**
@@ -218,15 +281,29 @@ class TransactionService {
 	 *
 	 * @param int                              $transactionId
 	 * @param \Shopware\Core\Framework\Context $context
-	 * @return \WalleePayment\Core\Api\Transaction\Entity\TransactionEntity
+	 * @return \WalleePayment\Core\Api\Transaction\Entity\TransactionEntity|null
 	 */
-	public function getByTransactionId(int $transactionId, Context $context): TransactionEntity
+	public function getByTransactionId(int $transactionId, Context $context): ?TransactionEntity
 	{
-		$transactionEntity = $this->container->get('wallee_transaction.repository')
-											 ->search(new Criteria(), $context)
-											 ->getEntities()
-											 ->getByTransactionId($transactionId);
-		return $transactionEntity;
+		return $this->container->get('wallee_transaction.repository')
+							   ->search((new Criteria())->addAssociations(['refunds']), $context)
+							   ->getEntities()
+							   ->getByTransactionId($transactionId);
+	}
+
+	/**
+	 * Get transaction entity by Wallee transaction id
+	 *
+	 * @param int                              $transactionId
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \WalleePayment\Core\Api\Refund\Entity\RefundEntityCollection
+	 */
+	public function getRefundEntityCollectionByTransactionId(int $transactionId, Context $context): ?RefundEntityCollection
+	{
+		return $this->container->get('wallee_refund.repository')
+							   ->search(new Criteria(), $context)
+							   ->getEntities()
+							   ->filterByTransactionId($transactionId);
 	}
 
 }

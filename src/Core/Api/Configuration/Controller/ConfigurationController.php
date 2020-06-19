@@ -10,12 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\{
 	HttpFoundation\JsonResponse,
 	HttpFoundation\Request,
-	HttpFoundation\Response,
-	Routing\Annotation\Route,};
+	Routing\Annotation\Route};
 use WalleePayment\Core\{
+	Api\OrderDeliveryState\Service\OrderDeliveryStateService,
 	Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService,
-	Api\WebHooks\Service\WebHooksService};
-use WalleePayment\Util\PaymentMethodUtil;
+	Api\WebHooks\Service\WebHooksService,
+	Util\PaymentMethodUtil};
 
 /**
  * Class ConfigurationController
@@ -38,7 +38,7 @@ class ConfigurationController extends AbstractController {
 	protected $logger;
 
 	/**
-	 * @var \WalleePayment\Util\PaymentMethodUtil
+	 * @var \WalleePayment\Core\Util\PaymentMethodUtil
 	 */
 	private $paymentMethodUtil;
 
@@ -50,7 +50,7 @@ class ConfigurationController extends AbstractController {
 	/**
 	 * ConfigurationController constructor.
 	 *
-	 * @param \WalleePayment\Util\PaymentMethodUtil                                                        $paymentMethodUtil
+	 * @param \WalleePayment\Core\Util\PaymentMethodUtil                                                   $paymentMethodUtil
 	 * @param \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService $paymentMethodConfigurationService
 	 * @param \WalleePayment\Core\Api\WebHooks\Service\WebHooksService                                     $webHooksService
 	 * @param \Psr\Log\LoggerInterface                                                                                    $logger
@@ -62,10 +62,11 @@ class ConfigurationController extends AbstractController {
 		LoggerInterface $logger
 	)
 	{
-		$this->paymentMethodUtil                 = $paymentMethodUtil;
-		$this->webHooksService                   = $webHooksService;
+		$this->logger            = $logger;
+		$this->webHooksService   = $webHooksService;
+		$this->paymentMethodUtil = $paymentMethodUtil;
+
 		$this->paymentMethodConfigurationService = $paymentMethodConfigurationService;
-		$this->logger                            = $logger;
 	}
 
 	/**
@@ -73,7 +74,7 @@ class ConfigurationController extends AbstractController {
 	 *
 	 * @param \Symfony\Component\HttpFoundation\Request $request
 	 * @param \Shopware\Core\Framework\Context          $context
-	 * @return \Symfony\Component\HttpFoundation\Response
+	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 *
 	 * @Route(
 	 *     "/api/v{version}/_action/wallee/configuration/set-wallee-as-sales-channel-payment-default",
@@ -81,13 +82,13 @@ class ConfigurationController extends AbstractController {
 	 *     methods={"POST"}
 	 *     )
 	 */
-	public function setWalleeAsSalesChannelPaymentDefault(Request $request, Context $context): Response
+	public function setWalleeAsSalesChannelPaymentDefault(Request $request, Context $context): JsonResponse
 	{
 		$salesChannelId = $request->request->get('salesChannelId');
 		$salesChannelId = ($salesChannelId == 'null') ? null : $salesChannelId;
 
 		$this->paymentMethodUtil->setWalleeAsDefaultPaymentMethod($context, $salesChannelId);
-		return new Response(null, Response::HTTP_NO_CONTENT);
+		return new JsonResponse([]);
 	}
 
 	/**
@@ -139,5 +140,28 @@ class ConfigurationController extends AbstractController {
 		$result = $this->paymentMethodConfigurationService->setSalesChannelId($salesChannelId)->synchronize($context);
 
 		return new JsonResponse(['result' => $result]);
+	}
+
+	/**
+	 * Install OrderDeliveryStates
+	 *
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \Symfony\Component\HttpFoundation\JsonResponse
+	 *
+	 * @Route(
+	 *     "/api/v{version}/_action/wallee/configuration/install-order-delivery-states",
+	 *     name="api.action.wallee.configuration.install-order-delivery-states",
+	 *     methods={"POST"}
+	 *   )
+	 */
+	public function installOrderDeliveryStates(Context $context): JsonResponse
+	{
+		/**
+		 * @var \WalleePayment\Core\Api\OrderDeliveryState\Service\OrderDeliveryStateService $orderDeliveryStateService
+		 */
+		$orderDeliveryStateService = $this->container->get(OrderDeliveryStateService::class);
+		$orderDeliveryStateService->install($context);
+
+		return new JsonResponse([]);
 	}
 }

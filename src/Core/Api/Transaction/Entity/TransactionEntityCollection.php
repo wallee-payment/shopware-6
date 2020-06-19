@@ -35,6 +35,7 @@ class TransactionEntityCollection extends EntityCollection {
 
 		return null;
 	}
+
 	/**
 	 * @return string
 	 */

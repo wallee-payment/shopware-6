@@ -1,6 +1,7 @@
 /* global Shopware */
 
 import template from './wallee-credentials.html.twig';
+import constants from '../../page/wallee-settings/wallee-config-consts'
 
 const {Component, Mixin} = Shopware;
 
@@ -54,12 +55,15 @@ Component.register('sw-wallee-credentials', {
 	},
 
 	data() {
-		return {};
+		return {
+			...constants
+		};
 	},
 
 	computed: {},
 
 	methods: {
+
 		checkTextFieldInheritance(value) {
 			if (typeof value !== 'string') {
 				return true;

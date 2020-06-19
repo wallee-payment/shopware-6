@@ -8,8 +8,8 @@
 	"messageNotBlank": "Dieser Wert sollte nicht leer sein.",
 	"salesChannelCard": {
 	  "button": {
-		"description": "Klicken Sie auf diese Schaltfläche, um Wallee zu aktivieren und ihn als Standard im ausgewählten Vertriebskanal auszuwählen.",
-		"label": "Wallee als Standard festlegen"
+		"description": "Klicken Sie auf diese Schaltfläche, um Wallee als Standard-Zahlungsabwickler im ausgewählten Vertriebskanal festzulegen",
+		"label": "Wallee als Standard-Zahlungsabwickler festlegen"
 	  }
 	},
 	"settingForm": {
@@ -29,12 +29,18 @@
 		}
 	  },
 	  "messageSaveSuccess": "Wallee-Einstellungen wurden gespeichert.",
+	  "messageOrderDeliveryStateError": "Wallee OrderDeliveryState konnte nicht gespeichert werden.",
+	  "messageOrderDeliveryStateUpdated": "Wallee OrderDeliveryState wurde aktualisiert.",
 	  "messagePaymentMethodConfigurationError": "Wallee PaymentMethodConfiguration konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Anmeldedaten.",
 	  "messagePaymentMethodConfigurationUpdated": "Wallee PaymentMethodConfiguration wurde registriert.",
 	  "messageWebHookError": "Wallee WebHook konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Zugangsdaten.",
 	  "messageWebHookUpdated": "Wallee WebHook wurde aktualisiert.",
 	  "options": {
 		"cardTitle": "Optionen",
+		"emailEnabled": {
+		  "label": "Auftragsbestätigung per E-Mail senden",
+		  "tooltipText": "Wenn diese Einstellung aktiviert ist, erhalten Ihre Kunden eine E-Mail, wenn die Zahlung ihrer Bestellung autorisiert ist."
+		},
 		"integration": {
 		  "label": "Integration",
 		  "options": {
@@ -45,7 +51,7 @@
 		},
 		"lineItemConsistencyEnabled": {
 		  "label": "Konsistenz der Einzelposteny",
-		  "tooltipText": "Line item consistency"
+		  "tooltipText": "Wenn diese Option aktiviert ist, stimmen die Summen der Einzelposten immer mit der Auftragssumme überein"
 		},
 		"spaceViewId": {
 		  "label": "Space View ID",

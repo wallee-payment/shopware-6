@@ -3,8 +3,13 @@
 namespace WalleePayment\Core\Api\Transaction\Entity;
 
 use Shopware\Core\{
+	Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity,
+	Checkout\Order\OrderEntity,
+	Checkout\Payment\PaymentMethodEntity,
 	Framework\DataAbstractionLayer\Entity,
-	Framework\DataAbstractionLayer\EntityIdTrait};
+	Framework\DataAbstractionLayer\EntityIdTrait,
+	System\SalesChannel\SalesChannelEntity};
+use WalleePayment\Core\Api\Refund\Entity\RefundEntityCollection;
 
 /**
  * Class TransactionEntity
@@ -16,9 +21,19 @@ class TransactionEntity extends Entity {
 	use EntityIdTrait;
 
 	/**
+	 * @var bool
+	 */
+	protected $confirmationEmailSent;
+
+	/**
 	 * @var array
 	 */
 	protected $data;
+
+	/**
+	 * @var \Shopware\Core\Checkout\Payment\PaymentMethodEntity
+	 */
+	protected $paymentMethod;
 
 	/**
 	 * @var string
@@ -26,14 +41,29 @@ class TransactionEntity extends Entity {
 	protected $paymentMethodId;
 
 	/**
+	 * @var \Shopware\Core\Checkout\Order\OrderEntity
+	 */
+	protected $order;
+
+	/**
 	 * @var string
 	 */
 	protected $orderId;
 
 	/**
+	 * @var \Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity
+	 */
+	protected $orderTransaction;
+
+	/**
 	 * @var string
 	 */
 	protected $orderTransactionId;
+
+	/**
+	 * @var \WalleePayment\Core\Api\Refund\Entity\RefundEntityCollection
+	 */
+	protected $refunds;
 
 	/**
 	 * @var int
@@ -46,6 +76,11 @@ class TransactionEntity extends Entity {
 	protected $state;
 
 	/**
+	 * @var \Shopware\Core\System\SalesChannel\SalesChannelEntity
+	 */
+	protected $salesChannel;
+
+	/**
 	 * @var string
 	 */
 	protected $salesChannelId;
@@ -54,6 +89,22 @@ class TransactionEntity extends Entity {
 	 * @var int
 	 */
 	protected $transactionId;
+
+	/**
+	 * @return bool
+	 */
+	public function isConfirmationEmailSent(): bool
+	{
+		return $this->confirmationEmailSent;
+	}
+
+	/**
+	 * @param bool $confirmationEmailSent
+	 */
+	public function setConfirmationEmailSent(bool $confirmationEmailSent): void
+	{
+		$this->confirmationEmailSent = $confirmationEmailSent;
+	}
 
 	/**
 	 * @return array
@@ -183,5 +234,83 @@ class TransactionEntity extends Entity {
 		$this->transactionId = $transactionId;
 	}
 
+	/**
+	 * @return \Shopware\Core\Checkout\Payment\PaymentMethodEntity
+	 */
+	public function getPaymentMethod(): PaymentMethodEntity
+	{
+		return $this->paymentMethod;
+	}
 
+	/**
+	 * @param \Shopware\Core\Checkout\Payment\PaymentMethodEntity $paymentMethod
+	 */
+	public function setPaymentMethod(PaymentMethodEntity $paymentMethod): void
+	{
+		$this->paymentMethod = $paymentMethod;
+	}
+
+	/**
+	 * @return \Shopware\Core\Checkout\Order\OrderEntity
+	 */
+	public function getOrder(): OrderEntity
+	{
+		return $this->order;
+	}
+
+	/**
+	 * @param \Shopware\Core\Checkout\Order\OrderEntity $order
+	 */
+	public function setOrder(OrderEntity $order): void
+	{
+		$this->order = $order;
+	}
+
+	/**
+	 * @return \Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity
+	 */
+	public function getOrderTransaction(): OrderTransactionEntity
+	{
+		return $this->orderTransaction;
+	}
+
+	/**
+	 * @param \Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity $orderTransaction
+	 */
+	public function setOrderTransaction(OrderTransactionEntity $orderTransaction): void
+	{
+		$this->orderTransaction = $orderTransaction;
+	}
+
+	/**
+	 * @return \WalleePayment\Core\Api\Refund\Entity\RefundEntityCollection|null
+	 */
+	public function getRefunds(): ?RefundEntityCollection
+	{
+		return $this->refunds;
+	}
+
+	/**
+	 * @param \WalleePayment\Core\Api\Refund\Entity\RefundEntityCollection $refunds
+	 */
+	public function setRefunds(RefundEntityCollection $refunds): void
+	{
+		$this->refunds = $refunds;
+	}
+
+	/**
+	 * @return \Shopware\Core\System\SalesChannel\SalesChannelEntity
+	 */
+	public function getSalesChannel(): SalesChannelEntity
+	{
+		return $this->salesChannel;
+	}
+
+	/**
+	 * @param \Shopware\Core\System\SalesChannel\SalesChannelEntity $salesChannel
+	 */
+	public function setSalesChannel(SalesChannelEntity $salesChannel): void
+	{
+		$this->salesChannel = $salesChannel;
+	}
 }

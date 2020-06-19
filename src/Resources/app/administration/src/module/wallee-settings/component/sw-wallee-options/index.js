@@ -1,6 +1,7 @@
 /* global Shopware */
 
 import template from './wallee-options.html.twig';
+import constants from '../../page/wallee-settings/wallee-config-consts'
 
 const {Component, Mixin} = Shopware;
 
@@ -22,15 +23,7 @@ Component.register('sw-wallee-options', {
 			type: Object,
 			required: true
 		},
-
 		selectedSalesChannelId: {
-			required: true
-		},
-		integrationFilled: {
-			type: Boolean,
-			required: true
-		},
-		integrationErrorState: {
 			required: true
 		},
 		isLoading: {
@@ -40,7 +33,9 @@ Component.register('sw-wallee-options', {
 	},
 
 	data() {
-		return {};
+		return {
+			...constants
+		};
 	},
 
 	computed: {

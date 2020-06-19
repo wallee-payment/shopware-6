@@ -7,7 +7,7 @@
 	<services>
 		<service id="WalleePayment\Core\Checkout\PaymentHandler\WalleePaymentHandler">
 			<argument type="service" id="WalleePayment\Core\Api\Transaction\Service\TransactionService"/>
-			<argument type="service" id="WalleePayment\Util\Logger"/>
+			<argument type="service" id="WalleePayment\Core\Util\Logger"/>
 			<tag name="shopware.payment.method.async"/>
 		</service>
 	</services>

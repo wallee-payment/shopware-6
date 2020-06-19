@@ -88,6 +88,26 @@ class WalleeConfigurationService extends ApiService {
 			return ApiService.handleResponse(response);
 		});
 	}
+
+	/**
+	 *
+	 * @return {*}
+	 */
+	installOrderDeliveryStates() {
+		const headers = this.getBasicHeaders();
+		const apiRoute = `_action/${this.getApiBasePath()}/configuration/install-order-delivery-states`;
+
+		return this.httpClient.post(
+			apiRoute,
+			{
+			},
+			{
+				headers: headers
+			}
+		).then((response) => {
+			return ApiService.handleResponse(response);
+		});
+	}
 }
 
 export default WalleeConfigurationService;

@@ -11,5 +11,6 @@ PluginManager.register(
 );
 
 if (module.hot) {
+    // noinspection JSValidateTypes
     module.hot.accept();
 }

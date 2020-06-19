@@ -7,18 +7,22 @@ use Shopware\Core\{
 	Checkout\Order\OrderDefinition,
 	Checkout\Payment\PaymentMethodDefinition,
 	Framework\DataAbstractionLayer\EntityDefinition,
+	Framework\DataAbstractionLayer\Field\BoolField,
 	Framework\DataAbstractionLayer\Field\CreatedAtField,
 	Framework\DataAbstractionLayer\Field\FkField,
+	Framework\DataAbstractionLayer\Field\Flag\CascadeDelete,
 	Framework\DataAbstractionLayer\Field\Flag\PrimaryKey,
 	Framework\DataAbstractionLayer\Field\Flag\Required,
 	Framework\DataAbstractionLayer\Field\IdField,
 	Framework\DataAbstractionLayer\Field\IntField,
 	Framework\DataAbstractionLayer\Field\JsonField,
+	Framework\DataAbstractionLayer\Field\OneToManyAssociationField,
 	Framework\DataAbstractionLayer\Field\OneToOneAssociationField,
 	Framework\DataAbstractionLayer\Field\StringField,
 	Framework\DataAbstractionLayer\Field\UpdatedAtField,
 	Framework\DataAbstractionLayer\FieldCollection,
 	System\SalesChannel\SalesChannelDefinition};
+use WalleePayment\Core\Api\Refund\Entity\RefundEntityDefinition;
 
 /**
  * Class TransactionEntityDefinition
@@ -44,6 +48,7 @@ class TransactionEntityDefinition extends EntityDefinition {
 	{
 		return new FieldCollection([
 			(new IdField('id', 'id'))->addFlags(new PrimaryKey(), new Required()),
+			new BoolField('confirmation_email_sent', 'confirmationEmailSent'),
 			(new JsonField('data', 'data'))->addFlags(new Required()),
 			(new FkField('payment_method_id', 'paymentMethodId', PaymentMethodDefinition::class))->addFlags(new Required()),
 			(new FkField('order_id', 'orderId', OrderDefinition::class))->addFlags(new Required()),
@@ -55,6 +60,7 @@ class TransactionEntityDefinition extends EntityDefinition {
 			new OneToOneAssociationField('paymentMethod', 'payment_method_id', 'id', PaymentMethodDefinition::class, true),
 			new OneToOneAssociationField('order', 'order_id', 'id', OrderDefinition::class, true),
 			new OneToOneAssociationField('orderTransaction', 'order_transaction_id', 'id', OrderTransactionDefinition::class, true),
+			(new OneToManyAssociationField('refunds', RefundEntityDefinition::class, 'transaction_id', 'transaction_id'))->addFlags(new CascadeDelete()),
 			new OneToOneAssociationField('salesChannel', 'sales_channel_id', 'id', SalesChannelDefinition::class, true),
 			new CreatedAtField(),
 			new UpdatedAtField(),

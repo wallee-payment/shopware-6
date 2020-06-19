@@ -1,165 +1,209 @@
 /* global Shopware */
 
 import template from './wallee.html.twig';
-import './wallee.scss';
+import constants from './wallee-config-consts';
 
 const {Component, Mixin} = Shopware;
 
 Component.register('wallee-settings', {
 
-	template: template,
+    template: template,
 
-	inject: [
-		'WalleeConfigurationService'
-	],
+    inject: [
+        'WalleeConfigurationService'
+    ],
 
-	mixins: [
-		Mixin.getByName('notification')
-	],
+    mixins: [
+        Mixin.getByName('notification')
+    ],
 
-	data() {
-		return {
-			config: {},
-			isLoading: false,
-			isSaveSuccessful: false,
+    data() {
+        return {
 
-			spaceIdFilled: false,
-			spaceIdErrorState: false,
+            config: {},
 
-			integrationFilled: false,
-			integrationErrorState: false,
+            isLoading: false,
+            isSaveSuccessful: false,
 
-			userIdFilled: false,
-			userIdErrorState: false,
+            applicationKeyFilled: false,
+            applicationKeyErrorState: false,
 
-			applicationKeyFilled: false,
-			applicationKeyErrorState: false,
+            spaceIdFilled: false,
+            spaceIdErrorState: false,
 
-			isSetDefaultPaymentSuccessful: false,
-			isSettingDefaultPaymentMethods: false
-		};
-	},
+            userIdFilled: false,
+            userIdErrorState: false,
 
-	props: {
-		isLoading: {
-			type: Boolean,
-			required: true
-		}
-	},
+            isSetDefaultPaymentSuccessful: false,
+            isSettingDefaultPaymentMethods: false,
 
-	metaInfo() {
-		return {
-			title: this.$createTitle()
-		};
-	},
+            ...constants
+        };
+    },
 
-	watch: {
-		config: {
-			handler() {
-				const defaultConfig = this.$refs.configComponent.allConfigs.null;
-				const salesChannelId = this.$refs.configComponent.selectedSalesChannelId;
+    props: {
+        isLoading: {
+            type: Boolean,
+            required: true
+        }
+    },
 
-				if (salesChannelId === null) {
-					this.spaceIdFilled = !!this.config['WalleePayment.config.spaceId'];
-					this.userIdFilled = !!this.config['WalleePayment.config.userId'];
-					this.applicationKeyFilled = !!this.config['WalleePayment.config.applicationKey'];
-					this.integrationFilled = !!this.config['WalleePayment.config.integration'];
-				} else {
-					this.spaceIdFilled = !!this.config['WalleePayment.config.spaceId']
-						|| !!defaultConfig['WalleePayment.config.spaceId'];
-					this.userIdFilled = !!this.config['WalleePayment.config.userId']
-						|| !!defaultConfig['WalleePayment.config.userId'];
-					this.applicationKeyFilled = !!this.config['WalleePayment.config.applicationKey']
-						|| !!defaultConfig['WalleePayment.config.applicationKey'];
-					this.integrationFilled = !!this.config['WalleePayment.config.integration']
-						|| !!defaultConfig['WalleePayment.config.integration'];
-				}
-			},
-			deep: true
-		}
-	},
+    metaInfo() {
+        return {
+            title: this.$createTitle()
+        };
+    },
 
-	methods: {
+    watch: {
+        config: {
+            handler() {
+                const defaultConfig = this.$refs.configComponent.allConfigs.null;
+                const salesChannelId = this.$refs.configComponent.selectedSalesChannelId;
 
-		onSave() {
-			if (!(this.spaceIdFilled && this.userIdFilled && this.applicationKeyFilled)) {
-				this.setErrorStates();
-				return;
-			}
-			this.save();
-		},
+                if (salesChannelId === null) {
 
-		save() {
-			this.isLoading = true;
+                    this.applicationKeyFilled = !!this.config[this.CONFIG_APPLICATION_KEY];
+                    this.spaceIdFilled = !!this.config[this.CONFIG_SPACE_ID];
+                    this.userIdFilled = !!this.config[this.CONFIG_USER_ID];
 
-			this.$refs.configComponent.save().then((res) => {
-				if (res) {
-					this.config = res;
-				}
-				this.registerWebHooks();
-				this.synchronizePaymentMethodConfiguration();
-			}).catch(() => {
-				this.isLoading = false;
-			});
-		},
+                    if (!(this.CONFIG_INTEGRATION in this.config) || !this.config[this.CONFIG_INTEGRATION]) {
+                        this.config[this.CONFIG_INTEGRATION] = 'iframe';
+                    }
 
-		registerWebHooks() {
-			this.WalleeConfigurationService.registerWebHooks(this.$refs.configComponent.selectedSalesChannelId)
-				.then((response) => {
-					this.createNotificationSuccess({
-						title: this.$tc('wallee-settings.settingForm.titleSuccess'),
-						message: this.$tc('wallee-settings.settingForm.messageWebHookUpdated')
-					});
-				}).catch((errorResponse) => {
-				this.createNotificationError({
-					title: this.$tc('wallee-settings.settingForm.titleError'),
-					message: this.$tc('wallee-settings.settingForm.messageWebHookError')
-				});
-				this.isLoading = false;
-			});
-		},
+                    if (!(this.CONFIG_EMAIL_ENABLED in this.config)) {
+                        this.config[this.CONFIG_EMAIL_ENABLED] = 1;
+                    }
 
-		synchronizePaymentMethodConfiguration() {
-			this.WalleeConfigurationService.synchronizePaymentMethodConfiguration(this.$refs.configComponent.selectedSalesChannelId)
-				.then((response) => {
-					this.createNotificationSuccess({
-						title: this.$tc('wallee-settings.settingForm.titleSuccess'),
-						message: this.$tc('wallee-settings.settingForm.messagePaymentMethodConfigurationUpdated')
-					});
-					this.isLoading = false;
-				}).catch((errorResponse) => {
-				this.createNotificationError({
-					title: this.$tc('wallee-settings.settingForm.titleError'),
-					message: this.$tc('wallee-settings.settingForm.messagePaymentMethodConfigurationError')
-				});
-				this.isLoading = false;
-			});
-		},
+                    if (!(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in this.config)) {
+                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = 0;
+                    }
 
-		onSetPaymentMethodDefault() {
-			this.WalleeConfigurationService.setWalleeAsSalesChannelPaymentDefault(
-				this.$refs.configComponent.selectedSalesChannelId
-			).then(() => {
-			});
-		},
+                } else {
 
-		setErrorStates() {
-			const messageNotBlankErrorState = {
-				code: 1,
-				detail: this.$tc('wallee-settings.messageNotBlank')
-			};
+                    this.applicationKeyFilled = !!this.config[this.CONFIG_APPLICATION_KEY] || !!defaultConfig[this.CONFIG_APPLICATION_KEY];
+                    this.spaceIdFilled = !!this.config[this.CONFIG_SPACE_ID] || !!defaultConfig[this.CONFIG_SPACE_ID];
+                    this.userIdFilled = !!this.config[this.CONFIG_USER_ID] || !!defaultConfig[this.CONFIG_USER_ID];
 
-			if (!this.spaceIdFilled) {
-				this.spaceIdErrorState = messageNotBlankErrorState;
-			}
 
-			if (!this.userIdFilled) {
-				this.userIdErrorState = messageNotBlankErrorState;
-			}
+                    if (!(this.CONFIG_INTEGRATION in this.config) || !(this.CONFIG_INTEGRATION in defaultConfig)) {
+                        this.config[this.CONFIG_INTEGRATION] = 'iframe';
+                    }
 
-			if (!this.applicationKeyFilled) {
-				this.applicationKeyErrorState = messageNotBlankErrorState;
-			}
-		},
-	}
+                    if (!(this.CONFIG_EMAIL_ENABLED in this.config) || !(this.CONFIG_EMAIL_ENABLED in defaultConfig)) {
+                        this.config[this.CONFIG_EMAIL_ENABLED] = 1;
+                    }
+
+                    if (!(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in this.config) || !(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in defaultConfig)) {
+                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = 0;
+                    }
+                }
+            },
+            deep: true
+        }
+    },
+
+    methods: {
+
+        onSave() {
+            if (!(this.spaceIdFilled && this.userIdFilled && this.applicationKeyFilled)) {
+                this.setErrorStates();
+                return;
+            }
+            this.save();
+        },
+
+        save() {
+            this.isLoading = true;
+
+            this.$refs.configComponent.save().then((res) => {
+                if (res) {
+                    this.config = res;
+                }
+                this.registerWebHooks();
+                this.synchronizePaymentMethodConfiguration();
+                this.installOrderDeliveryStates();
+            }).catch(() => {
+                this.isLoading = false;
+            });
+        },
+
+        registerWebHooks() {
+            this.WalleeConfigurationService.registerWebHooks(this.$refs.configComponent.selectedSalesChannelId)
+                .then(() => {
+                    this.createNotificationSuccess({
+                        title: this.$tc('wallee-settings.settingForm.titleSuccess'),
+                        message: this.$tc('wallee-settings.settingForm.messageWebHookUpdated')
+                    });
+                }).catch(() => {
+                this.createNotificationError({
+                    title: this.$tc('wallee-settings.settingForm.titleError'),
+                    message: this.$tc('wallee-settings.settingForm.messageWebHookError')
+                });
+                this.isLoading = false;
+            });
+        },
+
+        synchronizePaymentMethodConfiguration() {
+            this.WalleeConfigurationService.synchronizePaymentMethodConfiguration(this.$refs.configComponent.selectedSalesChannelId)
+                .then(() => {
+                    this.createNotificationSuccess({
+                        title: this.$tc('wallee-settings.settingForm.titleSuccess'),
+                        message: this.$tc('wallee-settings.settingForm.messagePaymentMethodConfigurationUpdated')
+                    });
+                    this.isLoading = false;
+                }).catch(() => {
+                this.createNotificationError({
+                    title: this.$tc('wallee-settings.settingForm.titleError'),
+                    message: this.$tc('wallee-settings.settingForm.messagePaymentMethodConfigurationError')
+                });
+                this.isLoading = false;
+            });
+        },
+
+        installOrderDeliveryStates(){
+            this.WalleeConfigurationService.installOrderDeliveryStates()
+                .then(() => {
+                    this.createNotificationSuccess({
+                        title: this.$tc('wallee-settings.settingForm.titleSuccess'),
+                        message: this.$tc('wallee-settings.settingForm.messageOrderDeliveryStateUpdated')
+                    });
+                    this.isLoading = false;
+                }).catch(() => {
+                this.createNotificationError({
+                    title: this.$tc('wallee-settings.settingForm.titleError'),
+                    message: this.$tc('wallee-settings.settingForm.messageOrderDeliveryStateError')
+                });
+                this.isLoading = false;
+            });
+        },
+
+        onSetPaymentMethodDefault() {
+            this.isSettingDefaultPaymentMethods = true;
+            this.WalleeConfigurationService.setWalleeAsSalesChannelPaymentDefault(
+                this.$refs.configComponent.selectedSalesChannelId
+            ).then(() => {
+                this.isSettingDefaultPaymentMethods = false;
+                this.isSetDefaultPaymentSuccessful = true;
+            });
+        },
+
+        setErrorStates() {
+            const messageNotBlankErrorState = {
+                code: 1,
+                detail: this.$tc('wallee-settings.messageNotBlank')
+            };
+
+            if (!this.spaceIdFilled) {
+                this.spaceIdErrorState = messageNotBlankErrorState;
+            }
+
+            if (!this.userIdFilled) {
+                this.userIdErrorState = messageNotBlankErrorState;
+            }
+
+            if (!this.applicationKeyFilled) {
+                this.applicationKeyErrorState = messageNotBlankErrorState;
+            }
+        },
+    }
 });

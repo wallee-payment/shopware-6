@@ -22,10 +22,19 @@
 							{% block page_checkout_finish_order_title %}
 								<div class="card-title">
 									<form name="confirmOrderForm" id="confirmOrderForm">
-										<button type="submit"
-												class="btn btn-primary btn-block btn-lg col-md-3 col-12">{{ "checkout.confirmHeader"|trans|sw_sanitize }}
-											&gt;
+										<div class="form-group">
+										<button type="submit" class="btn btn-primary float-left" disabled>
+											{{ "checkout.confirmHeader"|trans|sw_sanitize }}
+											{% sw_icon 'arrow-right' style {'pack': 'solid'} %}
 										</button>
+										<button
+												id="walleeOrderCancel"
+												class="btn btn-outline-primary header-minimal-back-to-shop-button float-right"
+												disabled
+										>
+											{{ "checkout.confirmChangePaymentShippingCancel"|trans|sw_sanitize }}
+										</button>
+										</div>
 									</form>
 								</div>
 							{% endblock %}

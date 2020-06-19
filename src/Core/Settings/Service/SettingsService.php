@@ -82,13 +82,44 @@ class SettingsService {
 				continue;
 			}
 			if (empty($value)) {
-				$this->logger->critical(strtr('Empty value for settings :property.', [':property' => $property]));
+				$this->logger->warning(strtr('Empty value :value for settings :property.', [':property' => $property, ':value' => $value]));
 			}
 			$propertyValuePairs[$property] = $value;
 		}
 
-		$settingsEntity = (new Settings())->assign($propertyValuePairs);
+		return (new Settings())->assign($propertyValuePairs);
+	}
 
-		return $settingsEntity;
+	/**
+	 * Get valid settings
+	 *
+	 * @param string|null $salesChannelId
+	 * @return \WalleePayment\Core\Settings\Struct\Settings|null
+	 */
+	public function getValidSettings(?string $salesChannelId = null): ?Settings
+	{
+		$settings = $this->getSettings($salesChannelId);
+
+		if (empty($settings->getSpaceId())) {
+			$this->logger->critical('Empty spaceId setting');
+			return null;
+		}
+
+		if (empty($settings->getUserId())) {
+			$this->logger->critical('Empty userId setting');
+			return null;
+		}
+
+		if (empty($settings->getIntegration())) {
+			$this->logger->critical('Empty integration setting');
+			return null;
+		}
+
+		if (empty($settings->getApplicationKey())) {
+			$this->logger->critical('Empty applicationKey setting');
+			return null;
+		}
+
+		return $settings;
 	}
 }

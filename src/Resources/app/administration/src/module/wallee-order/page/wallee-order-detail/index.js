@@ -1,8 +1,8 @@
 /* global Shopware */
 
-import '../../extension/wallee-order-action-completion';
-import '../../extension/wallee-order-action-refund';
-import '../../extension/wallee-order-action-void';
+import '../../component/wallee-order-action-completion';
+import '../../component/wallee-order-action-refund';
+import '../../component/wallee-order-action-void';
 import template from './wallee-order-detail.html.twig';
 import './wallee-order-detail.scss';
 
@@ -240,6 +240,7 @@ Component.register('wallee-order-detail', {
 				'_blank'
 			);
 		},
+
 		resetDataAttributes() {
 			this.transactionData = {
 				transactions: [],

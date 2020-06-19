@@ -53,8 +53,7 @@ class WalleeTransactionService extends ApiService {
 	 * @return {string}
 	 */
 	getInvoiceDocument(context, salesChannelId, transactionId) {
-		const apiRoute = `${context.apiPath}/v1/_action/${this.getApiBasePath()}/transaction/get-invoice-document/${salesChannelId}/${transactionId}`;
-		return apiRoute;
+		return `${context.apiPath}/v1/_action/${this.getApiBasePath()}/transaction/get-invoice-document/${salesChannelId}/${transactionId}`;
 	}
 
 	/**
@@ -66,8 +65,7 @@ class WalleeTransactionService extends ApiService {
 	 * @return {string}
 	 */
 	getPackingSlip(context, salesChannelId, transactionId) {
-		const apiRoute = `${context.apiPath}/v1/_action/${this.getApiBasePath()}/transaction/get-packing-slip/${salesChannelId}/${transactionId}`;
-		return apiRoute;
+		return `${context.apiPath}/v1/_action/${this.getApiBasePath()}/transaction/get-packing-slip/${salesChannelId}/${transactionId}`;
 	}
 }
 

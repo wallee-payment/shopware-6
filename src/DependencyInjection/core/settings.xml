@@ -7,7 +7,7 @@
 	<services>
 		<service id="WalleePayment\Core\Settings\Service\SettingsService">
 			<argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
-			<argument type="service" id="WalleePayment\Util\Logger"/>
+			<argument type="service" id="WalleePayment\Core\Util\Logger"/>
 		</service>
 	</services>
 

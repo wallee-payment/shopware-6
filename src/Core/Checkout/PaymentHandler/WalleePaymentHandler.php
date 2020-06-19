@@ -14,6 +14,7 @@ use Shopware\Core\{
 use Symfony\Component\{
 	HttpFoundation\RedirectResponse,
 	HttpFoundation\Request,};
+use Wallee\Sdk\Model\TransactionState;
 use WalleePayment\Core\Api\Transaction\Service\TransactionService;
 
 
@@ -87,6 +88,9 @@ class WalleePaymentHandler implements AsynchronousPaymentHandlerInterface {
 	 * @param \Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct $transaction
 	 * @param \Symfony\Component\HttpFoundation\Request                          $request
 	 * @param \Shopware\Core\System\SalesChannel\SalesChannelContext             $salesChannelContext
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
 	 */
 	public function finalize(
 		AsyncPaymentTransactionStruct $transaction,
@@ -94,12 +98,23 @@ class WalleePaymentHandler implements AsynchronousPaymentHandlerInterface {
 		SalesChannelContext $salesChannelContext
 	): void
 	{
-		$paymentState = $request->query->getAlpha('status');
-		if ($paymentState !== 'paid') {
-			$this->logger->warning(strtr('Customer canceled payment for :orderId on SalesChannel :salesChannelName', [
+		$transactionEntity = $this->transactionService->getByOrderId(
+			$transaction->getOrder()->getId(),
+			$salesChannelContext->getContext()
+		);
+
+		$walleeTransaction = $this->transactionService->read(
+			$transactionEntity->getTransactionId(),
+			$salesChannelContext->getSalesChannel()->getId()
+		);
+
+		if (in_array($walleeTransaction->getState(), [TransactionState::FAILED])) {
+			$errorMessage = strtr('Customer canceled payment for :orderId on SalesChannel :salesChannelName', [
 				':orderId'          => $transaction->getOrder()->getId(),
 				':salesChannelName' => $salesChannelContext->getSalesChannel()->getName(),
-			]));
+			]);
+			$this->logger->info($errorMessage);
+			//throw new CustomerCanceledAsyncPaymentException($transaction->getOrderTransaction()->getId());
 		}
 	}
 }

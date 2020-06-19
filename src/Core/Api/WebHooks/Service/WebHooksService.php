@@ -145,13 +145,8 @@ class WebHooksService {
 			'id'                => 1472041857405,
 			'name'              => 'Shopware6::WebHook::Payment Method Configuration',
 			'url'               => null,
-			'states'            => [
-				CreationEntityState::ACTIVE,
-				CreationEntityState::DELETED,
-				CreationEntityState::DELETING,
-				CreationEntityState::INACTIVE,
-			],
-			'notifyEveryChange' => false,
+			'states'            => [],
+			'notifyEveryChange' => true,
 		]);
 	}
 

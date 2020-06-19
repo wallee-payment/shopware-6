@@ -8,8 +8,8 @@
 	"messageNotBlank": "This value should not be blank.",
 	"salesChannelCard": {
 	  "button": {
-		"description": "Click this button to enable Wallee and select it as default in the selected SalesChannel",
-		"label": "Set Wallee as default"
+		"description": "Click this button to set Wallee as default payment handler in the selected SalesChannel",
+		"label": "Set Wallee as default payment handler"
 	  }
 	},
 	"settingForm": {
@@ -29,12 +29,18 @@
 		}
 	  },
 	  "messageSaveSuccess": "Wallee settings have been saved.",
+	  "messageOrderDeliveryStateError": "Wallee OrderDeliveryState could not be saved.",
+	  "messageOrderDeliveryStateUpdated": "Wallee OrderDeliveryState has been updated.",
 	  "messagePaymentMethodConfigurationError": "Wallee PaymentMethodConfiguration could not be saved. Please check your credentials.",
 	  "messagePaymentMethodConfigurationUpdated": "Wallee PaymentMethodConfiguration has been registered.",
 	  "messageWebHookError": "Wallee WebHook could not be saved. Please check your credentials.",
 	  "messageWebHookUpdated": "Wallee WebHook has been updated.",
 	  "options": {
 		"cardTitle": "Options",
+		"emailEnabled": {
+		  "label": "Send order confirmation email",
+		  "tooltipText": "If this setting is enabled your customers will receive an email when their order payment is authorised"
+		},
 		"integration": {
 		  "label": "Integration",
 		  "options": {
@@ -45,7 +51,7 @@
 		},
 		"lineItemConsistencyEnabled": {
 		  "label": "Line item consistency",
-		  "tooltipText": "Line item consistency"
+		  "tooltipText": "If this option is enabled line item totals will always match order total"
 		},
 		"spaceViewId": {
 		  "label": "Space View ID",

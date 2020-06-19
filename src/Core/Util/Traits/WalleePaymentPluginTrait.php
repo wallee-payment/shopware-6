@@ -1,0 +1,130 @@
+<?php declare(strict_types=1);
+
+namespace WalleePayment\Core\Util\Traits;
+
+use Doctrine\DBAL\Connection;
+use Shopware\Core\{
+	Framework\Context,
+	Framework\DataAbstractionLayer\EntityRepositoryInterface,
+	Framework\DataAbstractionLayer\Search\Criteria,
+	Framework\DataAbstractionLayer\Search\Filter\ContainsFilter,
+	Framework\DataAbstractionLayer\Search\Filter\EqualsFilter,
+	Framework\Plugin\Context\UninstallContext};
+use WalleePayment\Core\{
+	Checkout\PaymentHandler\WalleePaymentHandler,
+	Settings\Service\SettingsService};
+
+/**
+ * Trait WalleePaymentPluginTrait
+ *
+ * We use a trait keep the plugin class clean and free of auxiliary functions.
+ *
+ * @package WalleePayment\Core\Util\Traits
+ */
+trait WalleePaymentPluginTrait {
+
+	/**
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	protected function enablePaymentMethods(Context $context)
+	{
+		$paymentMethodIds = $this->getPaymentMethodIds($context);
+		foreach ($paymentMethodIds as $paymentMethodId) {
+			$this->setPaymentMethodIsActive($paymentMethodId, true, $context);
+		}
+	}
+
+	/**
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return string[]
+	 */
+	protected function getPaymentMethodIds(Context $context): array
+	{
+		/** @var EntityRepositoryInterface $paymentRepository */
+		$paymentRepository = $this->container->get('payment_method.repository');
+		$criteria          = (new Criteria())
+			->addFilter(new EqualsFilter('handlerIdentifier', WalleePaymentHandler::class));
+
+		return $paymentRepository->searchIds($criteria, $context)->getIds();
+	}
+
+	/**
+	 * @param string                           $paymentMethodId
+	 * @param bool                             $active
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	protected function setPaymentMethodIsActive(string $paymentMethodId, bool $active, Context $context): void
+	{
+		$paymentMethod = [
+			'id'     => $paymentMethodId,
+			'active' => $active,
+		];
+
+		/** @var EntityRepositoryInterface $paymentRepository */
+		$paymentRepository = $this->container->get('payment_method.repository');
+		$paymentRepository->update([$paymentMethod], $context);
+	}
+
+	/**
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	protected function disablePaymentMethods(Context $context): void
+	{
+		$paymentMethodIds = $this->getPaymentMethodIds($context);
+		foreach ($paymentMethodIds as $paymentMethodId) {
+			$this->setPaymentMethodIsActive($paymentMethodId, false, $context);
+		}
+	}
+
+	/**
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	private function removeConfiguration(Context $context): void
+	{
+		$criteria = (new Criteria())
+			->addFilter(new ContainsFilter('configurationKey', SettingsService::SYSTEM_CONFIG_DOMAIN));
+
+		$systemConfigRepository = $this->container->get('system_config.repository');
+		$idSearchResult         = $systemConfigRepository->searchIds($criteria, $context);
+
+		foreach ($idSearchResult->getIds() as $id) {
+			$systemConfigRepository->delete([['id' => $id]], $context);
+		}
+	}
+
+	/**
+	 * Delete user data when plugin is uninstalled
+	 *
+	 * @internal
+	 * @param \Shopware\Core\Framework\Plugin\Context\UninstallContext $uninstallContext
+	 */
+	protected function deleteUserData(UninstallContext $uninstallContext): void
+	{
+		$connection = $this->container->get(Connection::class);
+
+		/*
+		We keep transaction tables and data in the event that the plugin is uninstalled
+
+		if (!$uninstallContext->keepUserData()) {
+			$tablesDropQueries = [
+				strtr(
+					'DROP TABLE IF EXISTS `{db_table}`',
+					['{db_table}' => PaymentMethodConfigurationEntityDefinition::ENTITY_NAME]
+				),
+				strtr(
+					'DROP TABLE IF EXISTS `{db_table}`',
+					['{db_table}' => TransactionEntityDefinition::ENTITY_NAME]
+				),
+			];
+
+			foreach ($tablesDropQueries as $query) {
+				$connection->executeQuery($query);
+			}
+
+		}
+		*/
+
+		$query = 'ALTER TABLE `order` DROP COLUMN `wallee_lock`;';
+		$connection->executeQuery($query);
+	}
+}

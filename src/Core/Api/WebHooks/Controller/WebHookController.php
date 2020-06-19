@@ -2,16 +2,19 @@
 
 namespace WalleePayment\Core\Api\WebHooks\Controller;
 
+use Doctrine\DBAL\{
+	Connection,
+	TransactionIsolationLevel};
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Checkout\Cart\Exception\OrderNotFoundException,
 	Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity,
 	Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler,
 	Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates,
+	Checkout\Order\OrderEntity,
 	Framework\Context,
 	Framework\DataAbstractionLayer\Search\Criteria,
 	Framework\Routing\Annotation\RouteScope};
-use Shopware\Storefront\Page\GenericPageLoader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\{
 	HttpFoundation\JsonResponse,
@@ -23,10 +26,14 @@ use Wallee\Sdk\{
 	Model\TransactionInvoiceState,
 	Model\TransactionState,};
 use WalleePayment\Core\{
+	Api\OrderDeliveryState\Handler\OrderDeliveryStateHandler,
 	Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService,
+	Api\Refund\Service\RefundService,
+	Api\Transaction\Service\OrderMailService,
 	Api\Transaction\Service\TransactionService,
 	Api\WebHooks\Struct\WebHookRequest,
-	Settings\Service\SettingsService};
+	Settings\Service\SettingsService,
+	Util\Payload\TransactionPayload};
 
 /**
  * Class WebHookController
@@ -38,25 +45,43 @@ use WalleePayment\Core\{
 class WebHookController extends AbstractController {
 
 	/**
-	 * @var \Shopware\Storefront\Page\GenericPageLoader
+	 * @var \Doctrine\DBAL\Connection
 	 */
-	protected $genericLoader;
+	protected $connection;
 
+	/**
+	 * @var \Psr\Log\LoggerInterface
+	 */
+	protected $logger;
+
+	/**
+	 * @var \WalleePayment\Core\Api\Transaction\Service\OrderMailService
+	 */
+	protected $orderMailService;
 	/**
 	 * @var \Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler
 	 */
 	protected $orderTransactionStateHandler;
-
+	/**
+	 * @var \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService
+	 */
+	protected $paymentMethodConfigurationService;
+	/**
+	 * @var \WalleePayment\Core\Settings\Struct\Settings
+	 */
+	protected $settings;
 	/**
 	 * @var \WalleePayment\Core\Settings\Service\SettingsService
 	 */
 	protected $settingsService;
-
 	/**
-	 * @var \Wallee\Sdk\ApiClient
+	 * @var \WalleePayment\Core\Api\Refund\Service\RefundService
 	 */
-	protected $apiClient;
-
+	protected $refundService;
+	/**
+	 * @var \WalleePayment\Core\Api\Transaction\Service\TransactionService
+	 */
+	protected $transactionService;
 	/**
 	 * Transaction Final States
 	 *
@@ -67,59 +92,57 @@ class WebHookController extends AbstractController {
 		OrderTransactionStates::STATE_PAID,
 		OrderTransactionStates::STATE_REFUNDED,
 	];
-
 	/**
 	 * Transaction Failed States
 	 *
 	 * @var array
 	 */
-	protected $transactionFailedStates = [
+	protected $transactionFailedStates                       = [
 		TransactionState::DECLINE,
 		TransactionState::FAILED,
 		TransactionState::VOIDED,
 	];
-
+	protected $walleeTransactionSuccessStates = [
+		TransactionState::AUTHORIZED,
+		TransactionState::COMPLETED,
+		TransactionState::FULFILL,
+	];
 	/**
-	 * @var \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService
+	 * @var \Shopware\Core\Checkout\Order\OrderEntity
 	 */
-	protected $paymentMethodConfigurationService;
-
-	/**
-	 * @var \Psr\Log\LoggerInterface
-	 */
-	protected $logger;
-
-	/**
-	 * @var \WalleePayment\Core\Api\Transaction\Service\TransactionService
-	 */
-	protected $transactionService;
+	private $orderEntity;
 
 	/**
 	 * WebHookController constructor.
 	 *
-	 * @param \Shopware\Storefront\Page\GenericPageLoader                                                                 $genericLoader
+	 * @param \Doctrine\DBAL\Connection                                                                                   $connection
 	 * @param \Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler                       $orderTransactionStateHandler
 	 * @param \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService $paymentMethodConfigurationService
-	 * @param \WalleePayment\Core\Settings\Service\SettingsService                                         $settingsService
+	 * @param \WalleePayment\Core\Api\Refund\Service\RefundService                                         $refundService
+	 * @param \WalleePayment\Core\Api\Transaction\Service\OrderMailService                                 $orderMailService
 	 * @param \WalleePayment\Core\Api\Transaction\Service\TransactionService                               $transactionService
+	 * @param \WalleePayment\Core\Settings\Service\SettingsService                                         $settingsService
 	 * @param \Psr\Log\LoggerInterface                                                                                    $logger
 	 */
 	public function __construct(
-		GenericPageLoader $genericLoader,
+		Connection $connection,
 		OrderTransactionStateHandler $orderTransactionStateHandler,
 		PaymentMethodConfigurationService $paymentMethodConfigurationService,
-		SettingsService $settingsService,
+		RefundService $refundService,
+		OrderMailService $orderMailService,
 		TransactionService $transactionService,
+		SettingsService $settingsService,
 		LoggerInterface $logger
 	)
 	{
-		$this->genericLoader                     = $genericLoader;
+		$this->connection                        = $connection;
 		$this->orderTransactionStateHandler      = $orderTransactionStateHandler;
 		$this->paymentMethodConfigurationService = $paymentMethodConfigurationService;
-		$this->settingsService                   = $settingsService;
+		$this->refundService                     = $refundService;
+		$this->orderMailService                  = $orderMailService;
 		$this->transactionService                = $transactionService;
+		$this->settingsService                   = $settingsService;
 		$this->logger                            = $logger;
-
 	}
 
 	/**
@@ -135,17 +158,16 @@ class WebHookController extends AbstractController {
 	 *     options={"seo": "false"},
 	 *     defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false},
 	 *     methods={"POST"}
-	 *     )
+	 * )
 	 */
-	public function callback(Request $request, Context $context, string $salesChannelId)
+	public function callback(Request $request, Context $context, string $salesChannelId): Response
 	{
 		$status       = Response::HTTP_INTERNAL_SERVER_ERROR;
 		$callBackData = new WebHookRequest();
 		try {
 			// Configuration
-			$salesChannelId  = $salesChannelId == 'null' ? null : $salesChannelId;
-			$settings        = $this->settingsService->getSettings($salesChannelId);
-			$this->apiClient = $settings->getApiClient();
+			$salesChannelId = $salesChannelId == 'null' ? null : $salesChannelId;
+			$this->settings = $this->settingsService->getSettings($salesChannelId);
 
 			$callBackData->assign(json_decode($request->getContent(), true));
 
@@ -177,7 +199,7 @@ class WebHookController extends AbstractController {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 */
-	private function updatePaymentMethodConfiguration(Context $context, string $salesChannelId): Response
+	private function updatePaymentMethodConfiguration(Context $context, string $salesChannelId = null): Response
 	{
 		$result = $this->paymentMethodConfigurationService->setSalesChannelId($salesChannelId)->synchronize($context);
 
@@ -196,36 +218,39 @@ class WebHookController extends AbstractController {
 		$status = Response::HTTP_INTERNAL_SERVER_ERROR;
 
 		try {
-
 			/**
 			 * @var \Wallee\Sdk\Model\Transaction $transaction
 			 */
-			$refund              = $this->apiClient->getRefundService()
-												   ->read($callBackData->getSpaceId(), $callBackData->getEntityId());
-			$transaction         = $refund->getTransaction();
-			$transactionMetaData = $transaction->getMetaData();
-			$orderID             = $transactionMetaData['orderId'];
-			$orderTransactionId  = $transactionMetaData['orderTransactionId'];
-			$orderTransaction    = $this->getOrderTransaction($orderID, $context);
-			if (
-				in_array(
-					$orderTransaction->getStateMachineState()->getTechnicalName(),
-					[
-						OrderTransactionStates::STATE_PAID,
-						OrderTransactionStates::STATE_PARTIALLY_PAID,
-					]
-				) &&
-				($refund->getState() == RefundState::SUCCESSFUL)
-			) {
-				if ($refund->getAmount() == $orderTransaction->getAmount()->getTotalPrice()) {
-					$this->orderTransactionStateHandler->refund($orderTransactionId, $context);
-				} else {
-					if ($refund->getAmount() < $orderTransaction->getAmount()->getTotalPrice()) {
-						$this->orderTransactionStateHandler->refundPartially($orderTransactionId, $context);
+			$refund  = $this->settings->getApiClient()->getRefundService()
+									  ->read($callBackData->getSpaceId(), $callBackData->getEntityId());
+			$orderId = $refund->getTransaction()->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_ID];
+
+			$this->executeLocked($orderId, function () use ($callBackData, $orderId, $refund, $context) {
+
+				$this->refundService->upsert($refund, $context);
+
+				$orderTransactionId = $refund->getTransaction()->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_TRANSACTION_ID];
+				$orderTransaction   = $this->getOrderTransaction($orderId, $context);
+				if (
+					in_array(
+						$orderTransaction->getStateMachineState()->getTechnicalName(),
+						[
+							OrderTransactionStates::STATE_PAID,
+							OrderTransactionStates::STATE_PARTIALLY_PAID,
+						]
+					) &&
+					($refund->getState() == RefundState::SUCCESSFUL)
+				) {
+					if ($refund->getAmount() == $orderTransaction->getAmount()->getTotalPrice()) {
+						$this->orderTransactionStateHandler->refund($orderTransactionId, $context);
+					} else {
+						if ($refund->getAmount() < $orderTransaction->getAmount()->getTotalPrice()) {
+							$this->orderTransactionStateHandler->refundPartially($orderTransactionId, $context);
+						}
 					}
 				}
-			}
 
+			});
 			$status = Response::HTTP_OK;
 		} catch (\Exception $exception) {
 			$this->logger->critical(__CLASS__ . ' : ' . __FUNCTION__ . ' : ' . $exception->getMessage(), $callBackData->jsonSerialize());
@@ -235,25 +260,67 @@ class WebHookController extends AbstractController {
 	}
 
 	/**
+	 * @param string   $orderId
+	 * @param callable $operation
+	 * @return mixed
+	 * @throws \Doctrine\DBAL\ConnectionException
+	 */
+	private function executeLocked(string $orderId, callable $operation)
+	{
+		$this->connection->setTransactionIsolation(TransactionIsolationLevel::READ_COMMITTED);
+		$this->connection->beginTransaction();
+		try {
+			$this->connection->executeUpdate('UPDATE `order` SET `wallee_lock` = ? WHERE HEX(`id`) = ?', [
+				date('Y-m-d H:i:s'),
+				$orderId,
+			]);
+			$this->connection->executeQuery('SELECT `wallee_lock` FROM `order` WHERE HEX(`id`) = ?', [
+				$orderId,
+			]);
+
+			$result = $operation();
+
+			$this->connection->commit();
+			return $result;
+		} catch (\Exception $exception) {
+			$this->connection->rollBack();
+			throw $exception;
+		}
+	}
+
+	/**
 	 * @param String                           $orderId
 	 * @param \Shopware\Core\Framework\Context $context
 	 * @return \Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity
 	 */
 	private function getOrderTransaction(String $orderId, Context $context): OrderTransactionEntity
 	{
-		$criteria = (new Criteria([$orderId]))->addAssociations(['transactions',]);
+		return $this->getOrderEntity($orderId, $context)->getTransactions()->last();
+	}
 
-		try {
-			/** @var OrderTransactionEntity|null $transaction */
-			$transaction = $this->container->get('order.repository')->search(
-				$criteria,
-				$context
-			)->first()->getTransactions()->first();
-		} catch (\Exception $e) {
-			throw new OrderNotFoundException($orderId);
+	/**
+	 * Get order
+	 *
+	 * @param String                           $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \Shopware\Core\Checkout\Order\OrderEntity
+	 */
+	private function getOrderEntity(string $orderId, Context $context): OrderEntity
+	{
+		if (is_null($this->orderEntity)) {
+			$criteria = (new Criteria([$orderId]))->addAssociations(['deliveries', 'transactions',]);
+
+			try {
+				$this->orderEntity = $this->container->get('order.repository')->search(
+					$criteria,
+					$context
+				)->first();
+			} catch (\Exception $e) {
+				throw new OrderNotFoundException($orderId);
+			}
 		}
 
-		return $transaction;
+		return $this->orderEntity;
 	}
 
 	/**
@@ -268,31 +335,37 @@ class WebHookController extends AbstractController {
 		$status = Response::HTTP_INTERNAL_SERVER_ERROR;
 
 		try {
-
 			/**
 			 * @var \Wallee\Sdk\Model\Transaction $transaction
 			 * @var \Shopware\Core\Checkout\Order\OrderEntity    $order
 			 */
-			$transaction = $this->apiClient->getTransactionService()
-										   ->read(
-											   $callBackData->getSpaceId(),
-											   $callBackData->getEntityId()
-										   );
-			$this->transactionService->upsert($context, $transaction);
-			$transactionMetaData = $transaction->getMetaData();
-			$orderID             = $transactionMetaData['orderId'];
-			$orderTransactionId  = $transactionMetaData['orderTransactionId'];
-			$orderTransaction    = $this->getOrderTransaction($orderID, $context);
-			if (
-				!in_array(
-					$orderTransaction->getStateMachineState()->getTechnicalName(),
-					$this->transactionFinalStates,
-					true
-				) &&
-				in_array($transaction->getState(), $this->transactionFailedStates)
-			) {
-				$this->orderTransactionStateHandler->cancel($orderTransactionId, $context);
-			}
+			$transaction = $this->settings->getApiClient()
+										  ->getTransactionService()
+										  ->read(
+											  $callBackData->getSpaceId(),
+											  $callBackData->getEntityId()
+										  );
+			$orderId     = $transaction->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_ID];
+
+			$this->executeLocked($orderId, function () use ($callBackData, $orderId, $transaction, $context) {
+				$this->transactionService->upsert($transaction, $context);
+				$orderTransactionId = $transaction->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_TRANSACTION_ID];
+				$orderTransaction   = $this->getOrderTransaction($orderId, $context);
+				if (
+					!in_array(
+						$orderTransaction->getStateMachineState()->getTechnicalName(),
+						$this->transactionFinalStates
+					) &&
+					in_array($transaction->getState(), $this->transactionFailedStates)
+				) {
+					$this->orderTransactionStateHandler->cancel($orderTransactionId, $context);
+				}
+
+				if ($this->settings->isEmailEnabled() && in_array($transaction->getState(), $this->walleeTransactionSuccessStates)) {
+					$this->orderMailService->send($orderId, $context);
+				}
+
+			});
 			$status = Response::HTTP_OK;
 		} catch (\Exception $exception) {
 			$this->logger->critical(__CLASS__ . ' : ' . __FUNCTION__ . ' : ' . $exception->getMessage(), $callBackData->jsonSerialize());
@@ -316,32 +389,40 @@ class WebHookController extends AbstractController {
 			 * @var \Wallee\Sdk\Model\Transaction        $transaction
 			 * @var \Wallee\Sdk\Model\TransactionInvoice $transactionInvoice
 			 */
-			$transactionInvoice  = $this->apiClient->getTransactionInvoiceService()
-												   ->read($callBackData->getSpaceId(), $callBackData->getEntityId());
-			$transaction         = $this->apiClient->getTransactionService()
-												   ->read($callBackData->getSpaceId(), $transactionInvoice->getLinkedTransaction());
-			$transactionMetaData = $transaction->getMetaData();
-			$orderID             = $transactionMetaData['orderId'];
-			$orderTransactionId  = $transactionMetaData['orderTransactionId'];
-			$orderTransaction    = $this->getOrderTransaction($orderID, $context);
-			if (!in_array(
-				$orderTransaction->getStateMachineState()->getTechnicalName(),
-				$this->transactionFinalStates,
-				true
-			)) {
-				switch ($transactionInvoice->getState()) {
-					case TransactionInvoiceState::DERECOGNIZED:
-						$this->orderTransactionStateHandler->cancel($orderTransactionId, $context);
-						break;
-					case TransactionInvoiceState::NOT_APPLICABLE:
-					case TransactionInvoiceState::PAID:
-						$this->orderTransactionStateHandler->process($orderTransactionId, $context);
-						$this->orderTransactionStateHandler->paid($orderTransactionId, $context);
-						break;
-					default:
-						break;
+			$transactionInvoice = $this->settings->getApiClient()->getTransactionInvoiceService()
+												 ->read($callBackData->getSpaceId(), $callBackData->getEntityId());
+			$orderId            = $transactionInvoice->getCompletion()
+													 ->getLineItemVersion()
+													 ->getTransaction()
+													 ->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_ID];
+
+			$this->executeLocked($orderId, function () use ($callBackData, $orderId, $transactionInvoice, $context) {
+
+				$orderTransactionId = $transactionInvoice->getCompletion()
+														 ->getLineItemVersion()
+														 ->getTransaction()
+														 ->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_TRANSACTION_ID];
+				$orderTransaction   = $this->getOrderTransaction($orderId, $context);
+				if (!in_array(
+					$orderTransaction->getStateMachineState()->getTechnicalName(),
+					$this->transactionFinalStates,
+					true
+				)) {
+					switch ($transactionInvoice->getState()) {
+						case TransactionInvoiceState::DERECOGNIZED:
+							$this->orderTransactionStateHandler->cancel($orderTransactionId, $context);
+							break;
+						case TransactionInvoiceState::NOT_APPLICABLE:
+						case TransactionInvoiceState::PAID:
+							$this->orderTransactionStateHandler->process($orderTransactionId, $context);
+							$this->orderTransactionStateHandler->paid($orderTransactionId, $context);
+							$this->unholdDelivery($orderId, $context);
+							break;
+						default:
+							break;
+					}
 				}
-			}
+			});
 			$status = Response::HTTP_OK;
 		} catch (\Exception $exception) {
 			$this->logger->critical(__CLASS__ . ' : ' . __FUNCTION__ . ' : ' . $exception->getMessage(), $callBackData->jsonSerialize());
@@ -349,4 +430,25 @@ class WebHookController extends AbstractController {
 
 		return new JsonResponse(['data' => $callBackData->jsonSerialize()], $status);
 	}
+
+	/**
+	 * Hold delivery
+	 *
+	 * @param string                           $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	private function unholdDelivery(string $orderId, Context $context)
+	{
+		try {
+			/**
+			 * @var OrderDeliveryStateHandler $orderDeliveryStateHandler
+			 */
+			$orderEntity               = $this->getOrderEntity($orderId, $context);
+			$orderDeliveryStateHandler = $this->container->get(OrderDeliveryStateHandler::class);
+			$orderDeliveryStateHandler->unhold($orderEntity->getDeliveries()->last()->getId(), $context);
+		} catch (\Exception $exception) {
+			$this->logger->critical($exception->getTraceAsString());
+		}
+	}
+
 }

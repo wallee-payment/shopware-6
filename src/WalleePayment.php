@@ -12,7 +12,7 @@ use Symfony\Component\{
 	Config\FileLocator,
 	DependencyInjection\ContainerBuilder,
 	DependencyInjection\Loader\XmlFileLoader,};
-use WalleePayment\Util\Traits\WalleePaymentPluginTrait;
+use WalleePayment\Core\Util\Traits\WalleePaymentPluginTrait;
 
 /**
  * Class WalleePayment
@@ -30,14 +30,16 @@ class WalleePayment extends Plugin {
 	public function build(ContainerBuilder $container): void
 	{
 		parent::build($container);
-		$loader    = new XmlFileLoader($container, new FileLocator(__DIR__ . '/DependencyInjection/'));
+		$loader    = new XmlFileLoader($container, new FileLocator(__DIR__ . '/DependencyInjection/core'));
 		$resources = [
-			'core/checkout.xml',
-			'core/configuration.xml',
-			'core/payment_method_configuration.xml',
-			'core/settings.xml',
-			'core/transaction.xml',
-			'core/webhook.xml',
+			'api/configuration.xml',
+			'api/order_delivery_state.xml',
+			'api/payment_method_configuration.xml',
+			'api/refund.xml',
+			'api/transaction.xml',
+			'api/webhooks.xml',
+			'checkout.xml',
+			'settings.xml',
 			'storefront/checkout.xml',
 			'util.xml',
 		];
@@ -61,6 +63,8 @@ class WalleePayment extends Plugin {
 	{
 		parent::uninstall($uninstallContext);
 		$this->disablePaymentMethods($uninstallContext->getContext());
+		$this->removeConfiguration($uninstallContext->getContext());
+		$this->deleteUserData($uninstallContext);
 	}
 
 	/**

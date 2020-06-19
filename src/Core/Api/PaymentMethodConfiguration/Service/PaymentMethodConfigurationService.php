@@ -12,7 +12,8 @@ use Shopware\Core\{
 	Framework\DataAbstractionLayer\Search\Criteria,
 	Framework\DataAbstractionLayer\Search\Filter\EqualsFilter,
 	Framework\Plugin\Util\PluginIdProvider,
-	Framework\Uuid\Uuid};
+	Framework\Uuid\Uuid,
+	System\Language\LanguageCollection};
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wallee\Sdk\{
 	ApiClient,
@@ -160,14 +161,16 @@ class PaymentMethodConfigurationService {
 	/**
 	 * @param \Shopware\Core\Framework\Context $context
 	 */
-	private function disablePaymentMethodConfigurations(Context $context)
+	private function disablePaymentMethodConfigurations(Context $context): void
 	{
 		$criteria = (new Criteria())
 			->addFilter(new EqualsFilter('state', CreationEntityState::ACTIVE));
 
-		$paymentMethodConfigurationEntities = $this->container->get('wallee_payment_method_configuration.repository')
-															  ->search($criteria, $context)
-															  ->getEntities();
+		$walleePaymentMethodConfigurationRepository = $this->container->get('wallee_payment_method_configuration.repository');
+
+		$paymentMethodConfigurationEntities = $walleePaymentMethodConfigurationRepository
+			->search($criteria, $context)
+			->getEntities();
 		/**
 		 * @var $paymentMethodConfigurationEntity \WalleePayment\Core\Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntity
 		 */
@@ -177,8 +180,7 @@ class PaymentMethodConfigurationService {
 				'id'    => $paymentMethodConfigurationEntity->getId(),
 				'state' => CreationEntityState::INACTIVE,
 			];
-			$this->container->get('wallee_payment_method_configuration.repository')
-							->update([$data], $context);
+			$walleePaymentMethodConfigurationRepository->update([$data], $context);
 		}
 	}
 
@@ -193,10 +195,7 @@ class PaymentMethodConfigurationService {
 			'id'     => $paymentMethodId,
 			'active' => $active,
 		];
-
-		/** @var \Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface $paymentRepository */
-		$paymentRepository = $this->container->get('payment_method.repository');
-		$paymentRepository->update([$paymentMethod], $context);
+		$this->container->get('payment_method.repository')->update([$paymentMethod], $context);
 	}
 
 	/**
@@ -205,10 +204,10 @@ class PaymentMethodConfigurationService {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 */
-	private function enablePaymentMethodConfigurations(Context $context)
+	private function enablePaymentMethodConfigurations(Context $context): void
 	{
 		$paymentMethodConfigurations = $this->getPaymentMethodConfigurations();
-		$this->logger->info('Updating payment methods', $paymentMethodConfigurations);
+		$this->logger->debug('Updating payment methods', $paymentMethodConfigurations);
 
 		/**
 		 * @var $paymentMethodConfiguration \Wallee\Sdk\Model\PaymentMethodConfiguration
@@ -253,8 +252,21 @@ class PaymentMethodConfigurationService {
 	 */
 	private function getPaymentMethodConfigurations(): array
 	{
-		return $this->apiClient->getPaymentMethodConfigurationService()
-							   ->search($this->getSpaceId(), new EntityQuery());
+		$paymentMethodConfigurations = $this
+			->apiClient
+			->getPaymentMethodConfigurationService()
+			->search($this->getSpaceId(), new EntityQuery());
+
+
+		usort($paymentMethodConfigurations, function ($item1, $item2) {
+			/**
+			 * @var \Wallee\Sdk\Model\PaymentMethodConfiguration $item1
+			 * @var \Wallee\Sdk\Model\PaymentMethodConfiguration $item2
+			 */
+			return $item1->getSortOrder() <=> $item2->getSortOrder();
+		});
+
+		return $paymentMethodConfigurations;
 	}
 
 	/**
@@ -321,22 +333,55 @@ class PaymentMethodConfigurationService {
 		$data = [
 			'id'                => $id,
 			'handlerIdentifier' => WalleePaymentHandler::class,
-			'name'              => $paymentMethodConfiguration->getName(),
-			'description'       => empty($paymentMethodConfiguration->getDescription()->getDisplayName()) ?
-				$paymentMethodConfiguration->getName() :
-				$paymentMethodConfiguration->getDescription()->getDisplayName(),
 			'pluginId'          => $pluginId,
-			'position'          => -101,
+			'position'          => $paymentMethodConfiguration->getSortOrder() - 100,
 			'active'            => true,
+			'translations'      => $this->getPaymentMethodConfigurationTranslation($paymentMethodConfiguration, $context),
 		];
 
 		$data['mediaId'] = $this->upsertMedia($id, $paymentMethodConfiguration, $context);
 
 		$data = array_filter($data);
 
-		/** @var \Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface $paymentRepository */
-		$paymentRepository = $this->container->get('payment_method.repository');
-		$paymentRepository->upsert([$data], $context);
+		$this->container->get('payment_method.repository')->upsert([$data], $context);
+	}
+
+	/**
+	 * @param \Wallee\Sdk\Model\PaymentMethodConfiguration $paymentMethodConfiguration
+	 * @param \Shopware\Core\Framework\Context                            $context
+	 * @return array
+	 */
+	protected function getPaymentMethodConfigurationTranslation(PaymentMethodConfiguration $paymentMethodConfiguration, Context $context): array
+	{
+		$translations = [];
+		$languages    = $this->getAvailableLanguages($context);
+		$locales      = array_map(
+			function ($language) {
+				/**
+				 * @var \Shopware\Core\System\Language\LanguageEntity $language
+				 */
+				return $language->getLocale()->getCode();
+			},
+			$languages->jsonSerialize()
+		);
+		foreach ($locales as $locale) {
+			$translations[$locale] = [
+				'name'        => $paymentMethodConfiguration->getResolvedTitle()[$locale] ?? $paymentMethodConfiguration->getName(),
+				'description' => $paymentMethodConfiguration->getResolvedDescription()[$locale] ?? $paymentMethodConfiguration->getName(),
+			];
+		}
+		return $translations;
+	}
+
+	/**
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \Shopware\Core\System\Language\LanguageCollection
+	 */
+	protected function getAvailableLanguages(Context $context): LanguageCollection
+	{
+		return $this->container->get('language.repository')->search((new Criteria())->addAssociations([
+			'locale',
+		]), $context)->getEntities();
 	}
 
 	/**
@@ -373,15 +418,14 @@ class PaymentMethodConfigurationService {
 
 			$mediaDefinition = $this->container->get(MediaDefinition::class);
 			$this->mediaSerializer->setRegistry($this->serializerRegistry);
-			$data            = [
+			$data = [
 				'id'            => $id,
 				'title'         => $paymentMethodConfiguration->getName(),
 				'url'           => $paymentMethodConfiguration->getResolvedImageUrl(),
 				'mediaFolderId' => $id,
 			];
-			$data            = $this->mediaSerializer->deserialize(new Config([], []), $mediaDefinition, $data);
-			$mediaRepository = $this->container->get('media.repository');
-			$mediaRepository->upsert([$data], $context);
+			$data = $this->mediaSerializer->deserialize(new Config([], []), $mediaDefinition, $data);
+			$this->container->get('media.repository')->upsert([$data], $context);
 			return $id;
 		} catch (\Exception $e) {
 			$this->logger->critical($e->getMessage(), [$e->getTraceAsString()]);

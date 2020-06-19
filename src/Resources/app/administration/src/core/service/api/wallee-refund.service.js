@@ -8,7 +8,7 @@ const ApiService = Shopware.Classes.ApiService;
 class WalleeRefundService extends ApiService {
 
 	/**
-	 * WalleeRefundService construtor
+	 * WalleeRefundService constructor
 	 *
 	 * @param httpClient
 	 * @param loginService

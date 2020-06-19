@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unresolved */
 
+// noinspection NpmUsedModulesInstalled
 import Plugin from 'src/plugin-system/plugin.class';
 import HttpClient from 'src/service/http-client.service';
 

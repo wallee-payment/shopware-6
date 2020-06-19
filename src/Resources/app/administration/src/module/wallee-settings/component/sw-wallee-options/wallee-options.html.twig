@@ -10,17 +10,18 @@
 
 						{% block wallee_settings_content_card_channel_config_credentials_card_container_settings_space_view_id %}
 							<sw-inherit-wrapper
-									v-model="actualConfigData['WalleePayment.config.spaceViewId']"
-									:inheritedValue="selectedSalesChannelId === null ? null : allConfigs['null']['WalleePayment.config.spaceViewId']"
+									v-model="actualConfigData[CONFIG_SPACE_VIEW_ID]"
+									:inheritedValue="selectedSalesChannelId === null ? null : allConfigs['null'][CONFIG_SPACE_VIEW_ID]"
 									:customInheritationCheckFunction="checkTextFieldInheritance">
 								<template #content="props">
-									<sw-number-field name="WalleePayment.config.spaceViewId"
-													 :mapInheritance="props"
-													 :label="$tc('wallee-settings.settingForm.options.spaceViewId.label')"
-													 :helpText="$tc('wallee-settings.settingForm.options.spaceViewId.tooltipText')"
-													 :disabled="props.isInherited"
-													 :value="props.currentValue"
-													 @change="props.updateCurrentValue">
+									<sw-number-field
+											:name="CONFIG_SPACE_VIEW_ID"
+											:mapInheritance="props"
+											:label="$tc('wallee-settings.settingForm.options.spaceViewId.label')"
+											:helpText="$tc('wallee-settings.settingForm.options.spaceViewId.tooltipText')"
+											:disabled="props.isInherited"
+											:value="props.currentValue"
+											@change="props.updateCurrentValue">
 									</sw-number-field>
 								</template>
 							</sw-inherit-wrapper>
@@ -28,22 +29,21 @@
 
 						{% block wallee_settings_content_card_channel_config_credentials_card_container_settings_integration %}
 							<sw-inherit-wrapper
-									v-model="actualConfigData['WalleePayment.config.integration']"
-									:inheritedValue="selectedSalesChannelId === null ? null : allConfigs['null']['WalleePayment.config.integration']"
+									v-model="actualConfigData[CONFIG_INTEGRATION]"
+									:inheritedValue="selectedSalesChannelId === null ? null : allConfigs['null'][CONFIG_INTEGRATION]"
 									:customInheritationCheckFunction="checkTextFieldInheritance">
 								<template #content="props">
-									<sw-single-select name="WalleePayment.config.integration"
-													  :required="true"
-													  labelProperty="name"
-													  valueProperty="id"
-													  :options="integrationOptions"
-													  :mapInheritance="props"
-													  :label="$tc('wallee-settings.settingForm.options.integration.label')"
-													  :helpText="$tc('wallee-settings.settingForm.options.integration.tooltipText')"
-													  :disabled="props.isInherited"
-													  :value="props.currentValue ? props.currentValue : 'iframe'"
-													  :error="integrationErrorState"
-													  @change="props.updateCurrentValue">
+									<sw-single-select
+											:name="CONFIG_INTEGRATION"
+											labelProperty="name"
+											valueProperty="id"
+											:options="integrationOptions"
+											:mapInheritance="props"
+											:label="$tc('wallee-settings.settingForm.options.integration.label')"
+											:helpText="$tc('wallee-settings.settingForm.options.integration.tooltipText')"
+											:disabled="props.isInherited"
+											:value="props.currentValue ? props.currentValue : 'iframe'"
+											@change="props.updateCurrentValue">
 									</sw-single-select>
 								</template>
 							</sw-inherit-wrapper>
@@ -51,18 +51,38 @@
 
 						{% block wallee_settings_content_card_channel_config_credentials_card_container_settings_line_item_consistency_enabled %}
 							<sw-inherit-wrapper
-									v-model="actualConfigData['WalleePayment.config.lineItemConsistencyEnabled']"
-									:inheritedValue="selectedSalesChannelId == null ? null : allConfigs['null']['WalleePayment.config.lineItemConsistencyEnabled']"
+									v-model="actualConfigData[CONFIG_LINE_ITEM_CONSISTENCY_ENABLED]"
+									:inheritedValue="selectedSalesChannelId == null ? null : allConfigs['null'][CONFIG_LINE_ITEM_CONSISTENCY_ENABLED]"
 									:customInheritationCheckFunction="checkBoolFieldInheritance">
 								<template #content="props">
 									<sw-switch-field
-											name="WalleePayment.config.lineItemConsistencyEnabled"
+											:name="CONFIG_LINE_ITEM_CONSISTENCY_ENABLED"
 											bordered
 											:mapInheritance="props"
 											:label="$tc('wallee-settings.settingForm.options.lineItemConsistencyEnabled.label')"
 											:helpText="$tc('wallee-settings.settingForm.options.lineItemConsistencyEnabled.tooltipText')"
 											:disabled="props.isInherited"
 											:value="props.currentValue ? props.currentValue : 0"
+											@change="props.updateCurrentValue">
+									</sw-switch-field>
+								</template>
+							</sw-inherit-wrapper>
+						{% endblock %}
+
+						{% block wallee_settings_content_card_channel_config_credentials_card_container_settings_email_enabled %}
+							<sw-inherit-wrapper
+									v-model="actualConfigData[CONFIG_EMAIL_ENABLED]"
+									:inheritedValue="selectedSalesChannelId == null ? null : allConfigs['null'][CONFIG_EMAIL_ENABLED]"
+									:customInheritationCheckFunction="checkBoolFieldInheritance">
+								<template #content="props">
+									<sw-switch-field
+											:name="CONFIG_EMAIL_ENABLED"
+											bordered
+											:mapInheritance="props"
+											:label="$tc('wallee-settings.settingForm.options.emailEnabled.label')"
+											:helpText="$tc('wallee-settings.settingForm.options.emailEnabled.tooltipText')"
+											:disabled="props.isInherited"
+											:value="props.currentValue ? props.currentValue : 1"
 											@change="props.updateCurrentValue">
 									</sw-switch-field>
 								</template>

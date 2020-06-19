@@ -3,8 +3,9 @@
 namespace WalleePayment\Core\Api\Transaction\Controller;
 
 use Psr\Log\LoggerInterface;
-use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\Routing\Annotation\RouteScope;
+use Shopware\Core\{
+	Framework\Context,
+	Framework\Routing\Annotation\RouteScope};
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\{
 	HttpFoundation\HeaderUtils,
@@ -12,11 +13,6 @@ use Symfony\Component\{
 	HttpFoundation\Request,
 	HttpFoundation\Response,
 	Routing\Annotation\Route};
-use Wallee\Sdk\{
-	Model\CriteriaOperator,
-	Model\EntityQuery,
-	Model\EntityQueryFilter,
-	Model\EntityQueryFilterType};
 use WalleePayment\{
 	Core\Api\Transaction\Service\TransactionService,
 	Core\Settings\Service\SettingsService};
@@ -67,10 +63,6 @@ class TransactionController extends AbstractController {
 	 * @param \Symfony\Component\HttpFoundation\Request $request
 	 * @param \Shopware\Core\Framework\Context          $context
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
-	 * @throws \Wallee\Sdk\ApiException
-	 * @throws \Wallee\Sdk\Http\ConnectionException
-	 * @throws \Wallee\Sdk\VersioningException
-	 *
 	 * @Route(
 	 *     "/api/v{version}/_action/wallee/transaction/get-transaction-data/",
 	 *     name="api.action.wallee.transaction.get-transaction-data",
@@ -82,26 +74,13 @@ class TransactionController extends AbstractController {
 		$salesChannelId = $request->request->get('salesChannelId');
 		$transactionId  = $request->request->get('transactionId');
 
-		$settings  = $this->settingsService->getSettings($salesChannelId);
-		$apiClient = $settings->getApiClient();
-
-		$transaction = $this->transactionService->getByTransactionId(intval($transactionId), $context);
-
-		$entityQueryFilter = (new EntityQueryFilter())
-			->setFieldName('transaction')
-			->setValue($transactionId)
-			->setType(EntityQueryFilterType::LEAF)
-			->setOperator(CriteriaOperator::EQUALS);
-
-		$entityQuery = new EntityQuery(['filter' => $entityQueryFilter]);
-
-		$refunds = $apiClient->getRefundService()->search($settings->getSpaceId(), $entityQuery);
-		$refunds = array_map(
-			function ($refund) {
-				return json_decode(strval($refund), true);
-			},
-			$refunds
-		);
+		$transaction      = $this->transactionService->getByTransactionId(intval($transactionId), $context);
+		$refundCollection = $this->transactionService->getRefundEntityCollectionByTransactionId(intval($transactionId), $context);
+		
+		$refunds = [];
+		foreach ($refundCollection as $refundEntity) {
+			$refunds[] = $refundEntity->getData();
+		}
 
 		return new JsonResponse([
 			'refunds'      => $refunds,

@@ -25,6 +25,13 @@ class Settings extends Struct {
 	protected $applicationKey;
 
 	/**
+	 * Enable emails
+	 *
+	 * @var bool
+	 */
+	protected $emailEnabled;
+
+	/**
 	 * Preferred integration
 	 *
 	 * @var string
@@ -60,11 +67,28 @@ class Settings extends Struct {
 	protected $userId;
 
 	/**
+	 * @return bool
+	 */
+	public function isEmailEnabled(): bool
+	{
+		return boolval($this->emailEnabled);
+	}
+
+	/**
+	 * @param bool $emailEnabled
+	 */
+	public function setEmailEnabled(bool $emailEnabled): void
+	{
+		$this->emailEnabled = $emailEnabled;
+	}
+
+
+	/**
 	 * @return string
 	 */
 	public function getIntegration(): string
 	{
-		return (string) $this->integration;
+		return strval($this->integration);
 	}
 
 	/**
@@ -80,17 +104,15 @@ class Settings extends Struct {
 	 */
 	public function isLineItemConsistencyEnabled(): bool
 	{
-		return (bool) $this->lineItemConsistencyEnabled;
+		return boolval($this->lineItemConsistencyEnabled);
 	}
 
 	/**
 	 * @param bool $lineItemConsistencyEnabled
-	 * @return Settings
 	 */
-	public function setLineItemConsistencyEnabled(bool $lineItemConsistencyEnabled): Settings
+	public function setLineItemConsistencyEnabled(bool $lineItemConsistencyEnabled): void
 	{
 		$this->lineItemConsistencyEnabled = $lineItemConsistencyEnabled;
-		return $this;
 	}
 
 	/**
@@ -114,7 +136,11 @@ class Settings extends Struct {
 	 */
 	public function getSpaceViewId(): ?int
 	{
-		return !empty($this->spaceViewId) & is_numeric($this->spaceViewId) ? intval($this->spaceViewId) : null;
+		if (!empty($this->spaceViewId) && is_numeric($this->spaceViewId)) {
+			return intval($this->spaceViewId);
+		}
+
+		return null;
 	}
 
 	/**
@@ -161,7 +187,7 @@ class Settings extends Struct {
 	 */
 	public function getApplicationKey(): string
 	{
-		return (string) $this->applicationKey;
+		return strval($this->applicationKey);
 	}
 
 	/**
