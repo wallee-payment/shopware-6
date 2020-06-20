@@ -1,4 +1,6 @@
 {
   "wallee": {
+    "payHeader": "Bestellung bezahlen",
+    "payButton": "Zahlen"
   }
 }

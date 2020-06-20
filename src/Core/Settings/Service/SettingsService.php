@@ -81,7 +81,7 @@ class SettingsService {
 			if ($property === '') {
 				continue;
 			}
-			if (empty($value)) {
+			if (!is_numeric($value) && empty($value)) {
 				$this->logger->warning(strtr('Empty value :value for settings :property.', [':property' => $property, ':value' => $value]));
 			}
 			$propertyValuePairs[$property] = $value;

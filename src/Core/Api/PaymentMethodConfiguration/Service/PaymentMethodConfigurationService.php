@@ -74,6 +74,8 @@ class PaymentMethodConfigurationService {
 	 */
 	private $mediaSerializer;
 
+	private $languages;
+
 	/**
 	 * PaymentMethodConfigurationService constructor.
 	 *
@@ -366,11 +368,57 @@ class PaymentMethodConfigurationService {
 		);
 		foreach ($locales as $locale) {
 			$translations[$locale] = [
-				'name'        => $paymentMethodConfiguration->getResolvedTitle()[$locale] ?? $paymentMethodConfiguration->getName(),
-				'description' => $paymentMethodConfiguration->getResolvedDescription()[$locale] ?? $paymentMethodConfiguration->getName(),
+				'name'        => $this->translate($paymentMethodConfiguration->getResolvedTitle(), $locale) ?? $paymentMethodConfiguration->getName(),
+				'description' => $this->translate($paymentMethodConfiguration->getResolvedDescription(), $locale) ?? '',
 			];
 		}
 		return $translations;
+	}
+
+	protected function translate($translatedString, $locale)
+    {
+        if (isset($translatedString[$locale])) {
+            return $translatedString[$locale];
+        }
+
+        $primaryLanguage = $this->findPrimaryLanguage($locale);
+        if ($primaryLanguage !== false && isset($translatedString[$primaryLanguage->getIetfCode()])) {
+            return $translatedString[$primaryLanguage->getIetfCode()];
+        }
+
+        if (isset($translatedString['en-US'])) {
+            return $translatedString['en-US'];
+        }
+
+        return null;
+	}
+
+	/**
+     * Returns the primary language in the given group.
+     *
+     * @param string $code
+     * @return \Wallee\Sdk\Model\RestLanguage
+     */
+    protected function findPrimaryLanguage($code)
+    {
+        $code = substr($code, 0, 2);
+        foreach ($this->getLanguages() as $language) {
+            if ($language->getIso2Code() == $code && $language->getPrimaryOfGroup()) {
+                return $language;
+            }
+        }
+        return false;
+    }
+	
+	protected function getLanguages()
+	{
+		if ($this->languages == null) {
+			$this->languages = $this
+				->apiClient
+				->getLanguageService()
+				->all();
+		}
+		return $this->languages;
 	}
 
 	/**

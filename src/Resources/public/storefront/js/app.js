@@ -23,12 +23,9 @@
         /**
          * Variables
          */
-        payment_panel_class: 'wallee-payment-panel',
-        payment_method_tabs: 'ul.wallee-payment-panel li',
-        payment_method_iframe_prefix: 'iframe_payment_method_',
-        payment_method_iframe_class: '.wallee-payment-iframe',
+        payment_panel_id: 'wallee-payment-panel',
+        payment_method_iframe_id: 'wallee-payment-iframe',
         payment_method_handler_name: 'wallee_payment_handler',
-        payment_method_handler_prefix: 'wallee_handler_',
         payment_method_handler_status: 'input[name="wallee_payment_handler_validation_status"]',
         payment_form_id: 'confirmOrderForm',
         button_cancel_id: 'walleeOrderCancel',
@@ -37,6 +34,7 @@
         confirm_url: '/wallee/checkout/confirm?orderId=',
         pay_url: '/wallee/checkout/pay?orderId=',
         recreate_cart_url: '/wallee/checkout/recreate-cart?orderId=',
+        handler: null,
 
         /**
          * Initialize plugin
@@ -49,40 +47,18 @@
             this.recreate_cart_url += this.order_id;
 
             document.getElementById(this.button_cancel_id).addEventListener('click', this.recreateCart, false);
-
-            const payment_method_tabs = document.querySelectorAll(this.payment_method_tabs);
-            for (let i = 0; i < payment_method_tabs.length; i++) {
-                payment_method_tabs[i].addEventListener('click', this.getIframe, false);
-            }
             document.getElementById(this.payment_form_id).addEventListener('submit', this.submitPayment, false);
-            payment_method_tabs[0].click();
+
+            WalleeCheckout.getIframe();
         },
 
         activateLoader: function (activate) {
-            var panel = document.getElementsByClassName(WalleeCheckout.payment_panel_class)[0];
-            var loader = document.getElementById(WalleeCheckout.loader_id);
             const buttons = document.querySelectorAll('button');
             if (activate) {
-                panel.style.display = 'none';
-                panel.style.transition = 'opacity 2s ease-out 2s';
-                panel.style.opacity = '0';
-
-                loader.style.display = 'block';
-                loader.style.transition = 'opacity 2s ease-in 2s';
-                loader.style.opacity = '1';
                 for (let i = 0; i < buttons.length; i++) {
                     buttons[i].disabled = true;
                 }
-
             } else {
-                loader.style.display = 'none';
-                loader.style.transition = 'opacity 2s ease-out 2s';
-                loader.style.opacity = '0';
-
-                panel.style.display = 'block';
-                panel.style.transition = 'opacity 2s ease-in 2s';
-                panel.style.opacity = '1';
-
                 for (let i = 0; i < buttons.length; i++) {
                     buttons[i].disabled = false;
                 }
@@ -102,8 +78,7 @@
          */
         submitPayment: function (event) {
             WalleeCheckout.activateLoader(true);
-            const handler = document.querySelector('input[name="' + WalleeCheckout.payment_method_handler_name + '"]:checked').value;
-            window[handler].validate();
+            WalleeCheckout.handler.validate();
             event.preventDefault();
             return false;
         },
@@ -112,48 +87,83 @@
          * Get iframe
          */
         getIframe: function () {
-            const payment_method_iframe_class = document.querySelectorAll(WalleeCheckout.payment_method_iframe_class);
-            for (let i = 0; i < payment_method_iframe_class.length; i++) {
-                payment_method_iframe_class[i].style.display = 'none';
-            }
-            this.getElementsByTagName('input')[0].checked = true;
-            const value = this.dataset.id;
-            const iframe_div = WalleeCheckout.payment_method_iframe_prefix + value;
-            if (document.getElementById(iframe_div).children.length === 0) { // iframe has not been loaded yet
-                const payment_handler_name = WalleeCheckout.payment_method_handler_prefix + value;
+            const paymentPanel = document.getElementById(WalleeCheckout.payment_panel_id);
+            const paymentMethodConfigurationId = paymentPanel.dataset.id;
+            if (!WalleeCheckout.handler) { // iframe has not been loaded yet
                 // noinspection JSUnresolvedFunction
-                window[payment_handler_name] = window.IframeCheckoutHandler(value);
+                WalleeCheckout.handler = window.IframeCheckoutHandler(paymentMethodConfigurationId);
                 // noinspection JSUnresolvedFunction
-                window[payment_handler_name].setValidationCallback((validationResult) => {
-                    WalleeCheckout.validationCallBack(payment_handler_name, validationResult);
+                WalleeCheckout.handler.setValidationCallback((validationResult) => {
+                    WalleeCheckout.hideErrors();
+                    WalleeCheckout.validationCallBack(validationResult);
                 });
-                window[payment_handler_name].create(iframe_div);
-                document.getElementById(iframe_div).style.display = 'block';
-                setTimeout(function () {
+                WalleeCheckout.handler.setInitializeCallback(() => {
+                    var loader = document.getElementById(WalleeCheckout.loader_id);
+                    loader.parentNode.removeChild(loader);
                     WalleeCheckout.activateLoader(false);
-                }, 1000);
-
+                });
+                const iframeContainer = document.getElementById(WalleeCheckout.payment_method_iframe_id);
+                WalleeCheckout.handler.create(iframeContainer);
             }
-
-            return false;
         },
 
         /**
          * validation callback
-         * @param payment_handler_name
          * @param validationResult
          */
-        validationCallBack: function (payment_handler_name, validationResult) {
+        validationCallBack: function (validationResult) {
             if (validationResult.success) {
                 document.querySelector(this.payment_method_handler_status).value = true;
                 fetch(this.confirm_url).then(() => {
-                    window[payment_handler_name].submit();
+                    WalleeCheckout.handler.submit();
                 }).catch(() => {
                     WalleeCheckout.activateLoader(false);
                 });
             } else {
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+
+                if (validationResult.errors) {
+                    WalleeCheckout.showErrors(validationResult.errors);
+                }
                 document.querySelector(this.payment_method_handler_status).value = false;
                 WalleeCheckout.activateLoader(false);
+            }
+        },
+
+        showErrors: function(errors) {
+            var alert = document.createElement('div');
+            alert.setAttribute('class', 'alert alert-danger');
+            alert.setAttribute('role', 'alert');
+            alert.setAttribute('id', 'wallee-errors');
+            document.getElementsByClassName('flashbags')[0].appendChild(alert);
+
+            var alertContentContainer = document.createElement('div');
+            alertContentContainer.setAttribute('class', 'alert-content-container');
+            alert.appendChild(alertContentContainer);
+
+            var alertContent = document.createElement('div');
+            alertContent.setAttribute('class', 'alert-content');
+            alertContentContainer.appendChild(alertContent);
+
+            if (errors.length > 1) {
+                var alertList = document.createElement('ul');
+                alertList.setAttribute('class', 'alert-list');
+                alertContent.appendChild(alertList);
+                for (var index = 0; index < errors.length; index++) {
+                    var alertListItem = document.createElement('li');
+                    alertListItem.textContent = errors[index];
+                    alertList.appendChild(alertListItem);
+                }
+            } else {
+                alertContent.textContent = errors[0];
+            }
+        },
+
+        hideErrors: function() {
+            var errorElement = document.getElementById('wallee-errors');
+            if (errorElement) {
+                errorElement.parentNode.removeChild(errorElement);
             }
         },
 

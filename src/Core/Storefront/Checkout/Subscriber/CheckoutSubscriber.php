@@ -5,7 +5,9 @@ namespace WalleePayment\Core\Storefront\Checkout\Subscriber;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Checkout\Order\OrderEntity,
-	Content\MailTemplate\Service\Event\MailBeforeValidateEvent};
+	Content\MailTemplate\Service\Event\MailBeforeSentEvent,
+	Content\MailTemplate\Service\Event\MailBeforeValidateEvent,
+	Framework\Struct\ArrayStruct};
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoadedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use WalleePayment\Core\{
@@ -62,6 +64,7 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 		return [
 			CheckoutConfirmPageLoadedEvent::class => ['onConfirmPageLoaded', 1],
 			MailBeforeValidateEvent::class        => ['onMailBeforeValidate', 1],
+			MailBeforeSentEvent::class            => ['onMailBeforeSent', 1],
 		];
 	}
 
@@ -86,9 +89,19 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 				!$emailOriginIsWalleePayment &&
 				WalleePaymentHandler::class == $order->getTransactions()->first()->getPaymentMethod()->getHandlerIdentifier()
 			) {
-
+				$event->getContext()->addExtension('wallee-disable', new ArrayStruct());
 				$event->stopPropagation();
 			}
+		}
+	}
+
+	/**
+	 * @param \Shopware\Core\Content\MailTemplate\Service\Event\MailBeforeSentEvent $event
+	 */
+	public function onMailBeforeSent(MailBeforeSentEvent $event): void
+	{
+		if ($event->getContext()->hasExtension('wallee-disable')) {
+			$event->stopPropagation();
 		}
 	}
 
