@@ -225,7 +225,7 @@ class WebHookController extends AbstractController {
 									  ->read($callBackData->getSpaceId(), $callBackData->getEntityId());
 			$orderId = $refund->getTransaction()->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_ID];
 
-			$this->executeLocked($orderId, function () use ($callBackData, $orderId, $refund, $context) {
+			$this->executeLocked($orderId, function () use ($orderId, $refund, $context) {
 
 				$this->refundService->upsert($refund, $context);
 
@@ -347,7 +347,7 @@ class WebHookController extends AbstractController {
 										  );
 			$orderId     = $transaction->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_ID];
 
-			$this->executeLocked($orderId, function () use ($callBackData, $orderId, $transaction, $context) {
+			$this->executeLocked($orderId, function () use ($orderId, $transaction, $context) {
 				$this->transactionService->upsert($transaction, $context);
 				$orderTransactionId = $transaction->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_TRANSACTION_ID];
 				$orderTransaction   = $this->getOrderTransaction($orderId, $context);
@@ -396,7 +396,7 @@ class WebHookController extends AbstractController {
 													 ->getTransaction()
 													 ->getMetaData()[TransactionPayload::WALLEE_METADATA_ORDER_ID];
 
-			$this->executeLocked($orderId, function () use ($callBackData, $orderId, $transactionInvoice, $context) {
+			$this->executeLocked($orderId, function () use ($orderId, $transactionInvoice, $context) {
 
 				$orderTransactionId = $transactionInvoice->getCompletion()
 														 ->getLineItemVersion()

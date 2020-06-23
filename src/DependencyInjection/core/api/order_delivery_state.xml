@@ -5,9 +5,18 @@
 		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
 	<services>
+		<!-- Commands -->
+		<service id="WalleePayment\Core\Api\OrderDeliveryState\Command\OrderDeliveryStateCommand">
+			<argument type="service" id="WalleePayment\Core\Api\OrderDeliveryState\Service\OrderDeliveryStateService"/>
+			<tag name="console.command"/>
+		</service>
+
+		<!-- Handlers -->
 		<service id="WalleePayment\Core\Api\OrderDeliveryState\Handler\OrderDeliveryStateHandler" public="true">
 			<argument type="service" id="Shopware\Core\System\StateMachine\StateMachineRegistry"/>
 		</service>
+
+		<!-- Services -->
 		<service id="WalleePayment\Core\Api\OrderDeliveryState\Service\OrderDeliveryStateService" public="true">
 			<argument type="service" id="service_container"/>
 		</service>

@@ -2,14 +2,15 @@
 
 namespace WalleePayment\Core\Util;
 
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Framework\Context,
-	Framework\DataAbstractionLayer\EntityCollection,
-	Framework\DataAbstractionLayer\EntityRepositoryInterface,
 	Framework\DataAbstractionLayer\Search\Criteria,
 	Framework\DataAbstractionLayer\Search\Filter\EqualsFilter,
-	Framework\DataAbstractionLayer\Search\Sorting\FieldSorting};
+	Framework\DataAbstractionLayer\Search\Filter\NotFilter,
+	Framework\DataAbstractionLayer\Search\Sorting\FieldSorting,
+	System\SalesChannel\SalesChannelCollection,};
 use WalleePayment\Core\Checkout\PaymentHandler\WalleePaymentHandler;
 
 /**
@@ -25,6 +26,11 @@ class PaymentMethodUtil {
 	protected $logger;
 
 	/**
+	 * @var \Psr\Container\ContainerInterface
+	 */
+	protected $container;
+
+	/**
 	 * @var \Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface
 	 */
 	private $paymentRepository;
@@ -34,29 +40,40 @@ class PaymentMethodUtil {
 	 */
 	private $salesChannelRepository;
 
+	/**
+	 * @var \Shopware\Core\System\SalesChannel\Aggregate\SalesChannelPaymentMethod\SalesChannelPaymentMethodDefinition
+	 */
+	private $salesChannelPaymentMethodRepository;
 
 	/**
 	 * PaymentMethodUtil constructor.
 	 *
-	 * @param \Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface $paymentRepository
-	 * @param \Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface $salesChannelRepository
-	 * @param \Psr\Log\LoggerInterface                                                $logger
+	 * @param \Psr\Container\ContainerInterface $container
 	 */
-	public function __construct(
-		EntityRepositoryInterface $paymentRepository,
-		EntityRepositoryInterface $salesChannelRepository,
-		LoggerInterface $logger)
+	public function __construct(ContainerInterface $container)
 	{
-		$this->paymentRepository      = $paymentRepository;
-		$this->salesChannelRepository = $salesChannelRepository;
-		$this->logger                 = $logger;
+		$this->container                           = $container;
+		$this->paymentRepository                   = $this->container->get('payment_method.repository');
+		$this->salesChannelRepository              = $this->container->get('sales_channel.repository');
+		$this->salesChannelPaymentMethodRepository = $this->container->get('sales_channel_payment_method.repository');
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**
 	 * @param \Shopware\Core\Framework\Context $context
 	 * @param string|null                      $salesChannelId
 	 */
-	public function setWalleeAsDefaultPaymentMethod(Context $context, ?string $salesChannelId): void
+	public function setWalleeAsDefaultPaymentMethod(Context $context, ?string $salesChannelId = null): void
 	{
 		$paymentMethodIds = $this->getWalleePaymentMethodIds($context);
 		if (empty($paymentMethodIds)) {
@@ -103,13 +120,86 @@ class PaymentMethodUtil {
 	/**
 	 * @param \Shopware\Core\Framework\Context $context
 	 * @param string|null                      $salesChannelId
-	 * @return \Shopware\Core\Framework\DataAbstractionLayer\EntityCollection
+	 * @return \Shopware\Core\System\SalesChannel\SalesChannelCollection
 	 */
-	private function getSalesChannelsToChange(Context $context, ?string $salesChannelId): EntityCollection
+	private function getSalesChannelsToChange(Context $context, ?string $salesChannelId = null): SalesChannelCollection
 	{
 		$criteria = is_null($salesChannelId) ? new Criteria() : new Criteria([$salesChannelId]);
 		$criteria->addAssociation('paymentMethods');
 
 		return $this->salesChannelRepository->search($criteria, $context)->getEntities();
 	}
+
+	/**
+	 * Disable System Payment Methods
+	 *
+	 * @param \Shopware\Core\Framework\Context $context
+	 *
+	 */
+	public function disableSystemPaymentMethods(Context $context): void
+	{
+		$paymentMethodIds = $this->getSystemPaymentMethodIds($context);
+		$this->setPaymentMethodIsActive($paymentMethodIds, false, $context);
+		$this->disableSalesChannelPaymentMethods($paymentMethodIds, $context);
+	}
+
+	/**
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return string[]
+	 */
+	protected function getSystemPaymentMethodIds(Context $context): array
+	{
+		$criteria = (new Criteria())
+			->addFilter(new NotFilter(
+				NotFilter::CONNECTION_AND,
+				[
+					new EqualsFilter('handlerIdentifier', WalleePaymentHandler::class),
+				]
+			));
+
+		return $this->paymentRepository->searchIds($criteria, $context)->getIds();
+	}
+
+	/**
+	 * @param array                            $paymentMethodIds
+	 * @param \Shopware\Core\Framework\Context $context
+	 *
+	 */
+	protected function disableSalesChannelPaymentMethods(array $paymentMethodIds, Context $context)
+	{
+		$data = [];
+
+		$salesChannels = $this->getSalesChannelsToChange($context);
+
+		foreach ($salesChannels as $salesChannel) {
+			foreach ($paymentMethodIds as $paymentMethodId) {
+				$data[] = [
+					'paymentMethodId' => $paymentMethodId,
+					'salesChannelId'  => $salesChannel->getId(),
+				];
+			}
+		}
+		$this->salesChannelPaymentMethodRepository->delete($data, $context);
+	}
+
+	/**
+	 * @param array                            $paymentMethodIds
+	 * @param bool                             $active
+	 * @param \Shopware\Core\Framework\Context $context
+	 *
+	 */
+	protected function setPaymentMethodIsActive(array $paymentMethodIds, bool $active, Context $context): void
+	{
+		$data = [];
+
+		foreach ($paymentMethodIds as $paymentMethodId) {
+			$data[] = [
+				'id'     => $paymentMethodId,
+				'active' => $active,
+			];
+		}
+
+		$this->paymentRepository->update($data, $context);
+	}
+
 }

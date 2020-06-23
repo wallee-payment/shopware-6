@@ -71,7 +71,6 @@ class TransactionController extends AbstractController {
 	 */
 	public function getTransactionData(Request $request, Context $context): JsonResponse
 	{
-		$salesChannelId = $request->request->get('salesChannelId');
 		$transactionId  = $request->request->get('transactionId');
 
 		$transaction      = $this->transactionService->getByTransactionId(intval($transactionId), $context);

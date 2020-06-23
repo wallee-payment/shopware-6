@@ -1,3 +1,6 @@
+# 1.1.2
+- Prepare internal server side install for showcases and demos
+
 # 1.1.1
 - Stop default emails being sent
 - Prettify payment page

@@ -5,9 +5,23 @@
 		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
 	<services>
+		<!-- Commands -->
+		<service id="WalleePayment\Core\Api\PaymentMethodConfiguration\Command\PaymentMethodConfigurationCommand">
+			<argument type="service" id="WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService"/>
+			<tag name="console.command"/>
+		</service>
+
+		<service id="WalleePayment\Core\Api\PaymentMethodConfiguration\Command\PaymentMethodDefaultCommand">
+			<argument type="service" id="WalleePayment\Core\Util\PaymentMethodUtil"/>
+			<tag name="console.command"/>
+		</service>
+
+		<!-- Entities -->
 		<service id="WalleePayment\Core\Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntityDefinition">
 			<tag name="shopware.entity.definition" entity="wallee_payment_method_configuration"/>
 		</service>
+
+		<!-- Services -->
 		<service id="WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService">
 			<argument type="service" id="WalleePayment\Core\Settings\Service\SettingsService"/>
 			<argument type="service" id="service_container"/>

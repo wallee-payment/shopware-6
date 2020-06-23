@@ -38,9 +38,9 @@ class WalleePayment extends Plugin {
 			'api/refund.xml',
 			'api/transaction.xml',
 			'api/webhooks.xml',
+			'storefront/checkout.xml',
 			'checkout.xml',
 			'settings.xml',
-			'storefront/checkout.xml',
 			'util.xml',
 		];
 		foreach ($resources as $resource) {
