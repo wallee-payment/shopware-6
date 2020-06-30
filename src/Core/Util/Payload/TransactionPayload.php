@@ -4,7 +4,6 @@ namespace WalleePayment\Core\Util\Payload;
 
 
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Checkout\Cart\Tax\Struct\CalculatedTaxCollection,
 	Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressEntity,
@@ -72,18 +71,15 @@ class TransactionPayload extends AbstractPayload {
 	 * @param \Shopware\Core\System\SalesChannel\SalesChannelContext             $salesChannelContext
 	 * @param \WalleePayment\Core\Settings\Struct\Settings        $settings
 	 * @param \Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct $transaction
-	 * @param \Psr\Log\LoggerInterface                                           $logger
 	 */
 	public function __construct(
 		ContainerInterface $container,
 		LocaleCodeProvider $localeCodeProvider,
 		SalesChannelContext $salesChannelContext,
 		Settings $settings,
-		AsyncPaymentTransactionStruct $transaction,
-		LoggerInterface $logger
+		AsyncPaymentTransactionStruct $transaction
 	)
 	{
-		parent::__construct($logger);
 		$this->localeCodeProvider  = $localeCodeProvider;
 		$this->salesChannelContext = $salesChannelContext;
 		$this->settings            = $settings;
@@ -297,6 +293,14 @@ class TransactionPayload extends AbstractPayload {
 
 		if (abs($adjustmentPrice) != 0) {
 			if ($this->settings->isLineItemConsistencyEnabled()) {
+				$error = strtr('LineItems total :lineItemTotal does not add up to order total :orderTotal', [
+					':lineItemTotal' => $lineItemPriceTotal,
+					':orderTotal'    => $this->transaction->getOrder()->getAmountTotal(),
+				]);
+				$this->logger->critical($error);
+				throw new \Exception($error);
+
+			} else {
 				$lineItem = (new LineItemCreate())
 					->setName('Adjustment Line Item')
 					->setUniqueId('Adjustment-Line-Item')
@@ -309,14 +313,6 @@ class TransactionPayload extends AbstractPayload {
 					$this->logger->critical('Adjustment LineItem payload invalid:', $lineItem->listInvalidProperties());
 					throw new \Exception('Adjustment LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
 				}
-
-			} else {
-				$error = strtr('LineItems total :lineItemTotal does not add up to order total :orderTotal', [
-					':lineItemTotal' => $lineItemPriceTotal,
-					':orderTotal'    => $this->transaction->getOrder()->getAmountTotal(),
-				]);
-				$this->logger->critical($error);
-				throw new \Exception($error);
 			}
 		}
 

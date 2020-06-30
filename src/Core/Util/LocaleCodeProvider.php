@@ -10,7 +10,7 @@ use Shopware\Core\{
 
 /**
  * Class LocaleCodeProvider
- * 
+ *
  * @package WalleePayment\Core\Util
  */
 class LocaleCodeProvider {
@@ -29,11 +29,20 @@ class LocaleCodeProvider {
 	 * LocaleCodeProvider constructor.
 	 *
 	 * @param \Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface $languageRepository
-	 * @param \Psr\Log\LoggerInterface                                                $logger
 	 */
-	public function __construct(EntityRepositoryInterface $languageRepository, LoggerInterface $logger)
+	public function __construct(EntityRepositoryInterface $languageRepository)
 	{
 		$this->languageRepository = $languageRepository;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
 		$this->logger = $logger;
 	}
 

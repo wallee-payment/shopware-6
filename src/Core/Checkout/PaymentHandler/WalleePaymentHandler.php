@@ -39,15 +39,21 @@ class WalleePaymentHandler implements AsynchronousPaymentHandlerInterface {
 	 * WalleePaymentHandler constructor.
 	 *
 	 * @param \WalleePayment\Core\Api\Transaction\Service\TransactionService $transactionService
-	 * @param \Psr\Log\LoggerInterface                                                      $logger
 	 */
-	public function __construct(
-		TransactionService $transactionService,
-		LoggerInterface $logger
-	)
+	public function __construct(TransactionService $transactionService)
 	{
-		$this->logger             = $logger;
 		$this->transactionService = $transactionService;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

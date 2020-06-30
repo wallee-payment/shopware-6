@@ -1,3 +1,8 @@
+# 1.1.3
+- [WAL-8526] Make line item consistency default
+- [WAL-8526] Confirm transaction right away
+- [WAL-8526] Update settings descriptions
+
 # 1.1.2
 - Prepare internal server side install for showcases and demos
 

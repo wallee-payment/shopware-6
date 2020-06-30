@@ -122,7 +122,6 @@ class WebHookController extends AbstractController {
 	 * @param \WalleePayment\Core\Api\Transaction\Service\OrderMailService                                 $orderMailService
 	 * @param \WalleePayment\Core\Api\Transaction\Service\TransactionService                               $transactionService
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService                                         $settingsService
-	 * @param \Psr\Log\LoggerInterface                                                                                    $logger
 	 */
 	public function __construct(
 		Connection $connection,
@@ -131,8 +130,7 @@ class WebHookController extends AbstractController {
 		RefundService $refundService,
 		OrderMailService $orderMailService,
 		TransactionService $transactionService,
-		SettingsService $settingsService,
-		LoggerInterface $logger
+		SettingsService $settingsService
 	)
 	{
 		$this->connection                        = $connection;
@@ -142,7 +140,17 @@ class WebHookController extends AbstractController {
 		$this->orderMailService                  = $orderMailService;
 		$this->transactionService                = $transactionService;
 		$this->settingsService                   = $settingsService;
-		$this->logger                            = $logger;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

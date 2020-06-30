@@ -40,13 +40,21 @@ class SettingsService {
 	 * SettingsService constructor.
 	 *
 	 * @param \Shopware\Core\System\SystemConfig\SystemConfigService $systemConfigService
-	 * @param \Psr\Log\LoggerInterface                               $logger
 	 */
-	public function __construct(SystemConfigService $systemConfigService, LoggerInterface $logger)
+	public function __construct(SystemConfigService $systemConfigService)
 	{
 		$this->systemConfigService = $systemConfigService;
-		$this->logger              = $logger;
+	}
 
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -64,37 +72,6 @@ class SettingsService {
 				$salesChannelId
 			);
 		}
-	}
-
-	/**
-	 * Get settings
-	 *
-	 * @param string|null $salesChannelId
-	 * @return \WalleePayment\Core\Settings\Struct\Settings
-	 */
-	public function getSettings(?string $salesChannelId = null): Settings
-	{
-		$values = $this->systemConfigService->getDomain(
-			self::SYSTEM_CONFIG_DOMAIN,
-			$salesChannelId,
-			true
-		);
-
-		$propertyValuePairs = [];
-
-		/** @var string $key */
-		foreach ($values as $key => $value) {
-			$property = (string) \mb_substr($key, \mb_strlen(self::SYSTEM_CONFIG_DOMAIN));
-			if ($property === '') {
-				continue;
-			}
-			if (!is_numeric($value) && empty($value)) {
-				$this->logger->warning(strtr('Empty value :value for settings :property.', [':property' => $property, ':value' => $value]));
-			}
-			$propertyValuePairs[$property] = $value;
-		}
-
-		return (new Settings())->assign($propertyValuePairs);
 	}
 
 	/**
@@ -128,5 +105,36 @@ class SettingsService {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Get settings
+	 *
+	 * @param string|null $salesChannelId
+	 * @return \WalleePayment\Core\Settings\Struct\Settings
+	 */
+	public function getSettings(?string $salesChannelId = null): Settings
+	{
+		$values = $this->systemConfigService->getDomain(
+			self::SYSTEM_CONFIG_DOMAIN,
+			$salesChannelId,
+			true
+		);
+
+		$propertyValuePairs = [];
+
+		/** @var string $key */
+		foreach ($values as $key => $value) {
+			$property = (string) \mb_substr($key, \mb_strlen(self::SYSTEM_CONFIG_DOMAIN));
+			if ($property === '') {
+				continue;
+			}
+			if (!is_numeric($value) && empty($value)) {
+				$this->logger->warning(strtr('Empty value :value for settings :property.', [':property' => $property, ':value' => $value]));
+			}
+			$propertyValuePairs[$property] = $value;
+		}
+
+		return (new Settings())->assign($propertyValuePairs);
 	}
 }

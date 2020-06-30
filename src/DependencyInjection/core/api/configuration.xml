@@ -9,7 +9,9 @@
 			<argument type="service" id="WalleePayment\Core\Util\PaymentMethodUtil"/>
 			<argument type="service" id="WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService"/>
 			<argument type="service" id="WalleePayment\Core\Api\WebHooks\Service\WebHooksService"/>
-			<argument type="service" id="WalleePayment\Core\Util\Logger"/>
+			<call method="setLogger">
+				<argument type="service" id="WalleePayment\Core\Util\Logger"/>
+			</call>
 		</service>
 	</services>
 

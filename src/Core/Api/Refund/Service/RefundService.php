@@ -44,17 +44,22 @@ class RefundService {
 	 *
 	 * @param \Psr\Container\ContainerInterface                                   $container
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
-	 * @param \Psr\Log\LoggerInterface                                            $logger
 	 */
-	public function __construct(
-		ContainerInterface $container,
-		SettingsService $settingsService,
-		LoggerInterface $logger
-	)
+	public function __construct(ContainerInterface $container, SettingsService $settingsService)
 	{
 		$this->container       = $container;
 		$this->settingsService = $settingsService;
-		$this->logger          = $logger;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 

@@ -83,21 +83,29 @@ class PaymentMethodConfigurationService {
 	 * @param \Symfony\Component\DependencyInjection\ContainerInterface                                  $container
 	 * @param \Shopware\Core\Content\ImportExport\DataAbstractionLayer\Serializer\Entity\MediaSerializer $mediaSerializer
 	 * @param \Shopware\Core\Content\ImportExport\DataAbstractionLayer\Serializer\SerializerRegistry     $serializerRegistry
-	 * @param \Psr\Log\LoggerInterface                                                                   $logger
 	 */
 	public function __construct(
 		SettingsService $settingsService,
 		ContainerInterface $container,
 		MediaSerializer $mediaSerializer,
-		SerializerRegistry $serializerRegistry,
-		LoggerInterface $logger
+		SerializerRegistry $serializerRegistry
 	)
 	{
 		$this->settingsService    = $settingsService;
 		$this->container          = $container;
 		$this->mediaSerializer    = $mediaSerializer;
 		$this->serializerRegistry = $serializerRegistry;
-		$this->logger             = $logger;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -375,52 +383,6 @@ class PaymentMethodConfigurationService {
 		return $translations;
 	}
 
-	protected function translate($translatedString, $locale)
-    {
-        if (isset($translatedString[$locale])) {
-            return $translatedString[$locale];
-        }
-
-        $primaryLanguage = $this->findPrimaryLanguage($locale);
-        if ($primaryLanguage !== false && isset($translatedString[$primaryLanguage->getIetfCode()])) {
-            return $translatedString[$primaryLanguage->getIetfCode()];
-        }
-
-        if (isset($translatedString['en-US'])) {
-            return $translatedString['en-US'];
-        }
-
-        return null;
-	}
-
-	/**
-     * Returns the primary language in the given group.
-     *
-     * @param string $code
-     * @return \Wallee\Sdk\Model\RestLanguage
-     */
-    protected function findPrimaryLanguage($code)
-    {
-        $code = substr($code, 0, 2);
-        foreach ($this->getLanguages() as $language) {
-            if ($language->getIso2Code() == $code && $language->getPrimaryOfGroup()) {
-                return $language;
-            }
-        }
-        return false;
-    }
-	
-	protected function getLanguages()
-	{
-		if ($this->languages == null) {
-			$this->languages = $this
-				->apiClient
-				->getLanguageService()
-				->all();
-		}
-		return $this->languages;
-	}
-
 	/**
 	 * @param \Shopware\Core\Framework\Context $context
 	 * @return \Shopware\Core\System\Language\LanguageCollection
@@ -430,6 +392,52 @@ class PaymentMethodConfigurationService {
 		return $this->container->get('language.repository')->search((new Criteria())->addAssociations([
 			'locale',
 		]), $context)->getEntities();
+	}
+
+	protected function translate($translatedString, $locale)
+	{
+		if (isset($translatedString[$locale])) {
+			return $translatedString[$locale];
+		}
+
+		$primaryLanguage = $this->findPrimaryLanguage($locale);
+		if ($primaryLanguage !== false && isset($translatedString[$primaryLanguage->getIetfCode()])) {
+			return $translatedString[$primaryLanguage->getIetfCode()];
+		}
+
+		if (isset($translatedString['en-US'])) {
+			return $translatedString['en-US'];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the primary language in the given group.
+	 *
+	 * @param string $code
+	 * @return \Wallee\Sdk\Model\RestLanguage
+	 */
+	protected function findPrimaryLanguage($code)
+	{
+		$code = substr($code, 0, 2);
+		foreach ($this->getLanguages() as $language) {
+			if ($language->getIso2Code() == $code && $language->getPrimaryOfGroup()) {
+				return $language;
+			}
+		}
+		return false;
+	}
+
+	protected function getLanguages()
+	{
+		if ($this->languages == null) {
+			$this->languages = $this
+				->apiClient
+				->getLanguageService()
+				->all();
+		}
+		return $this->languages;
 	}
 
 	/**

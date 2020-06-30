@@ -73,16 +73,17 @@ class WebHooksService {
 	 *
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
 	 * @param \Symfony\Component\Routing\RouterInterface                          $router
-	 * @param \Psr\Log\LoggerInterface                                            $logger
 	 */
-	public function __construct(SettingsService $settingsService, RouterInterface $router, LoggerInterface $logger)
+	public function __construct(SettingsService $settingsService, RouterInterface $router)
 	{
 		$this->router          = $router;
 		$this->settingsService = $settingsService;
-		$this->logger          = $logger;
 		$this->setWebHookEntitiesConfig();
 	}
 
+	/**
+	 * Set webhook configs
+	 */
 	protected function setWebHookEntitiesConfig(): void
 	{
 		/**
@@ -148,6 +149,17 @@ class WebHooksService {
 			'states'            => [],
 			'notifyEveryChange' => true,
 		]);
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

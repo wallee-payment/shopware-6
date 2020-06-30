@@ -62,7 +62,7 @@
 											:label="$tc('wallee-settings.settingForm.options.lineItemConsistencyEnabled.label')"
 											:helpText="$tc('wallee-settings.settingForm.options.lineItemConsistencyEnabled.tooltipText')"
 											:disabled="props.isInherited"
-											:value="props.currentValue ? props.currentValue : 0"
+											:value="props.currentValue ? props.currentValue : true"
 											@change="props.updateCurrentValue">
 									</sw-switch-field>
 								</template>
@@ -82,7 +82,7 @@
 											:label="$tc('wallee-settings.settingForm.options.emailEnabled.label')"
 											:helpText="$tc('wallee-settings.settingForm.options.emailEnabled.tooltipText')"
 											:disabled="props.isInherited"
-											:value="props.currentValue ? props.currentValue : 1"
+											:value="props.currentValue ? props.currentValue : true"
 											@change="props.updateCurrentValue">
 									</sw-switch-field>
 								</template>

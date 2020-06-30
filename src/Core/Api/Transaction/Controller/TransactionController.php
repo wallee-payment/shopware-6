@@ -46,17 +46,22 @@ class TransactionController extends AbstractController {
 	 *
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService           $settingsService
 	 * @param \WalleePayment\Core\Api\Transaction\Service\TransactionService $transactionService
-	 * @param \Psr\Log\LoggerInterface                                                      $logger
 	 */
-	public function __construct(
-		SettingsService $settingsService,
-		TransactionService $transactionService,
-		LoggerInterface $logger
-	)
+	public function __construct(SettingsService $settingsService, TransactionService $transactionService)
 	{
 		$this->settingsService    = $settingsService;
 		$this->transactionService = $transactionService;
-		$this->logger             = $logger;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -71,11 +76,11 @@ class TransactionController extends AbstractController {
 	 */
 	public function getTransactionData(Request $request, Context $context): JsonResponse
 	{
-		$transactionId  = $request->request->get('transactionId');
+		$transactionId = $request->request->get('transactionId');
 
 		$transaction      = $this->transactionService->getByTransactionId(intval($transactionId), $context);
 		$refundCollection = $this->transactionService->getRefundEntityCollectionByTransactionId(intval($transactionId), $context);
-		
+
 		$refunds = [];
 		foreach ($refundCollection as $refundEntity) {
 			$refunds[] = $refundEntity->getData();

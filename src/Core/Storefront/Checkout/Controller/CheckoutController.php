@@ -80,21 +80,29 @@ class CheckoutController extends StorefrontController {
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService           $settingsService
 	 * @param \WalleePayment\Core\Api\Transaction\Service\TransactionService $transactionService
 	 * @param \Shopware\Storefront\Page\GenericPageLoader                                   $genericLoader
-	 * @param \Psr\Log\LoggerInterface                                                      $logger
 	 */
 	public function __construct(
 		CartService $cartService,
 		SettingsService $settingsService,
 		TransactionService $transactionService,
-		GenericPageLoader $genericLoader,
-		LoggerInterface $logger
+		GenericPageLoader $genericLoader
 	)
 	{
-		$this->logger             = $logger;
 		$this->cartService        = $cartService;
 		$this->genericLoader      = $genericLoader;
 		$this->settingsService    = $settingsService;
 		$this->transactionService = $transactionService;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -186,6 +194,20 @@ class CheckoutController extends StorefrontController {
 			'@WalleePayment/storefront/page/checkout/order/wallee.html.twig',
 			['page' => $page]
 		);
+	}
+
+	/**
+	 * @param                                  $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \Wallee\Sdk\Model\Transaction
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
+	 */
+	private function getTransaction($orderId, Context $context): Transaction
+	{
+		$transactionEntity = $this->transactionService->getByOrderId($orderId, $context);
+		return $this->settings->getApiClient()->getTransactionService()->read($this->settings->getSpaceId(), $transactionEntity->getTransactionId());
 	}
 
 	/**
@@ -282,73 +304,5 @@ class CheckoutController extends StorefrontController {
 		}
 
 		return $this->redirectToRoute('frontend.checkout.confirm.page');
-	}
-
-	/**
-	 * @param                                  $orderId
-	 * @param \Shopware\Core\Framework\Context $context
-	 * @return \Wallee\Sdk\Model\Transaction
-	 * @throws \Wallee\Sdk\ApiException
-	 * @throws \Wallee\Sdk\Http\ConnectionException
-	 * @throws \Wallee\Sdk\VersioningException
-	 */
-	private function getTransaction($orderId, Context $context): Transaction
-	{
-		$transactionEntity = $this->transactionService->getByOrderId($orderId, $context);
-		return $this->settings->getApiClient()->getTransactionService()->read($this->settings->getSpaceId(), $transactionEntity->getTransactionId());
-	}
-
-	/**
-	 * Confirm Transaction
-	 *
-	 * @param \Shopware\Core\System\SalesChannel\SalesChannelContext $salesChannelContext
-	 * @param \Symfony\Component\HttpFoundation\Request              $request
-	 * @return \Symfony\Component\HttpFoundation\JsonResponse
-	 * @throws \Wallee\Sdk\ApiException
-	 * @throws \Wallee\Sdk\Http\ConnectionException
-	 * @throws \Wallee\Sdk\VersioningException
-	 *
-	 * @Route(
-	 *     "/wallee/checkout/confirm",
-	 *     name="frontend.wallee.confirm",
-	 *     options={"seo": "false"},
-	 *     methods={"GET"}
-	 *     )
-	 */
-	public function confirm(Request $request, SalesChannelContext $salesChannelContext): Response
-	{
-		$orderId = $request->query->get('orderId');
-
-		if (empty($orderId)) {
-			throw new MissingRequestParameterException('orderId');
-		}
-
-		// Configuration
-		$this->settings = $this->settingsService->getSettings($salesChannelContext->getSalesChannel()->getId());
-
-		$transaction = $this->getTransaction($orderId, $salesChannelContext->getContext());
-
-		switch ($transaction->getState()) {
-			case TransactionState::AUTHORIZED:
-			case TransactionState::COMPLETED:
-			case TransactionState::CONFIRMED:
-			case TransactionState::FULFILL:
-			case TransactionState::PROCESSING:
-				return $this->redirect($transaction->getSuccessUrl(), Response::HTTP_MOVED_PERMANENTLY);
-				break;
-			case TransactionState::DECLINE:
-			case TransactionState::FAILED:
-			case TransactionState::VOIDED:
-				return $this->redirect($transaction->getFailedUrl(), Response::HTTP_MOVED_PERMANENTLY);
-				break;
-		}
-
-		$pendingTransaction = new TransactionPending();
-		$pendingTransaction->setId($transaction->getId());
-		$pendingTransaction->setVersion($transaction->getVersion());
-
-		$this->settings->getApiClient()->getTransactionService()->confirm($this->settings->getSpaceId(), $pendingTransaction);
-
-		return new JsonResponse([]);
 	}
 }

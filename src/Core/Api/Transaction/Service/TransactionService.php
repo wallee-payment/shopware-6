@@ -60,16 +60,24 @@ class TransactionService {
 	public function __construct(
 		ContainerInterface $container,
 		LocaleCodeProvider $localeCodeProvider,
-		SettingsService $settingsService,
-		LoggerInterface $logger
+		SettingsService $settingsService
 	)
 	{
 		$this->container          = $container;
 		$this->localeCodeProvider = $localeCodeProvider;
 		$this->settingsService    = $settingsService;
-		$this->logger             = $logger;
 	}
 
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
+	}
 
 	/**
 	 * The pay function will be called after the customer completed the order.
@@ -92,16 +100,24 @@ class TransactionService {
 		$settings  = $this->settingsService->getSettings($salesChannelContext->getSalesChannel()->getId());
 		$apiClient = $settings->getApiClient();
 
-		$transactionPayload = (new TransactionPayload(
+		$transactionPayloadClass = (new TransactionPayload(
 			$this->container,
 			$this->localeCodeProvider,
 			$salesChannelContext,
 			$settings,
-			$transaction,
-			$this->logger
-		))->get();
+			$transaction
+		));
+		$transactionPayloadClass->setLogger($this->logger);
+		$transactionPayload = $transactionPayloadClass->get();
 
 		$createdTransaction = $apiClient->getTransactionService()->create($settings->getSpaceId(), $transactionPayload);
+
+		$pendingTransaction = new TransactionPending();
+		$pendingTransaction->setId($createdTransaction->getId());
+		$pendingTransaction->setVersion($createdTransaction->getVersion());
+
+		$createdTransaction = $apiClient->getTransactionService()
+										->confirm($settings->getSpaceId(), $pendingTransaction);
 
 		$this->addWalleeTransactionId(
 			$transaction,
@@ -117,15 +133,8 @@ class TransactionService {
 		);
 
 		if ($settings->getIntegration() == Integration::PAYMENT_PAGE) {
-
-			$pendingTransaction = new TransactionPending();
-			$pendingTransaction->setId($createdTransaction->getId());
-			$pendingTransaction->setVersion($createdTransaction->getVersion());
-
-			$createdTransaction = $apiClient->getTransactionService()
-											->confirm($settings->getSpaceId(), $pendingTransaction);
-			$redirectUrl        = $apiClient->getTransactionPaymentPageService()
-											->paymentPageUrl($settings->getSpaceId(), $createdTransaction->getId());
+			$redirectUrl = $apiClient->getTransactionPaymentPageService()
+									 ->paymentPageUrl($settings->getSpaceId(), $createdTransaction->getId());
 		}
 
 		$this->upsert(
@@ -138,48 +147,6 @@ class TransactionService {
 		$this->holdDelivery($transaction->getOrder()->getId(), $salesChannelContext->getContext());
 
 		return $redirectUrl;
-	}
-
-	/**
-	 * Hold delivery
-	 *
-	 * @param string                           $orderId
-	 * @param \Shopware\Core\Framework\Context $context
-	 */
-	private function holdDelivery(string $orderId, Context $context){
-		try {
-			/**
-			 * @var OrderDeliveryStateHandler $orderDeliveryStateHandler
-			 */
-			$orderEntity               = $this->getOrderEntity($orderId, $context);
-			$orderDeliveryStateHandler = $this->container->get(OrderDeliveryStateHandler::class);
-			$orderDeliveryStateHandler->hold($orderEntity->getDeliveries()->last()->getId(), $context);
-		}catch (\Exception $exception){
-			$this->logger->critical($exception->getTraceAsString());
-		}
-	}
-
-	/**
-	 * Get order
-	 *
-	 * @param String                           $orderId
-	 * @param \Shopware\Core\Framework\Context $context
-	 * @return \Shopware\Core\Checkout\Order\OrderEntity
-	 */
-	private function getOrderEntity(string $orderId, Context $context): OrderEntity
-	{
-
-			$criteria = (new Criteria([$orderId]))->addAssociations(['deliveries']);
-
-			try {
-				return $this->container->get('order.repository')->search(
-					$criteria,
-					$context
-				)->first();
-			} catch (\Exception $e) {
-				throw new OrderNotFoundException($orderId);
-			}
-
 	}
 
 	/**
@@ -244,6 +211,49 @@ class TransactionService {
 		} catch (\Exception $exception) {
 			$this->logger->critical(__CLASS__ . ' : ' . __FUNCTION__ . ' : ' . $exception->getMessage());
 		}
+	}
+
+	/**
+	 * Hold delivery
+	 *
+	 * @param string                           $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 */
+	private function holdDelivery(string $orderId, Context $context)
+	{
+		try {
+			/**
+			 * @var OrderDeliveryStateHandler $orderDeliveryStateHandler
+			 */
+			$orderEntity               = $this->getOrderEntity($orderId, $context);
+			$orderDeliveryStateHandler = $this->container->get(OrderDeliveryStateHandler::class);
+			$orderDeliveryStateHandler->hold($orderEntity->getDeliveries()->last()->getId(), $context);
+		} catch (\Exception $exception) {
+			$this->logger->critical($exception->getTraceAsString());
+		}
+	}
+
+	/**
+	 * Get order
+	 *
+	 * @param String                           $orderId
+	 * @param \Shopware\Core\Framework\Context $context
+	 * @return \Shopware\Core\Checkout\Order\OrderEntity
+	 */
+	private function getOrderEntity(string $orderId, Context $context): OrderEntity
+	{
+
+		$criteria = (new Criteria([$orderId]))->addAssociations(['deliveries']);
+
+		try {
+			return $this->container->get('order.repository')->search(
+				$criteria,
+				$context
+			)->first();
+		} catch (\Exception $e) {
+			throw new OrderNotFoundException($orderId);
+		}
+
 	}
 
 	/**

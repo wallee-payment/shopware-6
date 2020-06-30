@@ -31,7 +31,6 @@
         button_cancel_id: 'walleeOrderCancel',
         order_id: '',
         loader_id: 'walleeLoader',
-        confirm_url: '/wallee/checkout/confirm?orderId=',
         pay_url: '/wallee/checkout/pay?orderId=',
         recreate_cart_url: '/wallee/checkout/recreate-cart?orderId=',
         handler: null,
@@ -42,7 +41,6 @@
         init: function () {
             WalleeCheckout.activateLoader(true);
             this.order_id = this.getParameterByName('orderId');
-            this.confirm_url += this.order_id;
             this.pay_url += this.order_id;
             this.recreate_cart_url += this.order_id;
 
@@ -114,11 +112,7 @@
         validationCallBack: function (validationResult) {
             if (validationResult.success) {
                 document.querySelector(this.payment_method_handler_status).value = true;
-                fetch(this.confirm_url).then(() => {
-                    WalleeCheckout.handler.submit();
-                }).catch(() => {
-                    WalleeCheckout.activateLoader(false);
-                });
+                WalleeCheckout.handler.submit();
             } else {
                 document.body.scrollTop = 0;
                 document.documentElement.scrollTop = 0;
@@ -195,8 +189,8 @@
  */
 window.addEventListener('load', function (e) {
     WalleeCheckout.init();
-    history.pushState({}, document.title, WalleeCheckout.recreate_cart_url);
-    history.pushState({}, document.title, WalleeCheckout.pay_url);
+    window.history.pushState({}, document.title, WalleeCheckout.recreate_cart_url);
+    window.history.pushState({}, document.title, WalleeCheckout.pay_url);
 }, false);
 
 window.addEventListener('popstate', function (e) {

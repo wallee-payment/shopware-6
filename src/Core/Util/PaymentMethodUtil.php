@@ -162,6 +162,26 @@ class PaymentMethodUtil {
 
 	/**
 	 * @param array                            $paymentMethodIds
+	 * @param bool                             $active
+	 * @param \Shopware\Core\Framework\Context $context
+	 *
+	 */
+	protected function setPaymentMethodIsActive(array $paymentMethodIds, bool $active, Context $context): void
+	{
+		$data = [];
+
+		foreach ($paymentMethodIds as $paymentMethodId) {
+			$data[] = [
+				'id'     => $paymentMethodId,
+				'active' => $active,
+			];
+		}
+
+		$this->paymentRepository->update($data, $context);
+	}
+
+	/**
+	 * @param array                            $paymentMethodIds
 	 * @param \Shopware\Core\Framework\Context $context
 	 *
 	 */
@@ -180,26 +200,6 @@ class PaymentMethodUtil {
 			}
 		}
 		$this->salesChannelPaymentMethodRepository->delete($data, $context);
-	}
-
-	/**
-	 * @param array                            $paymentMethodIds
-	 * @param bool                             $active
-	 * @param \Shopware\Core\Framework\Context $context
-	 *
-	 */
-	protected function setPaymentMethodIsActive(array $paymentMethodIds, bool $active, Context $context): void
-	{
-		$data = [];
-
-		foreach ($paymentMethodIds as $paymentMethodId) {
-			$data[] = [
-				'id'     => $paymentMethodId,
-				'active' => $active,
-			];
-		}
-
-		$this->paymentRepository->update($data, $context);
 	}
 
 }

@@ -43,17 +43,22 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 	 *
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
 	 * @param \WalleePayment\Core\Util\PaymentMethodUtil           $paymentMethodUtil
-	 * @param \Psr\Log\LoggerInterface                                            $logger
 	 */
-	public function __construct(
-		SettingsService $settingsService,
-		PaymentMethodUtil $paymentMethodUtil,
-		LoggerInterface $logger
-	)
+	public function __construct(SettingsService $settingsService, PaymentMethodUtil $paymentMethodUtil)
 	{
 		$this->settingsService   = $settingsService;
 		$this->paymentMethodUtil = $paymentMethodUtil;
-		$this->logger            = $logger;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

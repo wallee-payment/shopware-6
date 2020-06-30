@@ -50,13 +50,22 @@ class OrderMailService {
 	 *
 	 * @param \Psr\Container\ContainerInterface                                $container
 	 * @param \Shopware\Core\Content\MailTemplate\Service\MailServiceInterface $mailService
-	 * @param \Psr\Log\LoggerInterface                                         $logger
 	 */
-	public function __construct(ContainerInterface $container, MailServiceInterface $mailService, LoggerInterface $logger)
+	public function __construct(ContainerInterface $container, MailServiceInterface $mailService)
 	{
-		$this->logger      = $logger;
 		$this->container   = $container;
 		$this->mailService = $mailService;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

@@ -53,20 +53,28 @@ class ConfigurationController extends AbstractController {
 	 * @param \WalleePayment\Core\Util\PaymentMethodUtil                                                   $paymentMethodUtil
 	 * @param \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService $paymentMethodConfigurationService
 	 * @param \WalleePayment\Core\Api\WebHooks\Service\WebHooksService                                     $webHooksService
-	 * @param \Psr\Log\LoggerInterface                                                                                    $logger
 	 */
 	public function __construct(
 		PaymentMethodUtil $paymentMethodUtil,
 		PaymentMethodConfigurationService $paymentMethodConfigurationService,
-		WebHooksService $webHooksService,
-		LoggerInterface $logger
+		WebHooksService $webHooksService
 	)
 	{
-		$this->logger            = $logger;
 		$this->webHooksService   = $webHooksService;
 		$this->paymentMethodUtil = $paymentMethodUtil;
 
 		$this->paymentMethodConfigurationService = $paymentMethodConfigurationService;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

@@ -44,13 +44,22 @@ class RefundController extends AbstractController {
 	 *
 	 * @param \WalleePayment\Core\Api\Refund\Service\RefundService $refundService
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
-	 * @param \Psr\Log\LoggerInterface                                            $logger
 	 */
-	public function __construct(RefundService $refundService, SettingsService $settingsService, LoggerInterface $logger)
+	public function __construct(RefundService $refundService, SettingsService $settingsService)
 	{
 		$this->settingsService = $settingsService;
-		$this->logger          = $logger;
 		$this->refundService   = $refundService;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -75,7 +84,7 @@ class RefundController extends AbstractController {
 		$settings  = $this->settingsService->getSettings($salesChannelId);
 		$apiClient = $settings->getApiClient();
 
-		$transaction   = $apiClient->getTransactionService()->read($settings->getSpaceId(), $transactionId);
+		$transaction = $apiClient->getTransactionService()->read($settings->getSpaceId(), $transactionId);
 		$this->refundService->create($transaction, $refundableAmount, $context);
 
 		return new Response(null, Response::HTTP_NO_CONTENT);

@@ -39,7 +39,7 @@
 		"cardTitle": "Options",
 		"emailEnabled": {
 		  "label": "Send order confirmation email",
-		  "tooltipText": "If this setting is enabled your customers will receive an email when their order payment is authorised"
+		  "tooltipText": "If this setting is enabled your customers will receive an email from your store when their order payment is authorised"
 		},
 		"integration": {
 		  "label": "Integration",
@@ -51,7 +51,7 @@
 		},
 		"lineItemConsistencyEnabled": {
 		  "label": "Line item consistency",
-		  "tooltipText": "If this option is enabled line item totals will always match order total"
+		  "tooltipText": "If this option is enabled line item totals in WalleePayment will always match Shopware order total"
 		},
 		"spaceViewId": {
 		  "label": "Space View ID",

@@ -17,10 +17,12 @@ abstract class AbstractPayload {
 	protected $logger;
 
 	/**
-	 * RefundPayload constructor.
 	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
 	 */
-	public function __construct(LoggerInterface $logger)
+	public function setLogger(LoggerInterface $logger): void
 	{
 		$this->logger = $logger;
 	}

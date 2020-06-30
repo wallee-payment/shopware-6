@@ -39,7 +39,7 @@
 		"cardTitle": "Optionen",
 		"emailEnabled": {
 		  "label": "Auftragsbestätigung per E-Mail senden",
-		  "tooltipText": "Wenn diese Einstellung aktiviert ist, erhalten Ihre Kunden eine E-Mail, wenn die Zahlung ihrer Bestellung autorisiert ist."
+		  "tooltipText": "Wenn diese Einstellung aktiviert ist, erhalten Ihre Kunden eine E-Mail von Ihrem Geschäft, wenn die Zahlung ihrer Bestellung autorisiert ist."
 		},
 		"integration": {
 		  "label": "Integration",
@@ -51,7 +51,7 @@
 		},
 		"lineItemConsistencyEnabled": {
 		  "label": "Konsistenz der Einzelposteny",
-		  "tooltipText": "Wenn diese Option aktiviert ist, stimmen die Summen der Einzelposten immer mit der Auftragssumme überein"
+		  "tooltipText": "Wenn diese Option aktiviert ist, stimmen die Summen der Einzelposten in WalleePayment immer mit der Shopware-Bestellsumme überein"
 		},
 		"spaceViewId": {
 		  "label": "Space View ID",

@@ -37,12 +37,21 @@ class TransactionVoidController extends AbstractController {
 	 * TransactionVoidController constructor.
 	 *
 	 * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
-	 * @param \Psr\Log\LoggerInterface                                            $logger
 	 */
-	public function __construct(SettingsService $settingsService, LoggerInterface $logger)
+	public function __construct(SettingsService $settingsService)
 	{
 		$this->settingsService = $settingsService;
-		$this->logger          = $logger;
+	}
+
+	/**
+	 * @param \Psr\Log\LoggerInterface $logger
+	 * @internal
+	 * @required
+	 *
+	 */
+	public function setLogger(LoggerInterface $logger): void
+	{
+		$this->logger = $logger;
 	}
 
 	/**

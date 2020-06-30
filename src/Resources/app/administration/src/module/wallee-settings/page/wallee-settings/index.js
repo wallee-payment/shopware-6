@@ -71,11 +71,11 @@ Component.register('wallee-settings', {
                     }
 
                     if (!(this.CONFIG_EMAIL_ENABLED in this.config)) {
-                        this.config[this.CONFIG_EMAIL_ENABLED] = 1;
+                        this.config[this.CONFIG_EMAIL_ENABLED] = true;
                     }
 
                     if (!(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in this.config)) {
-                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = 0;
+                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = true;
                     }
 
                 } else {
@@ -90,11 +90,11 @@ Component.register('wallee-settings', {
                     }
 
                     if (!(this.CONFIG_EMAIL_ENABLED in this.config) || !(this.CONFIG_EMAIL_ENABLED in defaultConfig)) {
-                        this.config[this.CONFIG_EMAIL_ENABLED] = 1;
+                        this.config[this.CONFIG_EMAIL_ENABLED] = true;
                     }
 
                     if (!(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in this.config) || !(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in defaultConfig)) {
-                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = 0;
+                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = true;
                     }
                 }
             },
