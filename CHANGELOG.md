@@ -1,3 +1,6 @@
+# 1.1.5
+- Fix settings bug
+
 # 1.1.4
 - [WAL-8526] Disable changing credentials on the showcases
 

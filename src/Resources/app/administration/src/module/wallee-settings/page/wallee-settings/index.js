@@ -68,7 +68,7 @@ Component.register('wallee-settings', {
                     this.spaceIdFilled = !!this.config[this.CONFIG_SPACE_ID];
                     this.userIdFilled = !!this.config[this.CONFIG_USER_ID];
 
-                    if (!(this.CONFIG_INTEGRATION in this.config) || !this.config[this.CONFIG_INTEGRATION]) {
+                    if (!(this.CONFIG_INTEGRATION in this.config)) {
                         this.config[this.CONFIG_INTEGRATION] = 'iframe';
                     }
 
