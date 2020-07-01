@@ -13,7 +13,7 @@ use WalleePayment\Core\{
 
 /**
  * Class SettingsCommand
- *
+ * @internal
  * @package WalleePayment\Core\Settings\Command
  */
 class SettingsCommand extends Command {
@@ -50,6 +50,7 @@ class SettingsCommand extends Command {
 			SettingsService::CONFIG_APPLICATION_KEY               => $input->getOption(SettingsService::CONFIG_APPLICATION_KEY),
 			SettingsService::CONFIG_EMAIL_ENABLED                 => $input->getOption(SettingsService::CONFIG_EMAIL_ENABLED),
 			SettingsService::CONFIG_INTEGRATION                   => $input->getOption(SettingsService::CONFIG_INTEGRATION),
+			SettingsService::CONFIG_IS_SHOWCASE                   => $input->getOption(SettingsService::CONFIG_IS_SHOWCASE),
 			SettingsService::CONFIG_LINE_ITEM_CONSISTENCY_ENABLED => $input->getOption(SettingsService::CONFIG_LINE_ITEM_CONSISTENCY_ENABLED),
 			SettingsService::CONFIG_SPACE_ID                      => $input->getOption(SettingsService::CONFIG_SPACE_ID),
 			SettingsService::CONFIG_SPACE_VIEW_ID                 => $input->getOption(SettingsService::CONFIG_SPACE_VIEW_ID),
@@ -96,6 +97,13 @@ class SettingsCommand extends Command {
 				 InputOption::VALUE_OPTIONAL,
 				 SettingsService::CONFIG_INTEGRATION,
 				 Integration::IFRAME
+			 )
+			 ->addOption(
+				 SettingsService::CONFIG_IS_SHOWCASE,
+				 SettingsService::CONFIG_IS_SHOWCASE,
+				 InputOption::VALUE_OPTIONAL,
+				 SettingsService::CONFIG_IS_SHOWCASE,
+				 true
 			 )
 			 ->addOption(
 				 SettingsService::CONFIG_LINE_ITEM_CONSISTENCY_ENABLED,

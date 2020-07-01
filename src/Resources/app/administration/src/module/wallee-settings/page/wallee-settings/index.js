@@ -23,7 +23,9 @@ Component.register('wallee-settings', {
             config: {},
 
             isLoading: false,
+
             isSaveSuccessful: false,
+            isShowcase: false,
 
             applicationKeyFilled: false,
             applicationKeyErrorState: false,
@@ -59,7 +61,7 @@ Component.register('wallee-settings', {
             handler() {
                 const defaultConfig = this.$refs.configComponent.allConfigs.null;
                 const salesChannelId = this.$refs.configComponent.selectedSalesChannelId;
-
+                this.isShowcase = this.config[this.CONFIG_IS_SHOWCASE];
                 if (salesChannelId === null) {
 
                     this.applicationKeyFilled = !!this.config[this.CONFIG_APPLICATION_KEY];

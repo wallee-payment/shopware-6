@@ -6,74 +6,78 @@ import constants from '../../page/wallee-settings/wallee-config-consts'
 const {Component, Mixin} = Shopware;
 
 Component.register('sw-wallee-credentials', {
-	template: template,
+    template: template,
 
-	name: 'WalleeCredentials',
+    name: 'WalleeCredentials',
 
-	mixins: [
-		Mixin.getByName('notification')
-	],
+    mixins: [
+        Mixin.getByName('notification')
+    ],
 
-	props: {
-		actualConfigData: {
-			type: Object,
-			required: true
-		},
-		allConfigs: {
-			type: Object,
-			required: true
-		},
+    props: {
+        actualConfigData: {
+            type: Object,
+            required: true
+        },
+        allConfigs: {
+            type: Object,
+            required: true
+        },
 
-		selectedSalesChannelId: {
-			required: true
-		},
-		spaceIdFilled: {
-			type: Boolean,
-			required: true
-		},
-		spaceIdErrorState: {
-			required: true
-		},
-		userIdFilled: {
-			type: Boolean,
-			required: true
-		},
-		userIdErrorState: {
-			required: true
-		},
-		applicationKeyFilled: {
-			type: Boolean,
-			required: true
-		},
-		applicationKeyErrorState: {
-			required: true
-		},
-		isLoading: {
-			type: Boolean,
-			required: true
-		}
-	},
+        selectedSalesChannelId: {
+            required: true
+        },
+        spaceIdFilled: {
+            type: Boolean,
+            required: true
+        },
+        spaceIdErrorState: {
+            required: true
+        },
+        userIdFilled: {
+            type: Boolean,
+            required: true
+        },
+        userIdErrorState: {
+            required: true
+        },
+        applicationKeyFilled: {
+            type: Boolean,
+            required: true
+        },
+        applicationKeyErrorState: {
+            required: true
+        },
+        isLoading: {
+            type: Boolean,
+            required: true
+        },
+        isShowcase: {
+            type: Boolean,
+            required: true
+        }
+    },
 
-	data() {
-		return {
-			...constants
-		};
-	},
+    data() {
+        return {
+            ...constants
+        };
+    },
 
-	computed: {},
+    computed: {},
 
-	methods: {
+    methods: {
 
-		checkTextFieldInheritance(value) {
-			if (typeof value !== 'string') {
-				return true;
-			}
+        checkTextFieldInheritance(value) {
+            if (typeof value !== 'string') {
+                return true;
+            }
 
-			return value.length <= 0;
-		},
+            return value.length <= 0;
+        },
 
-		checkBoolFieldInheritance(value) {
-			return typeof value !== 'boolean';
-		}
-	}
+        checkBoolFieldInheritance(value) {
+            return typeof value !== 'boolean';
+        }
+    }
 });

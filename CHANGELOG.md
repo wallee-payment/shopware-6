@@ -1,3 +1,6 @@
+# 1.1.4
+- [WAL-8526] Disable changing credentials on the showcases
+
 # 1.1.3
 - [WAL-8526] Make line item consistency default
 - [WAL-8526] Confirm transaction right away

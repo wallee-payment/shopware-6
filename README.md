@@ -22,6 +22,7 @@ Once composer is installed, execute the following command in your project root t
 
 ```sh
 composer require wallee/shopware-6
+php bin/console plugin:refresh
 php bin/console plugin:install WalleePayment
 php bin/console plugin:activate WalleePayment
 php bin/console cache:clear
@@ -35,6 +36,7 @@ Uncompress the zip file you download, and include the autoloader in your project
 
 ```php
 # unzip to ShopwareInstallDir/custom/plugins/WalleePayment
+php bin/console plugin:refresh
 php bin/console plugin:install WalleePayment
 php bin/console plugin:activate WalleePayment
 php bin/console cache:clear
