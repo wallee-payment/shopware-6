@@ -1,3 +1,7 @@
+# 1.1.6
+- Disable sales channel selection on showcases
+- Add product attributes to transaction payload
+
 # 1.1.5
 - Fix settings bug
 

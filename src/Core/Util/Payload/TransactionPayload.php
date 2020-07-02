@@ -8,12 +8,14 @@ use Shopware\Core\{
 	Checkout\Cart\Tax\Struct\CalculatedTaxCollection,
 	Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressEntity,
 	Checkout\Customer\CustomerEntity,
+	Checkout\Order\Aggregate\OrderLineItem\OrderLineItemEntity,
 	Checkout\Payment\Cart\AsyncPaymentTransactionStruct,
 	Framework\DataAbstractionLayer\Search\Criteria,
 	System\SalesChannel\SalesChannelContext};
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Wallee\Sdk\{
 	Model\AddressCreate,
+	Model\LineItemAttributeCreate,
 	Model\LineItemCreate,
 	Model\LineItemType,
 	Model\TaxCreate,
@@ -95,7 +97,6 @@ class TransactionPayload extends AbstractPayload {
 	 */
 	public function get(): TransactionCreate
 	{
-
 		$customer = $this->salesChannelContext->getCustomer();
 
 		$lineItems       = $this->getLineItems();
@@ -117,7 +118,6 @@ class TransactionPayload extends AbstractPayload {
 			'space_view_id'          => $this->settings->getSpaceViewId() ?? null,
 		];
 
-
 		$transactionPayload = (new TransactionCreate())
 			->setAutoConfirmationEnabled(false)
 			->setBillingAddress($billingAddress)
@@ -132,7 +132,6 @@ class TransactionPayload extends AbstractPayload {
 			->setShippingAddress($shippingAddress)
 			->setShippingMethod($transactionData['shipping_method'])
 			->setSpaceViewId($transactionData['space_view_id']);
-
 
 		$paymentConfiguration = $this->getPaymentConfiguration($this->salesChannelContext->getPaymentMethod()->getId());
 
@@ -167,7 +166,6 @@ class TransactionPayload extends AbstractPayload {
 		 * @var \Shopware\Core\Checkout\Order\Aggregate\OrderLineItem\OrderLineItemEntity $shopLineItem
 		 */
 		foreach ($this->transaction->getOrder()->getLineItems() as $shopLineItem) {
-
 			$taxes    = $this->getTaxes(
 				$shopLineItem->getPrice()->getCalculatedTaxes(),
 				'Taxes'
@@ -178,7 +176,8 @@ class TransactionPayload extends AbstractPayload {
 				->setSku($this->fixLength($shopLineItem->getProductId(), 200))
 				->setQuantity($shopLineItem->getQuantity() ?? 1)
 				->setAmountIncludingTax($shopLineItem->getTotalPrice() ?? 0)
-				->setTaxes($taxes);
+				->setTaxes($taxes)
+				->setAttributes($this->getProductAttributes($shopLineItem));
 
 			/** @noinspection PhpParamsInspection */
 			$lineItem->setType(LineItemType::PRODUCT);
@@ -228,8 +227,28 @@ class TransactionPayload extends AbstractPayload {
 			$taxes [] = $tax;
 		}
 
-
 		return $taxes;
+	}
+
+	/**
+	 * @param \Shopware\Core\Checkout\Order\Aggregate\OrderLineItem\OrderLineItemEntity $shopLineItem
+	 *
+	 * @return array|null
+	 */
+	protected function getProductAttributes(OrderLineItemEntity $shopLineItem): ?array
+	{
+		$productAttributes = [];
+
+		if (!(empty($shopLineItem->getPayload()) && empty($shopLineItem->getPayload()['options']))) {
+			foreach ($shopLineItem->getPayload()['options'] as $option) {
+				$key                     = $this->fixLength('option_' . $option['group'], 40);
+				$productAttributes[$key] = (new LineItemAttributeCreate())
+					->setLabel($option['group'])
+					->setValue($option['option']);
+			}
+		}
+
+		return empty($productAttributes) ? null : $productAttributes;
 	}
 
 	/**
@@ -248,7 +267,6 @@ class TransactionPayload extends AbstractPayload {
 					$this->transaction->getOrder()->getShippingCosts()->getCalculatedTaxes(),
 					$shippingName
 				);
-
 
 				$lineItem = (new LineItemCreate())
 					->setAmountIncludingTax($amount)
