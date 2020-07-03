@@ -1,3 +1,7 @@
+# 1.1.7
+- [WAL-8566] Promotions
+- Code refactoring
+
 # 1.1.6
 - Disable sales channel selection on showcases
 - Add product attributes to transaction payload

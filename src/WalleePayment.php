@@ -49,14 +49,6 @@ class WalleePayment extends Plugin {
 	}
 
 	/**
-	 * @param \Shopware\Core\Framework\Plugin\Context\InstallContext $installContext
-	 */
-	public function install(InstallContext $installContext): void
-	{
-		parent::install($installContext);
-	}
-
-	/**
 	 * @param \Shopware\Core\Framework\Plugin\Context\UninstallContext $uninstallContext
 	 */
 	public function uninstall(UninstallContext $uninstallContext): void

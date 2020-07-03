@@ -18,7 +18,9 @@ use Wallee\Sdk\{
 use WalleePayment\Core\{
 	Api\OrderDeliveryState\Handler\OrderDeliveryStateHandler,
 	Api\Refund\Entity\RefundEntityCollection,
+	Api\Refund\Entity\RefundEntityDefinition,
 	Api\Transaction\Entity\TransactionEntity,
+	Api\Transaction\Entity\TransactionEntityDefinition,
 	Settings\Options\Integration,
 	Settings\Service\SettingsService,
 	Util\LocaleCodeProvider,
@@ -206,7 +208,7 @@ class TransactionService {
 			];
 
 			$data = array_filter($data);
-			$this->container->get('wallee_transaction.repository')->upsert([$data], $context);
+			$this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')->upsert([$data], $context);
 
 		} catch (\Exception $exception) {
 			$this->logger->critical(__CLASS__ . ' : ' . __FUNCTION__ . ' : ' . $exception->getMessage());
@@ -265,7 +267,7 @@ class TransactionService {
 	 */
 	public function getByOrderId(string $orderId, Context $context): TransactionEntity
 	{
-		return $this->container->get('wallee_transaction.repository')
+		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')
 							   ->search(new Criteria([$orderId]), $context)
 							   ->get($orderId);
 	}
@@ -295,7 +297,7 @@ class TransactionService {
 	 */
 	public function getByTransactionId(int $transactionId, Context $context): ?TransactionEntity
 	{
-		return $this->container->get('wallee_transaction.repository')
+		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')
 							   ->search((new Criteria())->addAssociations(['refunds']), $context)
 							   ->getEntities()
 							   ->getByTransactionId($transactionId);
@@ -310,7 +312,7 @@ class TransactionService {
 	 */
 	public function getRefundEntityCollectionByTransactionId(int $transactionId, Context $context): ?RefundEntityCollection
 	{
-		return $this->container->get('wallee_refund.repository')
+		return $this->container->get(RefundEntityDefinition::ENTITY_NAME .'.repository')
 							   ->search(new Criteria(), $context)
 							   ->getEntities()
 							   ->filterByTransactionId($transactionId);

@@ -23,6 +23,7 @@ use Wallee\Sdk\{
 use WalleePayment\Core\{
 	Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntity,
 	Settings\Struct\Settings,
+	Util\Exception\InvalidPayloadException,
 	Util\LocaleCodeProvider};
 
 /**
@@ -144,7 +145,7 @@ class TransactionPayload extends AbstractPayload {
 
 		if (!$transactionPayload->valid()) {
 			$this->logger->critical('Transaction payload invalid:', $transactionPayload->listInvalidProperties());
-			throw new \Exception('Transaction payload invalid:' . json_encode($transactionPayload->listInvalidProperties()));
+			throw new InvalidPayloadException('Transaction payload invalid:' . json_encode($transactionPayload->listInvalidProperties()));
 		}
 
 		return $transactionPayload;
@@ -170,21 +171,31 @@ class TransactionPayload extends AbstractPayload {
 				$shopLineItem->getPrice()->getCalculatedTaxes(),
 				'Taxes'
 			);
+			$uniqueId = $this->fixLength($shopLineItem->getId(), 200);
+			$sku      = $shopLineItem->getProductId() ? $this->fixLength($shopLineItem->getProductId(), 200) : $uniqueId;
 			$lineItem = (new LineItemCreate())
 				->setName($this->fixLength($shopLineItem->getLabel(), 150))
-				->setUniqueId($this->fixLength($shopLineItem->getId(), 200))
-				->setSku($this->fixLength($shopLineItem->getProductId(), 200))
+				->setUniqueId($uniqueId)
+				->setSku($sku)
 				->setQuantity($shopLineItem->getQuantity() ?? 1)
 				->setAmountIncludingTax($shopLineItem->getTotalPrice() ?? 0)
-				->setTaxes($taxes)
-				->setAttributes($this->getProductAttributes($shopLineItem));
+				->setTaxes($taxes);
 
-			/** @noinspection PhpParamsInspection */
-			$lineItem->setType(LineItemType::PRODUCT);
+			$productAttributes = $this->getProductAttributes($shopLineItem);
+
+			if(!empty($productAttributes)) {
+				$lineItem->setAttributes($productAttributes);
+			}
+
+			if ($shopLineItem->getTotalPrice() >= 0) {
+				$lineItem->setType(LineItemType::PRODUCT);
+			} else {
+				$lineItem->setType(LineItemType::DISCOUNT);
+			}
 
 			if (!$lineItem->valid()) {
 				$this->logger->critical('LineItem payload invalid:', $lineItem->listInvalidProperties());
-				throw new \Exception('LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
+				throw new InvalidPayloadException('LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
 			}
 
 			$lineItems[] = $lineItem;
@@ -221,7 +232,7 @@ class TransactionPayload extends AbstractPayload {
 
 			if (!$tax->valid()) {
 				$this->logger->critical('Tax payload invalid:', $tax->listInvalidProperties());
-				throw new \Exception('Tax payload invalid:' . json_encode($tax->listInvalidProperties()));
+				throw new InvalidPayloadException('Tax payload invalid:' . json_encode($tax->listInvalidProperties()));
 			}
 
 			$taxes [] = $tax;
@@ -238,9 +249,10 @@ class TransactionPayload extends AbstractPayload {
 	protected function getProductAttributes(OrderLineItemEntity $shopLineItem): ?array
 	{
 		$productAttributes = [];
+		$lineItemPayload = $shopLineItem->getPayload();
 
-		if (!(empty($shopLineItem->getPayload()) && empty($shopLineItem->getPayload()['options']))) {
-			foreach ($shopLineItem->getPayload()['options'] as $option) {
+		if (is_array($lineItemPayload) && !empty($lineItemPayload['options'])) {
+			foreach ($lineItemPayload['options'] as $option) {
 				$key                     = $this->fixLength('option_' . $option['group'], 40);
 				$productAttributes[$key] = (new LineItemAttributeCreate())
 					->setLabel($option['group'])
@@ -280,7 +292,7 @@ class TransactionPayload extends AbstractPayload {
 
 				if (!$lineItem->valid()) {
 					$this->logger->critical('Shipping LineItem payload invalid:', $lineItem->listInvalidProperties());
-					throw new \Exception('Shipping LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
+					throw new InvalidPayloadException('Shipping LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
 				}
 
 				return $lineItem;
@@ -329,7 +341,7 @@ class TransactionPayload extends AbstractPayload {
 
 				if (!$lineItem->valid()) {
 					$this->logger->critical('Adjustment LineItem payload invalid:', $lineItem->listInvalidProperties());
-					throw new \Exception('Adjustment LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
+					throw new InvalidPayloadException('Adjustment LineItem payload invalid:' . json_encode($lineItem->listInvalidProperties()));
 				}
 			}
 		}
@@ -376,7 +388,7 @@ class TransactionPayload extends AbstractPayload {
 
 		if (!$addressPayload->valid()) {
 			$this->logger->critical('Address payload invalid:', $addressPayload->listInvalidProperties());
-			throw new \Exception('Address payload invalid:' . json_encode($addressPayload->listInvalidProperties()));
+			throw new InvalidPayloadException('Address payload invalid:' . json_encode($addressPayload->listInvalidProperties()));
 		}
 
 		return $addressPayload;

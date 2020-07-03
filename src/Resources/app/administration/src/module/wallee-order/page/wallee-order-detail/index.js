@@ -173,13 +173,13 @@ Component.register('wallee-order-detail', {
 				this.isLoading = false;
 				const walleeTransactionId = order.transactions[0].customFields.wallee_transaction_id;
 				this.WalleeTransactionService.getTransactionData(order.salesChannelId, walleeTransactionId)
-					.then((WhitelabelMachineNameTransaction) => {
-						this.currency = WhitelabelMachineNameTransaction.transactions[0].currency;
-						WhitelabelMachineNameTransaction.transactions[0].authorized_amount = Utils.format.currency(
-							WhitelabelMachineNameTransaction.transactions[0].authorizationAmount,
+					.then((WalleeTransaction) => {
+						this.currency = WalleeTransaction.transactions[0].currency;
+						WalleeTransaction.transactions[0].authorized_amount = Utils.format.currency(
+							WalleeTransaction.transactions[0].authorizationAmount,
 							this.currency
 						);
-						WhitelabelMachineNameTransaction.transactions[0].lineItems.forEach((lineItem) => {
+						WalleeTransaction.transactions[0].lineItems.forEach((lineItem) => {
 							lineItem.amountIncludingTax = Utils.format.currency(
 								lineItem.amountIncludingTax,
 								this.currency
@@ -189,14 +189,14 @@ Component.register('wallee-order-detail', {
 								this.currency
 							);
 						});
-						WhitelabelMachineNameTransaction.refunds.forEach((refund) => {
+						WalleeTransaction.refunds.forEach((refund) => {
 							refund.amount = Utils.format.currency(
 								refund.amount,
 								this.currency
 							);
 						});
-						this.lineItems = WhitelabelMachineNameTransaction.transactions[0].lineItems;
-						this.transactionData = WhitelabelMachineNameTransaction;
+						this.lineItems = WalleeTransaction.transactions[0].lineItems;
+						this.transactionData = WalleeTransaction;
 						this.refundAmount = Number(this.transactionData.transactions[0].amountIncludingTax);
 						this.refundableAmount = Number(this.transactionData.transactions[0].amountIncludingTax);
 						this.transaction = this.transactionData.transactions[0];

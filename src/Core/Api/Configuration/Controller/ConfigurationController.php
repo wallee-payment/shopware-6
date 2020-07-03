@@ -20,7 +20,7 @@ use WalleePayment\Core\{
 /**
  * Class ConfigurationController
  *
- * This class handles web calls that are made via the WhiteLabelMachinePayment settings page.
+ * This class handles web calls that are made via the WalleePayment settings page.
  *
  * @package WalleePayment\Core\Api\Config\Controller
  * @RouteScope(scopes={"api"})

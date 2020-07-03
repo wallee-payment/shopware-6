@@ -19,9 +19,11 @@ use Wallee\Sdk\{
 	ApiClient,
 	Model\CreationEntityState,
 	Model\EntityQuery,
-	Model\PaymentMethodConfiguration};
+	Model\PaymentMethodConfiguration,
+	Model\RestLanguage};
 use WalleePayment\Core\{
 	Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntity,
+	Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntityDefinition,
 	Checkout\PaymentHandler\WalleePaymentHandler,
 	Settings\Service\SettingsService};
 use WalleePayment\WalleePayment;
@@ -74,6 +76,9 @@ class PaymentMethodConfigurationService {
 	 */
 	private $mediaSerializer;
 
+	/**
+	 * @var
+	 */
 	private $languages;
 
 	/**
@@ -176,7 +181,7 @@ class PaymentMethodConfigurationService {
 		$criteria = (new Criteria())
 			->addFilter(new EqualsFilter('state', CreationEntityState::ACTIVE));
 
-		$walleePaymentMethodConfigurationRepository = $this->container->get('wallee_payment_method_configuration.repository');
+		$walleePaymentMethodConfigurationRepository = $this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository');
 
 		$paymentMethodConfigurationEntities = $walleePaymentMethodConfigurationRepository
 			->search($criteria, $context)
@@ -249,7 +254,7 @@ class PaymentMethodConfigurationService {
 			$this->upsertPaymentMethod($id, $paymentMethodConfiguration, $context);
 
 
-			$this->container->get('wallee_payment_method_configuration.repository')
+			$this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository')
 							->upsert([$data], $context);
 		}
 	}
@@ -314,7 +319,7 @@ class PaymentMethodConfigurationService {
 			new EqualsFilter('paymentMethodConfigurationId', $paymentMethodConfigurationId)
 		);
 
-		return $this->container->get('wallee_payment_method_configuration.repository')
+		return $this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository')
 							   ->search($criteria, $context)
 							   ->getEntities()
 							   ->first();
@@ -326,6 +331,10 @@ class PaymentMethodConfigurationService {
 	 * @param string                                                      $id
 	 * @param \Wallee\Sdk\Model\PaymentMethodConfiguration $paymentMethodConfiguration
 	 * @param \Shopware\Core\Framework\Context                            $context
+	 *
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
 	 */
 	protected function upsertPaymentMethod(
 		string $id,
@@ -359,20 +368,24 @@ class PaymentMethodConfigurationService {
 	/**
 	 * @param \Wallee\Sdk\Model\PaymentMethodConfiguration $paymentMethodConfiguration
 	 * @param \Shopware\Core\Framework\Context                            $context
+	 *
 	 * @return array
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
 	 */
 	protected function getPaymentMethodConfigurationTranslation(PaymentMethodConfiguration $paymentMethodConfiguration, Context $context): array
 	{
-		$translations = [];
-		$languages    = $this->getAvailableLanguages($context);
-		$locales      = array_map(
+		$translations       = [];
+		$availableLanguages = $this->getAvailableLanguages($context);
+		$locales            = array_map(
 			function ($language) {
 				/**
 				 * @var \Shopware\Core\System\Language\LanguageEntity $language
 				 */
 				return $language->getLocale()->getCode();
 			},
-			$languages->jsonSerialize()
+			$availableLanguages->jsonSerialize()
 		);
 		foreach ($locales as $locale) {
 			$translations[$locale] = [
@@ -394,48 +407,70 @@ class PaymentMethodConfigurationService {
 		]), $context)->getEntities();
 	}
 
-	protected function translate($translatedString, $locale)
+	/**
+	 * @param array  $translatedString
+	 * @param string $locale
+	 *
+	 * @return string|null
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
+	 */
+	protected function translate(array $translatedString, string $locale): ?string
 	{
+		$translation = null;
+
 		if (isset($translatedString[$locale])) {
-			return $translatedString[$locale];
+			$translation = $translatedString[$locale];
 		}
 
-		$primaryLanguage = $this->findPrimaryLanguage($locale);
-		if ($primaryLanguage !== false && isset($translatedString[$primaryLanguage->getIetfCode()])) {
-			return $translatedString[$primaryLanguage->getIetfCode()];
+		if (is_null($translation)) {
+
+			$primaryLanguage = $this->findPrimaryLanguage($locale);
+			if (!is_null($primaryLanguage) && isset($translatedString[$primaryLanguage->getIetfCode()])) {
+				$translation = $translatedString[$primaryLanguage->getIetfCode()];
+			}
+
+			if (is_null($translation) && isset($translatedString['en-US'])) {
+				$translation = $translatedString['en-US'];
+			}
 		}
 
-		if (isset($translatedString['en-US'])) {
-			return $translatedString['en-US'];
-		}
-
-		return null;
+		return $translation;
 	}
 
 	/**
 	 * Returns the primary language in the given group.
 	 *
-	 * @param string $code
-	 * @return \Wallee\Sdk\Model\RestLanguage
+	 * @param $code
+	 *
+	 * @return \Wallee\Sdk\Model\RestLanguage|null
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
 	 */
-	protected function findPrimaryLanguage($code)
+	protected function findPrimaryLanguage(string $code): ?RestLanguage
 	{
 		$code = substr($code, 0, 2);
 		foreach ($this->getLanguages() as $language) {
-			if ($language->getIso2Code() == $code && $language->getPrimaryOfGroup()) {
+			if (($language->getIso2Code() == $code) && $language->getPrimaryOfGroup()) {
 				return $language;
 			}
 		}
-		return false;
+		return null;
 	}
 
-	protected function getLanguages()
+	/**
+	 *
+	 * @return array
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
+	 */
+	protected function getLanguages(): array
 	{
-		if ($this->languages == null) {
-			$this->languages = $this
-				->apiClient
-				->getLanguageService()
-				->all();
+		if (is_null($this->languages)) {
+			$this->languages = $this->apiClient->getLanguageService()->all();
 		}
 		return $this->languages;
 	}

@@ -8,7 +8,7 @@ const ApiService = Shopware.Classes.ApiService;
 class WalleeConfigurationService extends ApiService {
 
 	/**
-	 * WhitelabelmachinenameConfigurationService constructor
+	 * WalleeConfigurationService constructor
 	 *
 	 * @param httpClient
 	 * @param loginService

@@ -16,6 +16,7 @@ use Shopware\Core\{
 	System\SalesChannel\SalesChannelEntity};
 use Symfony\Component\HttpFoundation\ParameterBag;
 use WalleePayment\Core\Api\Transaction\Entity\TransactionEntity;
+use WalleePayment\Core\Api\Transaction\Entity\TransactionEntityDefinition;
 
 /**
  * Class OrderMailService
@@ -114,7 +115,7 @@ class OrderMailService {
 	 */
 	protected function getTransactionEntityByOrderId(string $orderId, Context $context): TransactionEntity
 	{
-		return $this->container->get('wallee_transaction.repository')
+		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')
 							   ->search(new Criteria([$orderId]), $context)
 							   ->get($orderId);
 	}
@@ -223,6 +224,6 @@ class OrderMailService {
 	 */
 	protected function markTransactionEntityConfirmationEmailAsSent(string $orderId, Context $context)
 	{
-		$this->container->get('wallee_transaction.repository')->upsert([['id' => $orderId, 'confirmationEmailSent' => true]], $context);
+		$this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')->upsert([['id' => $orderId, 'confirmationEmailSent' => true]], $context);
 	}
 }

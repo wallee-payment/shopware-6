@@ -2,12 +2,12 @@
 
 namespace WalleePayment\Core\Util\Payload;
 
-
 use Wallee\Sdk\{
 	Model\RefundCreate,
 	Model\RefundType,
 	Model\Transaction,
 	Model\TransactionState};
+use WalleePayment\Core\Util\Exception\InvalidPayloadException;
 
 /**
  * Class RefundPayload
@@ -28,16 +28,16 @@ class RefundPayload extends AbstractPayload {
 			($transaction->getState() == TransactionState::FULFILL) &&
 			($amount <= floatval($transaction->getAuthorizationAmount()))
 		) {
-			$refund = new RefundCreate();
-			$refund->setAmount($amount);
-			$refund->setTransaction($transaction->getId());
-			$refund->setMerchantReference($this->fixLength($transaction->getMerchantReference(), 100));
-			$refund->setExternalId($this->fixLength(uniqid('refund_', true), 100));
+			$refund = (new RefundCreate())
+			->setAmount($amount)
+			->setTransaction($transaction->getId())
+			->setMerchantReference($this->fixLength($transaction->getMerchantReference(), 100))
+			->setExternalId($this->fixLength(uniqid('refund_', true), 100))
 			/** @noinspection PhpParamsInspection */
-			$refund->setType(RefundType::MERCHANT_INITIATED_ONLINE);
+			->setType(RefundType::MERCHANT_INITIATED_ONLINE);
 			if (!$refund->valid()) {
 				$this->logger->critical('Refund payload invalid:', $refund->listInvalidProperties());
-				throw new \Exception('Refund payload invalid:' . json_encode($refund->listInvalidProperties()));
+				throw new InvalidPayloadException('Refund payload invalid:' . json_encode($refund->listInvalidProperties()));
 			}
 			return $refund;
 		}

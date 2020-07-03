@@ -101,29 +101,6 @@ trait WalleePaymentPluginTrait {
 	protected function deleteUserData(UninstallContext $uninstallContext): void
 	{
 		$connection = $this->container->get(Connection::class);
-
-		/*
-		We keep transaction tables and data in the event that the plugin is uninstalled
-
-		if (!$uninstallContext->keepUserData()) {
-			$tablesDropQueries = [
-				strtr(
-					'DROP TABLE IF EXISTS `{db_table}`',
-					['{db_table}' => PaymentMethodConfigurationEntityDefinition::ENTITY_NAME]
-				),
-				strtr(
-					'DROP TABLE IF EXISTS `{db_table}`',
-					['{db_table}' => TransactionEntityDefinition::ENTITY_NAME]
-				),
-			];
-
-			foreach ($tablesDropQueries as $query) {
-				$connection->executeQuery($query);
-			}
-
-		}
-		*/
-
 		$query = 'ALTER TABLE `order` DROP COLUMN `wallee_lock`;';
 		$connection->executeQuery($query);
 	}

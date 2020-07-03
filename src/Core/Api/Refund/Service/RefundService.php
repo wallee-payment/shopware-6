@@ -14,6 +14,7 @@ use Wallee\Sdk\{
 use WalleePayment\Core\{
 	Api\Refund\Entity\RefundEntity,
 	Api\Transaction\Entity\TransactionEntity,
+	Api\Transaction\Entity\TransactionEntityDefinition,
 	Settings\Service\SettingsService,
 	Util\Payload\RefundPayload};
 
@@ -102,7 +103,7 @@ class RefundService {
 	 */
 	public function getTransactionEntityByTransactionId(int $transactionId, Context $context): TransactionEntity
 	{
-		return $this->container->get('wallee_transaction.repository')
+		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')
 							   ->search(new Criteria(), $context)
 							   ->getEntities()
 							   ->getByTransactionId($transactionId);

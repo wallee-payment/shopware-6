@@ -39,6 +39,10 @@ Component.register('wallee-settings', {
             isSetDefaultPaymentSuccessful: false,
             isSettingDefaultPaymentMethods: false,
 
+            configIntegrationDefaultValue: 'iframe',
+            configEmailEnabledDefaultValue: true,
+            configLineItemConsistencyEnabledDefaultValue: true,
+
             ...constants
         };
     },
@@ -69,15 +73,15 @@ Component.register('wallee-settings', {
                     this.userIdFilled = !!this.config[this.CONFIG_USER_ID];
 
                     if (!(this.CONFIG_INTEGRATION in this.config)) {
-                        this.config[this.CONFIG_INTEGRATION] = 'iframe';
+                        this.config[this.CONFIG_INTEGRATION] = this.configIntegrationDefaultValue;
                     }
 
                     if (!(this.CONFIG_EMAIL_ENABLED in this.config)) {
-                        this.config[this.CONFIG_EMAIL_ENABLED] = true;
+                        this.config[this.CONFIG_EMAIL_ENABLED] = this.configEmailEnabledDefaultValue;
                     }
 
                     if (!(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in this.config)) {
-                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = true;
+                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = this.configLineItemConsistencyEnabledDefaultValue;
                     }
 
                 } else {
@@ -88,15 +92,15 @@ Component.register('wallee-settings', {
 
 
                     if (!(this.CONFIG_INTEGRATION in this.config) || !(this.CONFIG_INTEGRATION in defaultConfig)) {
-                        this.config[this.CONFIG_INTEGRATION] = 'iframe';
+                        this.config[this.CONFIG_INTEGRATION] = this.configIntegrationDefaultValue;
                     }
 
                     if (!(this.CONFIG_EMAIL_ENABLED in this.config) || !(this.CONFIG_EMAIL_ENABLED in defaultConfig)) {
-                        this.config[this.CONFIG_EMAIL_ENABLED] = true;
+                        this.config[this.CONFIG_EMAIL_ENABLED] = this.configEmailEnabledDefaultValue;
                     }
 
                     if (!(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in this.config) || !(this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED in defaultConfig)) {
-                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = true;
+                        this.config[this.CONFIG_LINE_ITEM_CONSISTENCY_ENABLED] = this.configLineItemConsistencyEnabledDefaultValue;
                     }
                 }
             },

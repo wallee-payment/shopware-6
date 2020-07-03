@@ -451,9 +451,9 @@ class WebHookController extends AbstractController {
 			/**
 			 * @var OrderDeliveryStateHandler $orderDeliveryStateHandler
 			 */
-			$orderEntity               = $this->getOrderEntity($orderId, $context);
+			$order               = $this->getOrderEntity($orderId, $context);
 			$orderDeliveryStateHandler = $this->container->get(OrderDeliveryStateHandler::class);
-			$orderDeliveryStateHandler->unhold($orderEntity->getDeliveries()->last()->getId(), $context);
+			$orderDeliveryStateHandler->unhold($order->getDeliveries()->last()->getId(), $context);
 		} catch (\Exception $exception) {
 			$this->logger->critical($exception->getTraceAsString());
 		}
