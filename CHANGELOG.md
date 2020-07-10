@@ -1,3 +1,6 @@
+# 1.1.11
+- Add documentation
+
 # 1.1.10
 - Stop responding with server errors when orders are not found
 

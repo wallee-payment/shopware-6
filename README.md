@@ -46,6 +46,10 @@ php bin/console cache:clear
 The library needs to be configured with your account's space id, user id, and application key which are available in your Wallee
 account dashboard.
 
+## Documentation
+
+[Documentation](https://github.com/wallee-payment/shopware-6/blob/master/docs/en/documentation.html)
+
 ## License
 
 Please see the [license file](https://github.com/wallee-payment/shopware-6/blob/master/LICENSE.txt) for more information.
