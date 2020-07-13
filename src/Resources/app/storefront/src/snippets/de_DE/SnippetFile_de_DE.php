@@ -22,7 +22,7 @@ class SnippetFile_de_DE implements SnippetFileInterface {
 
 	public function getAuthor(): string
 	{
-		return 'customweb GmbH';
+		return 'wallee';
 	}
 
 	public function isBase(): bool

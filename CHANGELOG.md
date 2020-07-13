@@ -1,3 +1,6 @@
+# 1.1.12
+- Update doc path
+
 # 1.1.11
 - Add documentation
 

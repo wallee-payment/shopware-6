@@ -48,7 +48,7 @@ account dashboard.
 
 ## Documentation
 
-[Documentation](https://github.com/wallee-payment/shopware-6/blob/master/docs/en/documentation.html)
+[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.1.12/docs/en/documentation.html)
 
 ## License
 
