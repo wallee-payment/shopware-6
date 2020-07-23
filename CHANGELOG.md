@@ -1,3 +1,11 @@
+# 1.1.14
+- Add cookies to the cookie manager
+- Resize icon to 40px * 40px
+- Fix line item attributes
+
+# 1.1.13
+- Include vendor folder in Shopware store releases
+
 # 1.1.12
 - Update doc path
 

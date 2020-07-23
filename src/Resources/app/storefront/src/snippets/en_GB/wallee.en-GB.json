@@ -2,5 +2,10 @@
   "wallee": {
     "payHeader": "Pay order",
     "payButton": "Pay"
+  },
+  "cookie": {
+    "wallee": {
+      "name": "Wallee Payment"
+    }
   }
 }
