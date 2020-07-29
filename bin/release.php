@@ -26,11 +26,11 @@ $composerJsonData['require']['shopware/storefront'] = '^6.2';
 
 switch ($release_env) {
 	case RELEASE_GIT_ENV:
-		exec('composer require wallee/sdk 2.1.0 -d /var/www/shopware.local');
-		$composerJsonData['require']['wallee/sdk'] = '2.1.0';
+		exec('composer require wallee/sdk 2.1.1 -d /var/www/shopware.local');
+		$composerJsonData['require']['wallee/sdk'] = '2.1.1';
 		break;
 	case RELEASE_SW_ENV:
-		exec('composer require wallee/sdk 2.1.0 -d /var/www/shopware.local/custom/plugins/WalleePayment');
+		exec('composer require wallee/sdk 2.1.1 -d /var/www/shopware.local/custom/plugins/WalleePayment');
 		break;
 }
 
