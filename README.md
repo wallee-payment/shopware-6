@@ -52,7 +52,7 @@ account dashboard.
 
 ## Documentation
 
-[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.1.16/docs/en/documentation.html)
+[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.1.17/docs/en/documentation.html)
 
 ## License
 
