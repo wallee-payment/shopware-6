@@ -214,7 +214,10 @@ class PaymentMethodConfigurationService {
 	}
 
 	/**
+	 * Enable payment methods from Wallee API
+	 *
 	 * @param \Shopware\Core\Framework\Context $context
+	 *
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
@@ -256,10 +259,13 @@ class PaymentMethodConfigurationService {
 
 			$this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository')
 							->upsert([$data], $context);
+
 		}
 	}
 
 	/**
+	 * Fetch merchant payment methods from Wallee API
+	 *
 	 * @return \Wallee\Sdk\Model\PaymentMethodConfiguration[]
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\Http\ConnectionException

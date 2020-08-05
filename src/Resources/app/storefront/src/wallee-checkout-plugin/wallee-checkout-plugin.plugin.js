@@ -14,7 +14,7 @@ class WalleeCheckoutPlugin extends Plugin {
         payment_method_handler_name: 'wallee_payment_handler',
         payment_method_handler_prefix: 'wallee_handler_',
         payment_method_handler_status: 'input[name="wallee_payment_handler_validation_status"]',
-        payment_form: 'confirmOrderForm'
+        payment_form: 'confirmOrderForm',
     };
 
     init() {
