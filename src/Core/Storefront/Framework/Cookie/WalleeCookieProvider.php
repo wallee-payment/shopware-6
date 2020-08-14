@@ -38,7 +38,7 @@ class WalleeCookieProvider implements CookieProviderInterface {
 			}
 
 			$cookie['entries'][] = [
-				'snippet_name' => 'cookie.wallee.name',
+				'snippet_name' => 'wallee.cookie.name',
 				'cookie'       => 'wallee-cookie-key',
 			];
 		}

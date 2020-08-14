@@ -1,11 +1,12 @@
 {
   "wallee": {
-    "payHeader": "Bestellung bezahlen",
-    "payButton": "Zahlen"
-  },
-  "cookie": {
-    "wallee": {
-      "name": "Wallee-Zahlungen"
-    }
+	"account": {
+	  "downloadInvoice": "Rechnung herunterladen"
+	},
+	"cookie": {
+	  "name": "Wallee-Zahlungen"
+	},
+	"payButton": "Zahlen",
+	"payHeader": "Bestellung bezahlen"
   }
 }

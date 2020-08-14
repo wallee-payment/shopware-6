@@ -1,11 +1,12 @@
 {
   "wallee": {
-    "payHeader": "Pay order",
-    "payButton": "Pay"
-  },
-  "cookie": {
-    "wallee": {
-      "name": "Wallee Payment"
-    }
+	"account": {
+	  "downloadInvoice": "Download Invoice"
+	},
+	"cookie": {
+	  "name": "Wallee Payment"
+	},
+	"payButton": "Pay",
+	"payHeader": "Pay order"
   }
 }
