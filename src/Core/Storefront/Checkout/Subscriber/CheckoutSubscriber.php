@@ -92,7 +92,8 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 
 			if (
 				!$emailOriginIsWalleePayment &&
-				WalleePaymentHandler::class == $order->getTransactions()->first()->getPaymentMethod()->getHandlerIdentifier()
+				$order->getTransactions()->last()->getPaymentMethod() &&
+				WalleePaymentHandler::class == $order->getTransactions()->last()->getPaymentMethod()->getHandlerIdentifier()
 			) {
 				$event->getContext()->addExtension('wallee-disable', new ArrayStruct());
 				$event->stopPropagation();
