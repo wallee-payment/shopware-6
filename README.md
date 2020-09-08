@@ -6,7 +6,7 @@ The Wallee Payment plugin wraps around the Wallee API. This library facilitates 
 ## Requirements
 
 - PHP 7.2 and above
-- Shopware 6.2
+- Shopware 6.2 and above
 
 ## Installation
 
@@ -22,13 +22,15 @@ Once composer is installed, execute the following command in your project root t
 
 ```bash
 composer require wallee/shopware-6
-php bin/console plugin:install --refresh --activate --clearCache WalleePayment
+php bin/console plugin:refresh
+php bin/console plugin:install --activate --clearCache WalleePayment
 ```
 
 #### Update via composer
 ```bash
 composer update wallee/shopware-6
-php bin/console plugin:install --refresh --activate --clearCache WalleePayment
+php bin/console plugin:refresh
+php bin/console plugin:install --activate --clearCache WalleePayment
 ```
 
 ### Manual Installation
@@ -40,7 +42,8 @@ Uncompress the zip file you download, and include the autoloader in your project
 ```bash
 # unzip to ShopwareInstallDir/custom/plugins/WalleePayment
 composer require wallee/sdk 2.1.2
-php bin/console plugin:install --refresh --activate --clearCache WalleePayment
+php bin/console plugin:refresh
+php bin/console plugin:install --activate --clearCache WalleePayment
 ```
 
 ## Usage
@@ -49,7 +52,7 @@ account dashboard.
 
 ## Documentation
 
-[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.1.20/docs/en/documentation.html)
+[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.1.21/docs/en/documentation.html)
 
 ## License
 
