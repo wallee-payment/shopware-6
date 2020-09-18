@@ -1,7 +1,7 @@
 /* global Shopware */
 
-import template from './wallee-credentials.html.twig';
-import constants from '../../page/wallee-settings/wallee-config-consts'
+import template from './index.html.twig';
+import constants from '../../page/wallee-settings/configuration-constants'
 
 const {Component, Mixin} = Shopware;
 

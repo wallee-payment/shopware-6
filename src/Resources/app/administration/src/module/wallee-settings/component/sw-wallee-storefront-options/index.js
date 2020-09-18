@@ -5,10 +5,10 @@ import constants from '../../page/wallee-settings/configuration-constants'
 
 const {Component, Mixin} = Shopware;
 
-Component.register('sw-wallee-options', {
+Component.register('sw-wallee-storefront-options', {
 	template: template,
 
-	name: 'WalleeOptions',
+	name: 'WalleeStorefrontOptions',
 
 	mixins: [
 		Mixin.getByName('notification')
@@ -39,18 +39,6 @@ Component.register('sw-wallee-options', {
 	},
 
 	computed: {
-		integrationOptions() {
-			return [
-				{
-					id: 'iframe',
-					name: this.$tc('wallee-settings.settingForm.options.integration.options.iframe')
-				},
-				{
-					id: 'payment_page',
-					name: this.$tc('wallee-settings.settingForm.options.integration.options.payment_page')
-				}
-			];
-		}
 	},
 
 	methods: {
