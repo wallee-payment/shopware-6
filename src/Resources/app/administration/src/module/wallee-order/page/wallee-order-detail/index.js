@@ -3,8 +3,8 @@
 import '../../component/wallee-order-action-completion';
 import '../../component/wallee-order-action-refund';
 import '../../component/wallee-order-action-void';
-import template from './wallee-order-detail.html.twig';
-import './wallee-order-detail.scss';
+import template from './index.html.twig';
+import './index.scss';
 
 const {Component, Mixin, Filter, Context, Utils} = Shopware;
 const Criteria = Shopware.Data.Criteria;

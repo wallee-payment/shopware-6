@@ -1,6 +1,6 @@
 /* global Shopware */
 
-import template from './wallee-order-action-void.html.twig';
+import template from './index.html.twig';
 
 const {Component, Mixin, Filter, Utils} = Shopware;
 

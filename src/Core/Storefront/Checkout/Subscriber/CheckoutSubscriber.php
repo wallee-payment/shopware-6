@@ -88,13 +88,15 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 			 * @var $order OrderEntity
 			 */
 			$order                                     = $templateData['order'];
-			$emailOriginIsWalleePayment = isset($templateData[OrderMailService::EMAIL_ORIGIN_IS_WALLEE]);
+			$isWalleeEmail = isset($templateData[OrderMailService::EMAIL_ORIGIN_IS_WALLEE]);
 
 			if (
-				!$emailOriginIsWalleePayment &&
+				$this->settingsService->getSettings($order->getSalesChannelId())->isEmailEnabled() &&
+				!$isWalleeEmail &&
 				$order->getTransactions()->last()->getPaymentMethod() &&
 				WalleePaymentHandler::class == $order->getTransactions()->last()->getPaymentMethod()->getHandlerIdentifier()
 			) {
+				$this->logger->info('Email disabled for ', ['orderId' => $order->getId()]);
 				$event->getContext()->addExtension('wallee-disable', new ArrayStruct());
 				$event->stopPropagation();
 			}
