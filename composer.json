@@ -49,8 +49,8 @@
         "ext-json": "*",
         "ext-mbstring": "*",
         "php": ">=7.2",
-        "shopware/core": "~6.2.3 || ~6.3.0",
-        "shopware/storefront": "~6.2.3 || ~6.3.0",
+        "shopware/core": "~6.2.3 || ~6.3",
+        "shopware/storefront": "~6.2.3 || ~6.3",
         "wallee/sdk": "2.1.4"
     },
     "type": "shopware-platform-plugin",
