@@ -2,6 +2,7 @@
 
 namespace WalleePayment\Core\Api\PaymentMethodConfiguration\Service;
 
+use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Checkout\Cart\Rule\CartAmountRule,
@@ -168,7 +169,7 @@ class PaymentMethodConfigurationService {
 
 		$this->disablePaymentMethodConfigurations($context);
 		$this->enablePaymentMethodConfigurations($context);
-
+		$this->disableOrphanPaymentMethods();
 		return [];
 	}
 
@@ -200,24 +201,58 @@ class PaymentMethodConfigurationService {
 	 */
 	private function disablePaymentMethodConfigurations(Context $context): void
 	{
+		$data     = [];
+		$pmdata   = [];
 		$criteria = (new Criteria())
-			->addFilter(new EqualsFilter('state', CreationEntityState::ACTIVE));
+			->addFilter(new EqualsFilter('spaceId', $this->getSpaceId()));
 
-		$walleePaymentMethodConfigurationRepository = $this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository');
+		$walleePMConfigurationRepository = $this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository');
 
-		$paymentMethodConfigurationEntities = $walleePaymentMethodConfigurationRepository
+		$paymentMethodConfigurationEntities = $walleePMConfigurationRepository
 			->search($criteria, $context)
 			->getEntities();
+
 		/**
 		 * @var $paymentMethodConfigurationEntity \WalleePayment\Core\Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntity
 		 */
 		foreach ($paymentMethodConfigurationEntities as $paymentMethodConfigurationEntity) {
-			$this->setPaymentMethodIsActive($paymentMethodConfigurationEntity->getPaymentMethodId(), false, $context);
-			$data = [
+			$data[] = [
 				'id'    => $paymentMethodConfigurationEntity->getId(),
 				'state' => CreationEntityState::INACTIVE,
 			];
-			$walleePaymentMethodConfigurationRepository->update([$data], $context);
+
+			$pmdata[] = [
+				'id'     => $paymentMethodConfigurationEntity->getId(),
+				'active' => false,
+			];
+		}
+
+		$walleePMConfigurationRepository->update($data, $context);
+
+		$this->container->get('payment_method.repository')->update($pmdata, $context);
+	}
+
+	/**
+	 * Full proof method to disable any orphaned payment methods
+	 *
+	 */
+	protected function disableOrphanPaymentMethods(): void
+	{
+		try {
+			$query = "UPDATE payment_method 
+				  	  SET active=0 
+				  	  WHERE handler_identifier=:handler_identifier AND id NOT IN (
+				  	  	SELECT payment_method_id FROM wallee_payment_method_configuration
+				  	  )";
+
+			$params = [
+				'handler_identifier' => WalleePaymentHandler::class,
+			];
+
+			$connection = $this->container->get(Connection::class);
+			$connection->executeQuery($query, $params);
+		} catch (\Exception $exception) {
+			$this->logger->critical($exception->getMessage());
 		}
 	}
 
@@ -259,10 +294,6 @@ class PaymentMethodConfigurationService {
 				$paymentMethodConfiguration->getId(),
 				$context
 			);
-
-			if (!($paymentMethodConfiguration->getState() == CreationEntityState::ACTIVE)) {
-				continue;
-			}
 
 			$id = is_null($paymentMethodConfigurationEntity) ? Uuid::randomHex() : $paymentMethodConfigurationEntity->getId();
 
@@ -383,6 +414,7 @@ class PaymentMethodConfigurationService {
 			'availabilityRuleId' => $availabilityRuleId,
 			'pluginId'           => $pluginId,
 			'position'           => $paymentMethodConfiguration->getSortOrder() - 100,
+			'afterOrderEnabled'  => true,
 			'active'             => true,
 			'translations'       => $this->getPaymentMethodConfigurationTranslation($paymentMethodConfiguration, $context),
 		];

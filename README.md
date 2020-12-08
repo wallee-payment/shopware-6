@@ -50,9 +50,16 @@ php bin/console plugin:install --activate --clearCache WalleePayment
 The library needs to be configured with your account's space id, user id, and application key which are available in your Wallee
 account dashboard.
 
+### Logs and debugging
+To view the logs please run the command below:
+```bash
+cd shopware/install/dir
+tail -f var/log/wallee_payment*.log
+```
+
 ## Documentation
 
-[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.2.0/docs/en/documentation.html)
+[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/1.3.0/docs/en/documentation.html)
 
 ## License
 
