@@ -4,10 +4,9 @@ namespace WalleePayment\Core\Storefront\Checkout\Subscriber;
 
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
+	Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates,
 	Checkout\Order\OrderEntity,
-	Content\MailTemplate\Service\Event\MailBeforeSentEvent,
-	Content\MailTemplate\Service\Event\MailBeforeValidateEvent,
-	Framework\Struct\ArrayStruct};
+	Content\MailTemplate\Service\Event\MailBeforeValidateEvent};
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoadedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use WalleePayment\Core\{
@@ -52,6 +51,7 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 
 	/**
 	 * @param \Psr\Log\LoggerInterface $logger
+	 *
 	 * @internal
 	 * @required
 	 *
@@ -69,14 +69,11 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 		return [
 			CheckoutConfirmPageLoadedEvent::class => ['onConfirmPageLoaded', 1],
 			MailBeforeValidateEvent::class        => ['onMailBeforeValidate', 1],
-			MailBeforeSentEvent::class            => ['onMailBeforeSent', 1],
 		];
 	}
 
 	/**
 	 * Stop order emails being sent out
-	 *
-	 * @see https://issues.shopware.com/issues/NEXT-9067
 	 *
 	 * @param \Shopware\Core\Content\MailTemplate\Service\Event\MailBeforeValidateEvent $event
 	 */
@@ -85,31 +82,41 @@ class CheckoutSubscriber implements EventSubscriberInterface {
 		$templateData = $event->getTemplateData();
 		if (!empty($templateData['order']) && ($templateData['order'] instanceof OrderEntity)) {
 			/**
-			 * @var $order OrderEntity
+			 * @var $order \Shopware\Core\Checkout\Order\OrderEntity
 			 */
-			$order                                     = $templateData['order'];
+			$order                                      = $templateData['order'];
+			$isWalleeEmailSettingEnabled = $this->settingsService->getSettings($order->getSalesChannelId())->isEmailEnabled();
+
+			if (!$isWalleeEmailSettingEnabled) { //setting is disabled
+				return;
+			}
+
+			$orderTransactionLast = $order->getTransactions()->last();
+			if (empty($orderTransactionLast) || empty($orderTransactionLast->getPaymentMethod())) { // no payment method available
+				return;
+			}
+
+			$isWalleePM = WalleePaymentHandler::class == $orderTransactionLast->getPaymentMethod()->getHandlerIdentifier();
+			if (!$isWalleePM) { // not our payment method
+				return;
+			}
+
+			$isOrderTransactionStateOpen = in_array(
+				$orderTransactionLast->getStateMachineState()->getTechnicalName(), [
+				OrderTransactionStates::STATE_OPEN,
+				OrderTransactionStates::STATE_IN_PROGRESS,
+			]);
+
+			if (!$isOrderTransactionStateOpen) { // order payment status is open or in progress
+				return;
+			}
+
 			$isWalleeEmail = isset($templateData[OrderMailService::EMAIL_ORIGIN_IS_WALLEE]);
 
-			if (
-				$this->settingsService->getSettings($order->getSalesChannelId())->isEmailEnabled() &&
-				!$isWalleeEmail &&
-				$order->getTransactions()->last()->getPaymentMethod() &&
-				WalleePaymentHandler::class == $order->getTransactions()->last()->getPaymentMethod()->getHandlerIdentifier()
-			) {
+			if (!$isWalleeEmail) {
 				$this->logger->info('Email disabled for ', ['orderId' => $order->getId()]);
-				$event->getContext()->addExtension('wallee-disable', new ArrayStruct());
 				$event->stopPropagation();
 			}
-		}
-	}
-
-	/**
-	 * @param \Shopware\Core\Content\MailTemplate\Service\Event\MailBeforeSentEvent $event
-	 */
-	public function onMailBeforeSent(MailBeforeSentEvent $event): void
-	{
-		if ($event->getContext()->hasExtension('wallee-disable')) {
-			$event->stopPropagation();
 		}
 	}
 
