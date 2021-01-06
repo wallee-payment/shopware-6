@@ -212,33 +212,38 @@ class PaymentMethodConfigurationService {
 	{
 		$data     = [];
 		$pmdata   = [];
-		$criteria = (new Criteria())
-			->addFilter(new EqualsFilter('spaceId', $this->getSpaceId()));
+		$criteria = (new Criteria())->addFilter(new EqualsFilter('spaceId', $this->getSpaceId()));
 
+		/**
+		 * @var $walleePMConfigurationRepository
+		 */
 		$walleePMConfigurationRepository = $this->container->get(PaymentMethodConfigurationEntityDefinition::ENTITY_NAME . '.repository');
 
 		$paymentMethodConfigurationEntities = $walleePMConfigurationRepository
 			->search($criteria, $context)
 			->getEntities();
 
-		/**
-		 * @var $paymentMethodConfigurationEntity \WalleePayment\Core\Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntity
-		 */
-		foreach ($paymentMethodConfigurationEntities as $paymentMethodConfigurationEntity) {
-			$data[] = [
-				'id'    => $paymentMethodConfigurationEntity->getId(),
-				'state' => CreationEntityState::INACTIVE,
-			];
+		if (!empty($paymentMethodConfigurationEntities)) {
 
-			$pmdata[] = [
-				'id'     => $paymentMethodConfigurationEntity->getId(),
-				'active' => false,
-			];
+			/**
+			 * @var $paymentMethodConfigurationEntity \WalleePayment\Core\Api\PaymentMethodConfiguration\Entity\PaymentMethodConfigurationEntity
+			 */
+			foreach ($paymentMethodConfigurationEntities as $paymentMethodConfigurationEntity) {
+				$data[] = [
+					'id'    => $paymentMethodConfigurationEntity->getId(),
+					'state' => CreationEntityState::INACTIVE,
+				];
+
+				$pmdata[] = [
+					'id'     => $paymentMethodConfigurationEntity->getId(),
+					'active' => false,
+				];
+			}
+
+			$walleePMConfigurationRepository->update($data, $context);
+			$this->paymentMethodRepository->update($pmdata, $context);
 		}
 
-		$walleePMConfigurationRepository->update($data, $context);
-
-		$this->paymentMethodRepository->update($pmdata, $context);
 	}
 
 	/**
