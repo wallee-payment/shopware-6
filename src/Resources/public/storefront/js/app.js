@@ -99,8 +99,9 @@
                     let loader = document.getElementById(WalleeCheckout.loader_id);
                     loader.parentNode.removeChild(loader);
                     WalleeCheckout.activateLoader(false);
-                    const iframe = document.getElementById(WalleeCheckout.payment_method_iframe_id).getElementsByTagName('iframe')[0];
-                    if(iframe.clientHeight < 1){ // iframe has no fields
+                });
+                WalleeCheckout.handler.setHeightChangeCallback((height)=>{
+                    if(height < 1){ // iframe has no fields
                         WalleeCheckout.handler.submit();
                     }
                 });
