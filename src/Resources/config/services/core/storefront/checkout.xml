@@ -7,6 +7,7 @@
 	<services>
 		<!-- Controllers -->
 		<service id="WalleePayment\Core\Storefront\Checkout\Controller\CheckoutController" public="true">
+			<argument type="service" id="Shopware\Core\Checkout\Cart\LineItemFactoryRegistry"/>
 			<argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
 			<argument type="service" id="WalleePayment\Core\Settings\Service\SettingsService"/>
 			<argument type="service" id="WalleePayment\Core\Api\Transaction\Service\TransactionService"/>

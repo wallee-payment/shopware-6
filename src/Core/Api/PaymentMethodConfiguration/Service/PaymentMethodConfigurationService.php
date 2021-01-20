@@ -5,7 +5,6 @@ namespace WalleePayment\Core\Api\PaymentMethodConfiguration\Service;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
-	Checkout\Cart\Rule\CartAmountRule,
 	Content\ImportExport\DataAbstractionLayer\Serializer\Entity\MediaSerializer,
 	Content\ImportExport\DataAbstractionLayer\Serializer\SerializerRegistry,
 	Content\ImportExport\Struct\Config,
@@ -14,7 +13,6 @@ use Shopware\Core\{
 	Framework\DataAbstractionLayer\Search\Criteria,
 	Framework\DataAbstractionLayer\Search\Filter\EqualsFilter,
 	Framework\Plugin\Util\PluginIdProvider,
-	Framework\Rule\Container\AndRule,
 	Framework\Uuid\Uuid};
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wallee\Sdk\{
@@ -41,8 +39,6 @@ use WalleePayment\WalleePayment;
  * @package WalleePayment\Core\Api\PaymentMethodConfiguration\Service
  */
 class PaymentMethodConfigurationService {
-
-	public const WALLEE_AVAILABILITY_RULE_NAME = 'WalleeAvailabilityRule';
 
 	/**
 	 * @var \WalleePayment\Core\Settings\Service\SettingsService
@@ -442,12 +438,9 @@ class PaymentMethodConfigurationService {
 			$context
 		);
 
-		$availabilityRuleId = $this->getAvailabilityRuleId($id, $context);
-
 		$data = [
 			'id'                 => $id,
 			'handlerIdentifier'  => WalleePaymentHandler::class,
-			'availabilityRuleId' => $availabilityRuleId,
 			'pluginId'           => $pluginId,
 			'position'           => $paymentMethodConfiguration->getSortOrder() - 100,
 			'afterOrderEnabled'  => true,
@@ -460,61 +453,6 @@ class PaymentMethodConfigurationService {
 		$data = array_filter($data);
 
 		$this->paymentMethodRepository->upsert([$data], $context);
-	}
-
-	/**
-	 * Get payment method availability rule
-	 *
-	 * @param string                           $id
-	 * @param \Shopware\Core\Framework\Context $context
-	 *
-	 * @return string
-	 */
-	private function getAvailabilityRuleId(string $id, Context $context): string
-	{
-		/**
-		 * @var \Shopware\Core\Checkout\Payment\PaymentMethodEntity $paymentMethod
-		 */
-		$paymentMethod = $this->paymentMethodRepository->search((new Criteria([$id])), $context)->first();
-		if (!(
-			is_null($paymentMethod) ||
-			is_null($paymentMethod->getAvailabilityRuleId())
-		)) {
-			return $paymentMethod->getAvailabilityRuleId();
-		}
-
-		$criteria         = (new Criteria())->addFilter(new EqualsFilter('name', self::WALLEE_AVAILABILITY_RULE_NAME));
-		$availabilityRule = $this->ruleRepository->search($criteria, $context)->first();
-
-		if (!is_null($availabilityRule)) {
-			return $availabilityRule->getId();
-		}
-
-		$ruleId = Uuid::randomHex();
-		$data   = [
-			'id'          => $ruleId,
-			'name'        => self::WALLEE_AVAILABILITY_RULE_NAME,
-			'priority'    => 1,
-			'description' => 'Determines whether or not Wallee payment methods are available for the given rule context.',
-			'conditions'  => [
-				[
-					'type'     => (new AndRule())->getName(),
-					'children' => [
-						[
-							'type'  => (new CartAmountRule())->getName(),
-							'value' => [
-								'operator' => CartAmountRule::OPERATOR_GTE,
-								'amount'   => '0.01',
-							],
-						],
-					],
-				],
-			],
-		];
-
-		$this->ruleRepository->create([$data], $context);
-
-		return $ruleId;
 	}
 
 	/**
