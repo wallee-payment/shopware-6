@@ -132,6 +132,8 @@ class WalleePaymentHandler implements AsynchronousPaymentHandlerInterface {
 				]);
 				$this->logger->info($errorMessage);
 				throw new CustomerCanceledAsyncPaymentException($transaction->getOrder()->getId());
+			}else{
+				$this->orderTransactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $salesChannelContext->getContext());	
 			}
 		}else{
 			$this->orderTransactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $salesChannelContext->getContext());
