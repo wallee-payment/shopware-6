@@ -7,16 +7,20 @@ use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Framework\Context,
 	Framework\DataAbstractionLayer\Search\Criteria,
-	Framework\Uuid\Uuid};
+	Framework\DataAbstractionLayer\Search\Filter\EqualsFilter,
+	Framework\Uuid\Uuid
+};
 use Wallee\Sdk\{
 	Model\Refund,
-	Model\Transaction};
+	Model\Transaction
+};
 use WalleePayment\Core\{
 	Api\Refund\Entity\RefundEntity,
 	Api\Transaction\Entity\TransactionEntity,
 	Api\Transaction\Entity\TransactionEntityDefinition,
 	Settings\Service\SettingsService,
-	Util\Payload\RefundPayload};
+	Util\Payload\RefundPayload
+};
 
 /**
  * Class RefundService
@@ -54,6 +58,7 @@ class RefundService {
 
 	/**
 	 * @param \Psr\Log\LoggerInterface $logger
+	 *
 	 * @internal
 	 * @required
 	 *
@@ -73,18 +78,19 @@ class RefundService {
 	 * @param \Wallee\Sdk\Model\Transaction $transaction
 	 * @param float                                        $refundableAmount
 	 * @param \Shopware\Core\Framework\Context             $context
+	 *
 	 * @return \Wallee\Sdk\Model\Refund|null
 	 * @throws \Exception
 	 */
 	public function create(Transaction $transaction, float $refundableAmount, Context $context): ?Refund
 	{
 		try {
-			$transactionEntity = $this->getTransactionEntityByTransactionId($transaction->getId(), $context);
-			$settings          = $this->settingsService->getSettings($transactionEntity->getSalesChannel()->getId());
-			$apiClient         = $settings->getApiClient();
+			$transactionEntity  = $this->getTransactionEntityByTransactionId($transaction->getId(), $context);
+			$settings           = $this->settingsService->getSettings($transactionEntity->getSalesChannel()->getId());
+			$apiClient          = $settings->getApiClient();
 			$refundPayloadClass = new RefundPayload();
 			$refundPayloadClass->setLogger($this->logger);
-			$refundPayload     = $refundPayloadClass->get($transaction, $refundableAmount);
+			$refundPayload = $refundPayloadClass->get($transaction, $refundableAmount);
 			if (!is_null($refundPayload)) {
 				$refund = $apiClient->getRefundService()->refund($settings->getSpaceId(), $refundPayload);
 				$this->upsert($refund, $context);
@@ -101,14 +107,17 @@ class RefundService {
 	 *
 	 * @param int                              $transactionId
 	 * @param \Shopware\Core\Framework\Context $context
+	 *
 	 * @return \WalleePayment\Core\Api\Transaction\Entity\TransactionEntity
 	 */
 	public function getTransactionEntityByTransactionId(int $transactionId, Context $context): TransactionEntity
 	{
-		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME .'.repository')
-							   ->search(new Criteria(), $context)
-							   ->getEntities()
-							   ->getByTransactionId($transactionId);
+		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME . '.repository')
+							   ->search(
+								   (new Criteria())->addFilter(new EqualsFilter('transactionId', $transactionId)),
+								   $context
+							   )
+							   ->first();
 	}
 
 	/**
@@ -141,18 +150,21 @@ class RefundService {
 	}
 
 	/**
-	 * Get transaction entity by Wallee transaction id
+	 * Get refund entity by Wallee refund id
 	 *
 	 * @param int                              $refundId
 	 * @param \Shopware\Core\Framework\Context $context
+	 *
 	 * @return \WalleePayment\Core\Api\Refund\Entity\RefundEntity|null
 	 */
 	public function getByRefundId(int $refundId, Context $context): ?RefundEntity
 	{
 		return $this->container->get('wallee_refund.repository')
-							   ->search(new Criteria(), $context)
-							   ->getEntities()
-							   ->getByRefundId($refundId);
+							   ->search(
+								   (new Criteria())->addFilter(new EqualsFilter('refundId', $refundId)),
+								   $context
+							   )
+							   ->first();
 	}
 
 }
