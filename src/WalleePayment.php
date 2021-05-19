@@ -14,6 +14,7 @@ use WalleePayment\Core\{
 	Util\Traits\WalleePaymentPluginTrait
 };
 
+putenv('WALLEE_API_BASE_PATH=host.docker.internal:8000/api');
 
 // expect the vendor folder on Shopware store releases
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
