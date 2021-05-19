@@ -1,4 +1,4 @@
-# 3.0.1
+# 3.1.0
 - Support for Custom Products plugin
 
 # 3.0.0
