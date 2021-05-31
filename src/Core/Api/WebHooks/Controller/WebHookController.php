@@ -184,7 +184,7 @@ class WebHookController extends AbstractController {
 	 *
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/webHook/callback/{salesChannelId}",
+	 *     "/api/_action/wallee/webHook/callback/{salesChannelId}",
 	 *     name="api.action.wallee.webhook.update",
 	 *     options={"seo": "false"},
 	 *     defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false},

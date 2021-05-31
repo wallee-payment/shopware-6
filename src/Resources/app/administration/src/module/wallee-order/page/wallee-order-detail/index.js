@@ -222,7 +222,6 @@ Component.register('wallee-order-detail', {
 		downloadPackingSlip() {
 			window.open(
 				this.WalleeTransactionService.getPackingSlip(
-					Shopware.Context.api,
 					this.transaction.metaData.salesChannelId,
 					this.transaction.id
 				),
@@ -233,7 +232,6 @@ Component.register('wallee-order-detail', {
 		downloadInvoice() {
 			window.open(
 				this.WalleeTransactionService.getInvoiceDocument(
-					Shopware.Context.api,
 					this.transaction.metaData.salesChannelId,
 					this.transaction.id
 				),

@@ -70,7 +70,7 @@ class RefundController extends AbstractController {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/refund/create-refund/",
+	 *     "/api/_action/wallee/refund/create-refund/",
 	 *     name="api.action.wallee.refund.create-refund",
 	 *     methods={"POST"}
 	 *     )

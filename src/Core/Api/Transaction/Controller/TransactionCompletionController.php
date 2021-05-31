@@ -63,7 +63,7 @@ class TransactionCompletionController extends AbstractController {
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/transaction-completion/create-transaction-completion/",
+	 *     "/api/_action/wallee/transaction-completion/create-transaction-completion/",
 	 *     name="api.action.wallee.transaction-completion.create-transaction-completion",
 	 *     methods={"POST"}
 	 *     )

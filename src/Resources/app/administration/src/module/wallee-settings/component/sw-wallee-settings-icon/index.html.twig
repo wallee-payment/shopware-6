@@ -1,10 +1,6 @@
-{% block sw_settings_content_card_slot_plugins %}
-	{% parent %}
-	<sw-settings-item :label="$tc('wallee-settings.general.mainMenuItemGeneral')"
-					  :to="{ name: 'wallee.settings.index' }"
-					  :backgroundEnabled="false">
-		<template #icon>
-			<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="text/ecmascript" zoomAndPan="magnify" contentStyleType="text/css" enable-background="new 0 0 1000 1000" version="1.1" xml:space="preserve" width="1000px" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 1000" height="1000px" x="0px" y="0px">
+{% block wallee_settings_icon %}
+    <span class="sw-icon icon--wallee-multicolor sw-icon--multicolor">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="text/ecmascript" zoomAndPan="magnify" contentStyleType="text/css" enable-background="new 0 0 1000 1000" version="1.1" xml:space="preserve" width="1000px" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 1000" height="1000px" x="0px" y="0px">
 <g id="Layer_1">
 </g>
 <g id="Layer_1_copy">
@@ -23,6 +19,5 @@
 </g>
 </svg>
 
-		</template>
-	</sw-settings-item>
+    </span>
 {% endblock %}

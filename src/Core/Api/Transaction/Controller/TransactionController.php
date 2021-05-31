@@ -71,7 +71,7 @@ class TransactionController extends AbstractController {
 	 *
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/transaction/get-transaction-data/",
+	 *     "/api/_action/wallee/transaction/get-transaction-data/",
 	 *     name="api.action.wallee.transaction.get-transaction-data",
 	 *     methods={"POST"}
 	 *     )
@@ -104,7 +104,7 @@ class TransactionController extends AbstractController {
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/transaction/get-invoice-document/{salesChannelId}/{transactionId}",
+	 *     "/api/_action/wallee/transaction/get-invoice-document/{salesChannelId}/{transactionId}",
 	 *     name="api.action.wallee.transaction.get-invoice-document",
 	 *     methods={"GET"},
 	 *     defaults={"csrf_protected"=false, "auth_required"=false}
@@ -140,7 +140,7 @@ class TransactionController extends AbstractController {
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/transaction/get-packing-slip/{salesChannelId}/{transactionId}",
+	 *     "/api/_action/wallee/transaction/get-packing-slip/{salesChannelId}/{transactionId}",
 	 *     name="api.action.wallee.transaction.get-packing-slip",
 	 *     methods={"GET"},
 	 *     defaults={"csrf_protected"=false, "auth_required"=false}

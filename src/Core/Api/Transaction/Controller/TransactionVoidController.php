@@ -62,7 +62,7 @@ class TransactionVoidController extends AbstractController {
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
 	 * @Route(
-	 *     "/api/v{version}/_action/wallee/transaction-void/create-transaction-void/",
+	 *     "/api/_action/wallee/transaction-void/create-transaction-void/",
 	 *     name="api.action.wallee.transaction-void.create-transaction-void",
 	 *     methods={"POST"}
 	 *     )
