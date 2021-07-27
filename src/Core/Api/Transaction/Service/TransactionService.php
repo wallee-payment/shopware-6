@@ -318,6 +318,24 @@ class TransactionService {
 	}
 
 	/**
+	 * Get transaction entity by Wallee order transaction id
+	 *
+	 * @param string                           $transactionId
+	 * @param \Shopware\Core\Framework\Context $context
+	 *
+	 * @return \WalleePayment\Core\Api\Transaction\Entity\TransactionEntity|null
+	 */
+	public function getByOrderTransactionId(string $orderTransactionId, Context $context): ?TransactionEntity
+	{
+		return $this->container->get(TransactionEntityDefinition::ENTITY_NAME . '.repository')
+			->search(
+				(new Criteria())->addFilter(new EqualsFilter('orderTransactionId', $orderTransactionId))
+					->addAssociations(['refunds']), $context
+			)
+			->first();
+	}
+
+	/**
 	 * Get transaction entity by Wallee transaction id
 	 *
 	 * @param int                              $transactionId
