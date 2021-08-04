@@ -102,6 +102,6 @@ trait WalleePaymentPluginTrait {
 	{
 		$connection = $this->container->get(Connection::class);
 		$query = 'ALTER TABLE `order` DROP COLUMN `wallee_lock`;';
-		$connection->executeQuery($query);
+		$connection->executeStatement($query);
 	}
 }
