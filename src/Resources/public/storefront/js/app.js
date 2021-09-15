@@ -87,6 +87,8 @@
         getIframe: function () {
             const paymentPanel = document.getElementById(WalleeCheckout.payment_panel_id);
             const paymentMethodConfigurationId = paymentPanel.dataset.id;
+            const iframeContainer = document.getElementById(WalleeCheckout.payment_method_iframe_id);
+
             if (!WalleeCheckout.handler) { // iframe has not been loaded yet
                 // noinspection JSUnresolvedFunction
                 WalleeCheckout.handler = window.IframeCheckoutHandler(paymentMethodConfigurationId);
@@ -99,15 +101,36 @@
                     let loader = document.getElementById(WalleeCheckout.loader_id);
                     loader.parentNode.removeChild(loader);
                     WalleeCheckout.activateLoader(false);
+                    if (this.measureIframe(iframeContainer) < 1) {
+                        WalleeCheckout.handler.submit();
+                    }
                 });
                 WalleeCheckout.handler.setHeightChangeCallback((height)=>{
                     if(height < 1){ // iframe has no fields
                         WalleeCheckout.handler.submit();
                     }
                 });
-                const iframeContainer = document.getElementById(WalleeCheckout.payment_method_iframe_id);
                 WalleeCheckout.handler.create(iframeContainer);
             }
+        },
+
+        /**
+         * pixel height of first iframe or 0
+         * @param iframeContainer
+         * @return {int}
+         */
+        measureIframe: function (iframeContainer) {
+            if (iframeContainer.tagName.toLowerCase() === 'iframe') {
+                return iframeContainer.offsetHeight;
+            }
+
+            iframeContainer.childNodes.forEach( child => {
+                if (child.tagName.toLowerCase() === 'iframe') {
+                    return child.offsetHeight;
+                }
+            })
+
+            return 0;
         },
 
         /**
