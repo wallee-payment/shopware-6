@@ -63,6 +63,14 @@
             }
         },
 
+        hideLoader: function () {
+            const loader = document.getElementById(WalleeCheckout.loader_id);
+            if(loader.parentNode !== null) {
+                loader.parentNode.removeChild(loader);
+            }
+            WalleeCheckout.activateLoader(false);
+        },
+
         recreateCart: function (e) {
             window.location.href = WalleeCheckout.cart_recreate_url;
             e.preventDefault();
@@ -93,21 +101,19 @@
                 // noinspection JSUnresolvedFunction
                 WalleeCheckout.handler = window.IframeCheckoutHandler(paymentMethodConfigurationId);
                 // noinspection JSUnresolvedFunction
-                WalleeCheckout.handler.setValidationCallback((validationResult) => {
+                WalleeCheckout.handler.setValidationCallback(function(validationResult){
                     WalleeCheckout.hideErrors();
                     WalleeCheckout.validationCallBack(validationResult);
                 });
-                WalleeCheckout.handler.setInitializeCallback(() => {
-                    let loader = document.getElementById(WalleeCheckout.loader_id);
-                    loader.parentNode.removeChild(loader);
-                    WalleeCheckout.activateLoader(false);
-                });
-                WalleeCheckout.handler.setHeightChangeCallback((height)=>{
+                WalleeCheckout.handler.setInitializeCallback(WalleeCheckout.hideLoader());
+                WalleeCheckout.handler.setHeightChangeCallback(function(height){
                     if(height < 1){ // iframe has no fields
                         WalleeCheckout.handler.submit();
                     }
                 });
                 WalleeCheckout.handler.create(iframeContainer);
+                setTimeout(WalleeCheckout.hideLoader(), 10000);
+
             }
         },
 

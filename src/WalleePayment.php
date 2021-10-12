@@ -58,22 +58,4 @@ class WalleePayment extends Plugin {
 		$this->disablePaymentMethods($deactivateContext->getContext());
 	}
 
-
-	/**
-	 * @param \Shopware\Core\Framework\Plugin\Context\UpdateContext $updateContext
-	 *
-	 * @throws \Wallee\Sdk\ApiException
-	 * @throws \Wallee\Sdk\Http\ConnectionException
-	 * @throws \Wallee\Sdk\VersioningException
-	 */
-	public function postUpdate(UpdateContext $updateContext): void
-	{
-		parent::postUpdate($updateContext);
-		/**
-		 * @var \WalleePayment\Core\Api\WebHooks\Service\WebHooksService $webHooksService
-		 */
-		$webHooksService = $this->container->get(WebHooksService::class);
-		$webHooksService->install();
-	}
-
 }
