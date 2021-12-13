@@ -6,6 +6,7 @@ import './component/sw-wallee-credentials';
 import './component/sw-wallee-options';
 import './component/sw-wallee-settings-icon';
 import './component/sw-wallee-storefront-options';
+import './component/sw-wallee-advanced-options';
 
 const {Module} = Shopware;
 

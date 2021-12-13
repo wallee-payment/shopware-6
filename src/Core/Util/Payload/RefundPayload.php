@@ -3,12 +3,12 @@
 namespace WalleePayment\Core\Util\Payload;
 
 use Wallee\Sdk\{
+	Model\LineItem,
 	Model\RefundCreate,
 	Model\RefundType,
 	Model\Transaction,
 	Model\TransactionState};
 use WalleePayment\Core\Util\Exception\InvalidPayloadException;
-use Wallee\Sdk\Model\LineItem;
 
 /**
  * Class RefundPayload
