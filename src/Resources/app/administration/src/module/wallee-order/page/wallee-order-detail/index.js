@@ -2,6 +2,7 @@
 
 import '../../component/wallee-order-action-completion';
 import '../../component/wallee-order-action-refund';
+import '../../component/wallee-order-action-refund-by-amount';
 import '../../component/wallee-order-action-void';
 import template from './index.html.twig';
 import './index.scss';
@@ -35,6 +36,8 @@ Component.register('wallee-order-detail', {
 			orderId: '',
 			currency: '',
 			modalType: '',
+			refundAmount: 0,
+			refundableAmount: 0,
 			currentLineItem: '',
 			refundLineItem: []
 		};
@@ -179,6 +182,8 @@ Component.register('wallee-order-detail', {
 			orderRepository.get(this.orderId, Context.api, orderCriteria).then((order) => {
 				this.order = order;
 				this.isLoading = false;
+				var totalAmountTemp = 0;
+				var refundsAmountTemp = 0;
 				const walleeTransactionId = order.transactions[0].customFields.wallee_transaction_id;
 				this.WalleeTransactionService.getTransactionData(order.salesChannelId, walleeTransactionId)
 					.then((WalleeTransaction) => {
@@ -190,6 +195,7 @@ Component.register('wallee-order-detail', {
 						);
 
 						WalleeTransaction.refunds.forEach((refund) => {
+							refundsAmountTemp = parseFloat(parseFloat(refundsAmountTemp) + parseFloat(refund.amount));
 							refund.amount = Utils.format.currency(
 								refund.amount,
 								this.currency
@@ -215,6 +221,8 @@ Component.register('wallee-order-detail', {
 								this.currency
 							);
 
+							totalAmountTemp = parseFloat(lineItem.unitPriceIncludingTax * lineItem.quantity);
+
 							lineItem.refundableQuantity = parseInt(
 								parseInt(lineItem.quantity) - parseInt(this.refundLineItem[lineItem.uniqueId] || 0)
 							);
@@ -223,6 +231,8 @@ Component.register('wallee-order-detail', {
 						this.lineItems = WalleeTransaction.transactions[0].lineItems;
 						this.transactionData = WalleeTransaction;
 						this.transaction = this.transactionData.transactions[0];
+						this.refundAmount = Number(this.transactionData.transactions[0].amountIncludingTax);
+						this.refundableAmount = parseFloat(parseFloat(totalAmountTemp) - parseFloat(refundsAmountTemp));
 					}).catch((errorResponse) => {
 					try {
 						this.createNotificationError({

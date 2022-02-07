@@ -90,4 +90,32 @@ class RefundController extends AbstractController {
 
 		return new Response(null, Response::HTTP_NO_CONTENT);
 	}
+
+	/**
+	 * @param \Symfony\Component\HttpFoundation\Request $request
+	 * @param \Shopware\Core\Framework\Context          $context
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 * @throws \Wallee\Sdk\ApiException
+	 * @throws \Wallee\Sdk\Http\ConnectionException
+	 * @throws \Wallee\Sdk\VersioningException
+	 * @Route(
+	 *     "/api/_action/wallee/refund/create-refund-by-amount/",
+	 *     name="api.action.wallee.refund.create.refund.by.amount",
+	 *     methods={"POST"}
+	 *     )
+	 */
+	public function createRefundByAmount(Request $request, Context $context): Response
+	{
+		$salesChannelId   = $request->request->get('salesChannelId');
+		$transactionId    = $request->request->get('transactionId');
+		$refundableAmount = $request->request->get('refundableAmount');
+
+		$settings  = $this->settingsService->getSettings($salesChannelId);
+		$apiClient = $settings->getApiClient();
+
+		$transaction = $apiClient->getTransactionService()->read($settings->getSpaceId(), $transactionId);
+		$this->refundService->createRefundByAmount($transaction, $refundableAmount, $context);
+
+		return new Response(null, Response::HTTP_NO_CONTENT);
+	}
 }
