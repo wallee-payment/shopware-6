@@ -21,8 +21,14 @@ class Analytics {
 	 */
 	public static function getDefaultData()
 	{
+		$major_version = 6;
+		$minor_version = 'unknown';
+
 		$shop_version = InstalledVersions::getVersion('shopware/core');
-		[$major_version, $minor_version, $rest] = explode('.', $shop_version, 3);
+		if ($shop_version) {
+			[$major_version, $minor_version, $rest] = explode('.', $shop_version, 3);
+		}
+
 		return [
 			self::SHOP_SYSTEM             => 'shopware',
 			self::SHOP_SYSTEM_VERSION     => $shop_version,
