@@ -12,10 +12,9 @@ use Wallee\Sdk\ApiClient;
  */
 class Analytics {
 
-	public const SHOP_SYSTEM             = 'x-wallee-shop-system';
-	public const SHOP_SYSTEM_VERSION     = 'x-wallee-shop-system-version';
-	public const SHOP_SYSTEM_AND_VERSION = 'x-wallee-shop-system-and-version';
-	public const PLUGIN_FEATURE          = 'x-wallee-shop-plugin-feature';
+	public const SHOP_SYSTEM             = 'x-meta-shop-system';
+	public const SHOP_SYSTEM_VERSION     = 'x-meta-shop-system-version';
+	public const SHOP_SYSTEM_AND_VERSION = 'x-meta-shop-system-and-version';
 
 	/**
 	 * @return array
