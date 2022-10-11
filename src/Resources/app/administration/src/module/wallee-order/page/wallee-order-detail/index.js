@@ -58,7 +58,7 @@ Component.register('wallee-order-detail', {
 		relatedResourceColumns() {
 			return [
 				{
-					property: 'paymentConnectorConfiguration.name',
+					property: 'paymentMethodName',
 					label: this.$tc('wallee-order.transactionHistory.types.payment_method'),
 					rawData: true
 				},
