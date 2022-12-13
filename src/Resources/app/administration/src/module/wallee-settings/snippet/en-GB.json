@@ -1,4 +1,14 @@
 {
+  "sw-privileges": {
+	"permissions": {
+	  "parents": {
+		"wallee": "Wallee plugin"
+	  },
+	  "wallee": {
+		"label": "Wallee permissions"
+	  }
+	}
+  },
   "wallee-settings": {
 	"general": {
 	  "descriptionTextModule": "Wallee settings",

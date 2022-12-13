@@ -1,4 +1,14 @@
 {
+	"sw-privileges": {
+		"permissions": {
+			"parents": {
+				"wallee": "Wallee brancher"
+			},
+			"wallee": {
+				"label": "Wallee autorisations"
+			}
+		}
+	},
 	"wallee-settings": {
 	  "general": {
 		"descriptionTextModule": "Paramètres de Wallee",
