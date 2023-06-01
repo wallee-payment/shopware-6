@@ -48,7 +48,7 @@ use WalleePayment\Core\{
  *
  * @package WalleePayment\Core\Api\WebHooks\Controller
  *
- * @RouteScope(scopes={"api"})
+ * @Route(defaults={"_routeScope"={"api"}})
  */
 class WebHookController extends AbstractController {
 

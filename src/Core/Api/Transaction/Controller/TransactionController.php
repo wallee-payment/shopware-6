@@ -22,7 +22,7 @@ use WalleePayment\{
  *
  * @package WalleePayment\Core\Api\Transaction\Controller
  *
- * @RouteScope(scopes={"api"})
+ * @Route(defaults={"_routeScope"={"api"}})
  */
 class TransactionController extends AbstractController {
 

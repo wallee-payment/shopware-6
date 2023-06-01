@@ -25,7 +25,7 @@ use WalleePayment\Core\{
  * This class handles web calls that are made via the WalleePayment settings page.
  *
  * @package WalleePayment\Core\Api\Config\Controller
- * @RouteScope(scopes={"api"})
+ * @Route(defaults={"_routeScope"={"api"}})
  */
 class ConfigurationController extends AbstractController {
 
