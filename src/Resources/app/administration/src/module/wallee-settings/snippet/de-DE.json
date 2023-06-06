@@ -1,0 +1,94 @@
+{
+  "sw-privileges": {
+	"permissions": {
+	  "parents": {
+		"wallee": "Wallee plugin"
+	  },
+	  "wallee": {
+		"label": "Wallee berechtigungen"
+	  }
+	}
+  },
+  "wallee-settings": {
+	"general": {
+	  "descriptionTextModule": "Wallee-Einstellungen",
+	  "mainMenuItemGeneral": "Wallee"
+	},
+	"header": "Wallee",
+	"messageNotBlank": "Dieser Wert sollte nicht leer sein.",
+	"salesChannelCard": {
+	  "button": {
+		"description": "Klicken Sie auf diese Schaltfläche, um Wallee als Standard-Zahlungsabwickler im ausgewählten Vertriebskanal festzulegen",
+		"label": "Wallee als Standard-Zahlungsabwickler festlegen"
+	  }
+	},
+	"settingForm": {
+	  "credentials": {
+		"applicationKey": {
+		  "label": "Application Key",
+		  "tooltipText": "Der Anwendungsschlüssel wird verwendet, um dieses Plugin mit der API Wallee zu authentifizieren."
+		},
+		"cardTitle": "Anmeldedaten",
+		"spaceId": {
+		  "label": "Space ID",
+		  "tooltipText": "Die Space ID wird verwendet, um dieses Plugin mit der API Wallee zu authentifizieren."
+		},
+		"userId": {
+		  "label": "User ID",
+		  "tooltipText": "Die Benutzer-ID wird verwendet, um dieses Plugin mit der Wallee-API zu authentifizieren."
+		}
+	  },
+	  "messageSaveSuccess": "Wallee-Einstellungen wurden gespeichert.",
+	  "messageOrderDeliveryStateError": "Wallee OrderDeliveryState konnte nicht gespeichert werden.",
+	  "messageOrderDeliveryStateUpdated": "Wallee OrderDeliveryState wurde aktualisiert.",
+	  "messagePaymentMethodConfigurationError": "Wallee PaymentMethodConfiguration konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Anmeldedaten.",
+	  "messagePaymentMethodConfigurationUpdated": "Wallee PaymentMethodConfiguration wurde registriert.",
+	  "messageWebHookError": "Wallee WebHook konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Zugangsdaten.",
+	  "messageWebHookUpdated": "Wallee WebHook wurde aktualisiert.",
+	  "options": {
+		"cardTitle": "Optionen",
+		"emailEnabled": {
+		  "label": "Auftragsbestätigung per E-Mail senden",
+		  "tooltipText": "Wenn diese Einstellung aktiviert ist, erhalten Ihre Kunden eine E-Mail von Ihrem Geschäft, wenn die Zahlung ihrer Bestellung autorisiert ist."
+		},
+		"integration": {
+		  "label": "Integration",
+		  "options": {
+			"iframe": "Iframe",
+			"payment_page": "Payment Page"
+		  },
+		  "tooltipText": "Integration"
+		},
+		"lineItemConsistencyEnabled": {
+		  "label": "Konsistenz der Einzelposten",
+		  "tooltipText": "Wenn diese Option aktiviert ist, stimmen die Summen der Einzelposten in WalleePayment immer mit der Shopware-Bestellsumme überein."
+		},
+		"spaceViewId": {
+		  "label": "Space View ID",
+		  "tooltipText": "Space View ID"
+		}
+	  },
+	  "save": "Speichern",
+	  "storefrontOptions": {
+		"cardTitle": "Storefront-Optionen",
+		"invoiceDownloadEnabled": {
+		  "label": "Rechnung Download",
+		  "tooltipText": "Wenn diese Einstellung aktiviert ist, können Ihre Kunden Auftragsrechnungen von Wallee herunterladen."
+		}
+	  },
+	  "advancedOptions": {
+		"cardTitle": "Erweiterte-Optionen",
+		"webhooksUpdateEnabled": {
+			"label": "Webhooks-Update",
+			"tooltipText": "Wenn diese Einstellung aktiviert ist, wird das Webhook-Update ausgelöst, wenn Sie die Einstellungen speichern"
+		},
+	    "paymentsUpdateEnabled": {
+		  "label": "Payments-Update",
+		  "tooltipText": "Wenn diese Einstellung aktiviert ist, wird die Aktualisierung der Zahlungsmethoden ausgelöst, wenn Sie die Einstellungen speichern"
+	    }
+	  },
+	  "titleError": "Fehler",
+	  "titleSuccess": "Erfolg"
+	}
+  }
+}

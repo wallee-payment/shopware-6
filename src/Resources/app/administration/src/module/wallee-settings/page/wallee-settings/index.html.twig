@@ -1,0 +1,143 @@
+{% block wallee_settings %}
+<sw-page class="wallee-settings">
+
+	{% block wallee_settings_header %}
+	<template #smart-bar-header>
+		<h2>
+			{{ $tc('sw-settings.index.title') }}
+			<sw-icon name="small-arrow-medium-right" small></sw-icon>
+			{{ $tc('wallee-settings.header') }}
+		</h2>
+	</template>
+	{% endblock %}
+
+	{% block wallee_settings_actions %}
+	<template #smart-bar-actions>
+		{% block wallee_settings_actions_save %}
+		<sw-button-process
+				v-model="isSaveSuccessful"
+				class="sw-settings-login-registration__save-action"
+				variant="primary"
+				:isLoading="isLoading"
+				:disabled="isLoading"
+				@click="onSave">
+			{{ $tc('wallee-settings.settingForm.save') }}
+		</sw-button-process>
+		{% endblock %}
+	</template>
+	{% endblock %}
+
+	{% block wallee_settings_content %}
+	<template #content>
+
+		{% block wallee_settings_content_card %}
+		<sw-card-view>
+
+			{% block wallee_settings_content_card_channel_config %}
+			<sw-sales-channel-config v-model="config"
+									 ref="configComponent"
+									 :domain="CONFIG_DOMAIN">
+
+				{% block wallee_settings_content_card_channel_config_sales_channel %}
+				<template #select="{ onInput, selectedSalesChannelId, salesChannel }">
+
+					{% block wallee_settings_content_card_channel_config_sales_channel_card %}
+					<sw-card title="Sales Channel Switch">
+
+						{% block wallee_settings_content_card_channel_config_sales_channel_card_title %}
+						<sw-single-select
+								v-model="selectedSalesChannelId"
+								labelProperty="translated.name"
+								valueProperty="id"
+								:options="salesChannel"
+								:disabled="isShowcase"
+								@change="onInput">
+						</sw-single-select>
+						{% endblock %}
+						{% block wallee_settings_content_card_channel_config_sales_channel_card_footer %}
+						<template #footer>
+
+							{% block wallee_settings_content_card_channel_config_sales_channel_card_footer_container %}
+							<sw-container columns="2fr 1fr" gap="0px 30px">
+
+								{% block wallee_settings_content_card_channel_config_sales_channel_card_footer_container_text %}
+								<p>{{ $tc('wallee-settings.salesChannelCard.button.description') }}</p>
+								{% endblock %}
+
+								{% block wallee_settings_content_card_channel_config_sales_channel_card_footer_container_button %}
+								<sw-button-process
+										v-model="isSetDefaultPaymentSuccessful"
+										:isLoading="isSettingDefaultPaymentMethods"
+										@click="onSetPaymentMethodDefault">
+									{{ $tc('wallee-settings.salesChannelCard.button.label') }}
+								</sw-button-process>
+								{% endblock %}
+							</sw-container>
+							{% endblock %}
+						</template>
+						{% endblock %}
+					</sw-card>
+					{% endblock %}
+				</template>
+				{% endblock %}
+
+				{% block wallee_settings_content_card_channel_config_cards %}
+				<template #content="{ actualConfigData, allConfigs, selectedSalesChannelId }">
+					<div v-if="actualConfigData">
+
+						<sw-wallee-credentials
+								:actualConfigData="actualConfigData"
+								:allConfigs="allConfigs"
+								:selectedSalesChannelId="selectedSalesChannelId"
+								:spaceIdErrorState="spaceIdErrorState"
+								:userIdErrorState="userIdErrorState"
+								:applicationKeyErrorState="applicationKeyErrorState"
+								:spaceIdFilled="spaceIdFilled"
+								:userIdFilled="userIdFilled"
+								:applicationKeyFilled="applicationKeyFilled"
+								:isLoading="isLoading"
+								:isShowcase="isShowcase"
+						></sw-wallee-credentials>
+
+						<sw-wallee-options
+								:actualConfigData="actualConfigData"
+								:allConfigs="allConfigs"
+								:isLoading="isLoading"
+								:selectedSalesChannelId="selectedSalesChannelId"
+						>
+						</sw-wallee-options>
+
+						<sw-wallee-storefront-options
+								:actualConfigData="actualConfigData"
+								:allConfigs="allConfigs"
+								:isLoading="isLoading"
+								:selectedSalesChannelId="selectedSalesChannelId"
+						>
+						</sw-wallee-storefront-options>
+
+						<sw-wallee-advanced-options
+								:actualConfigData="actualConfigData"
+								:allConfigs="allConfigs"
+								:isLoading="isLoading"
+								:selectedSalesChannelId="selectedSalesChannelId"
+						>
+						</sw-wallee-advanced-options>
+
+
+					</div>
+				</template>
+				{% endblock %}
+
+			</sw-sales-channel-config>
+			{% endblock %}
+
+			{% block wallee_settings_content_card_loading %}
+			<sw-loader v-if="isLoading"></sw-loader>
+			{% endblock %}
+		</sw-card-view>
+		{% endblock %}
+
+	</template>
+	{% endblock %}
+</sw-page>
+{% endblock %}
