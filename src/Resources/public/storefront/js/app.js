@@ -29,6 +29,7 @@
         payment_method_handler_status: 'input[name="wallee_payment_handler_validation_status"]',
         payment_form_id: 'confirmOrderForm',
         button_cancel_id: 'walleeOrderCancel',
+        button_home_override: 'walleeHomeLink',
         loader_id: 'walleeLoader',
         checkout_url: null,
         checkout_url_id: 'checkoutUrl',
@@ -45,6 +46,7 @@
             this.cart_recreate_url = document.getElementById(this.cart_recreate_url_id).value;
 
             document.getElementById(this.button_cancel_id).addEventListener('click', this.recreateCart, false);
+            document.getElementById(this.button_home_override).addEventListener('click', this.recreateCart, false);
             document.getElementById(this.payment_form_id).addEventListener('submit', this.submitPayment, false);
 
             WalleeCheckout.getIframe();
