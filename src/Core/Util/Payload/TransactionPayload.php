@@ -176,7 +176,7 @@ class TransactionPayload extends AbstractPayload
 		if (!empty($companyDepartment = $customer->getDefaultBillingAddress()->getDepartment())) {
 			$transactionData['meta_data']['billingCompanyDepartment'] = $companyDepartment;
 		}
-		
+
 		if (!empty($companyDepartment = $customer->getDefaultShippingAddress()->getDepartment())) {
 			$transactionData['meta_data']['shippingCompanyDepartment'] = $companyDepartment;
 		}
@@ -399,7 +399,7 @@ class TransactionPayload extends AbstractPayload
 				$label = $option['group'];
 				$lineItemAttributeCreate = (new LineItemAttributeCreate())
 					->setLabel($this->fixLength($label, 512))
-					->setValue($this->fixLength($option['option'], 512));
+					->setValue($this->fixLength((string)$option['option'], 512));
 
 				if ($lineItemAttributeCreate->valid()) {
 					$key = $this->fixLength('option_' . md5($label), 40);
@@ -544,7 +544,7 @@ class TransactionPayload extends AbstractPayload
 		}
 
 		$organization_name = !empty($organization_name) ? $this->fixLength($organization_name, 100) : null;
-		
+
 		$salesTaxNumber = null;
 		if ($returnSalesTaxNumber) {
 			// salesTaxNumber
@@ -590,7 +590,7 @@ class TransactionPayload extends AbstractPayload
 			'street' => $customerAddressEntity->getStreet() ? $this->fixLength($customerAddressEntity->getStreet(), 300) : null,
 			'birthday' => $birthday
 		];
-		
+
 		if ($returnSalesTaxNumber) {
 			$addressData['sales_tax_number'] = $salesTaxNumber;
 		}
@@ -607,11 +607,11 @@ class TransactionPayload extends AbstractPayload
 			->setPostalState($addressData['postal_state'])
 			->setSalutation($addressData['salutation'])
 			->setStreet($addressData['street']);
-		
+
 		if ($returnSalesTaxNumber) {
 			$addressPayload->setSalesTaxNumber($addressData['sales_tax_number']);
 		}
-		
+
 		if (!empty($addressData['birthday'])) {
 			$addressPayload->setDateOfBirth($addressData['birthday']);
 		}
