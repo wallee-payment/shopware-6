@@ -26,6 +26,7 @@
 
 		<!-- Subscribers -->
 		<service id="WalleePayment\Core\Storefront\Checkout\Subscriber\CheckoutSubscriber">
+			<argument id="WalleePayment\Core\Api\Transaction\Service\TransactionService" type="service"/>
 			<argument id="WalleePayment\Core\Settings\Service\SettingsService" type="service"/>
 			<argument id="WalleePayment\Core\Util\PaymentMethodUtil" type="service"/>
 			<call method="setLogger">

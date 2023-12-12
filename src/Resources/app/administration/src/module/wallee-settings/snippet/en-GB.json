@@ -36,6 +36,15 @@
 		"userId": {
 		  "label": "User ID",
 		  "tooltipText": "The user ID is used to authenticate this plugin with the Wallee API."
+		},
+		"button": {
+		  "description": "Click this button to test the Wallee API",
+		  "label": "API connection test"
+		},
+		"alert": {
+		  "title": "API Test",
+		  "successMessage": "The connection was successfully tested.",
+		  "errorMessage": "The connection was failed. Try it again."
 		}
 	  },
 	  "messageSaveSuccess": "Wallee settings have been saved.",

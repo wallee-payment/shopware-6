@@ -1,3 +1,6 @@
+# 5.0.4
+- Adjust documentation and release command
+
 # 5.0.3
 - Support of PHP 8.2
 - Cast to string the option of product attribute.
