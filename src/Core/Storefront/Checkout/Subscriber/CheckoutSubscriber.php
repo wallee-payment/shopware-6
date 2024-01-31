@@ -6,8 +6,7 @@ use Psr\Log\LoggerInterface;
 use Shopware\Core\{Checkout\Order\Aggregate\OrderTransaction\OrderTransactionCollection,
     Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates,
     Checkout\Order\OrderEntity,
-    Content\MailTemplate\Service\Event\MailBeforeValidateEvent
-};
+    Content\MailTemplate\Service\Event\MailBeforeValidateEvent};
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoadedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -16,8 +15,8 @@ use WalleePayment\Core\{Api\Transaction\Service\OrderMailService,
     Checkout\PaymentHandler\WalleePaymentHandler,
     Settings\Service\SettingsService,
     Settings\Struct\Settings,
-    Util\PaymentMethodUtil
-};
+    Util\PaymentMethodUtil};
+use WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService;
 use WalleePayment\Sdk\{Model\AddressCreate,
     Model\ChargeAttempt,
     Model\CreationEntityState,
@@ -31,8 +30,7 @@ use WalleePayment\Sdk\{Model\AddressCreate,
     Model\TaxCreate,
     Model\Transaction,
     Model\TransactionCreate,
-    Model\TransactionPending
-};
+    Model\TransactionPending};
 
 /**
  * Class CheckoutSubscriber
@@ -46,6 +44,11 @@ class CheckoutSubscriber implements EventSubscriberInterface
      * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @var \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService
+     */
+    private $paymentMethodConfigurationService;
 
     /**
      * @var \WalleePayment\Core\Api\Transaction\Service\TransactionService
@@ -65,12 +68,14 @@ class CheckoutSubscriber implements EventSubscriberInterface
     /**
      * CheckoutSubscriber constructor.
      *
+     * @param \WalleePayment\Core\Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService $paymentMethodConfigurationService
      * @param \WalleePayment\Core\Api\Transaction\Service\TransactionService $transactionService
      * @param \WalleePayment\Core\Settings\Service\SettingsService $settingsService
      * @param \WalleePayment\Core\Util\PaymentMethodUtil $paymentMethodUtil
      */
-    public function __construct(TransactionService $transactionService, SettingsService $settingsService, PaymentMethodUtil $paymentMethodUtil)
+    public function __construct(PaymentMethodConfigurationService $paymentMethodConfigurationService, TransactionService $transactionService, SettingsService $settingsService, PaymentMethodUtil $paymentMethodUtil)
     {
+        $this->paymentMethodConfigurationService = $paymentMethodConfigurationService;
         $this->transactionService = $transactionService;
         $this->settingsService = $settingsService;
         $this->paymentMethodUtil = $paymentMethodUtil;
@@ -170,11 +175,8 @@ class CheckoutSubscriber implements EventSubscriberInterface
             $createdTransactionId = $this->transactionService->createPendingTransaction($event);
             $this->updateTempTransactionIfNeeded($salesChannelContext, $createdTransactionId);
 
-            $arrayOfPossibleMethods = $_SESSION['arrayOfPossibleMethods'] ?? null;
-            if (!$arrayOfPossibleMethods) {
-                $this->getAvailablePaymentMethods($settings, $createdTransactionId);
-            }
-            $this->setPossiblePaymentMethods($event);
+            $this->getAvailablePaymentMethods($settings, $createdTransactionId);
+            $this->setPossiblePaymentMethods($settings->getSpaceId(), $event);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             $this->removeWalleePaymentMethodFromConfirmPage($event);
@@ -204,22 +206,33 @@ class CheckoutSubscriber implements EventSubscriberInterface
         $possiblePaymentMethods = $transactionService->fetchPaymentMethods($settings->getSpaceId(), $createdTransactionId, 'iframe');
         $arrayOfPossibleMethods = [];
         foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
-            foreach ($possiblePaymentMethod->getResolvedTitle() as $resolvedTitle) {
-                $arrayOfPossibleMethods[] = $resolvedTitle;
-            }
+            $arrayOfPossibleMethods[] = $possiblePaymentMethod->getid();
         }
         $_SESSION['arrayOfPossibleMethods'] = $arrayOfPossibleMethods;
     }
 
     /**
+     * @param int $spaceId
      * @param CheckoutConfirmPageLoadedEvent $event
      * @return void
      */
-    private function setPossiblePaymentMethods(CheckoutConfirmPageLoadedEvent $event): void
+    private function setPossiblePaymentMethods(int $spaceId, CheckoutConfirmPageLoadedEvent $event): void
     {
+        $localPaymentMethods = [];
+        $paymentMethodConfigurations = $this->paymentMethodConfigurationService->getAllPaymentMethodConfigurations($spaceId, $event->getSalesChannelContext()->getContext());
+        foreach ($paymentMethodConfigurations as $paymentMethodConfiguration) {
+            $localPaymentMethods[$paymentMethodConfiguration->getId()] = $paymentMethodConfiguration->getPaymentMethodConfigurationId();
+        }
+
         $paymentMethodCollection = $event->getPage()->getPaymentMethods();
         foreach ($paymentMethodCollection as $paymentMethodCollectionItem) {
-            if (!\in_array($paymentMethodCollectionItem->getName(), $_SESSION['arrayOfPossibleMethods'])) {
+            $isWalleePM = WalleePaymentHandler::class == $paymentMethodCollectionItem->getHandlerIdentifier();
+            if (!$isWalleePM) {
+                continue;
+            }
+
+            $paymentMethodConfigurationId = $localPaymentMethods[$paymentMethodCollectionItem->getId()];
+            if (!\in_array($paymentMethodConfigurationId, $_SESSION['arrayOfPossibleMethods'])) {
                 $paymentMethodCollection->remove($paymentMethodCollectionItem->getId());
             }
         }
