@@ -4,6 +4,7 @@ namespace WalleePayment\Core\Settings\Command;
 
 use Symfony\Component\{
 	Console\Command\Command,
+    Console\Attribute\AsCommand,
 	Console\Input\InputInterface,
 	Console\Input\InputOption,
 	Console\Output\OutputInterface};
@@ -16,12 +17,8 @@ use WalleePayment\Core\{
  * @internal
  * @package WalleePayment\Core\Settings\Command
  */
+#[AsCommand(name: 'wallee:settings:install')]
 class SettingsCommand extends Command {
-
-	/**
-	 * @var string
-	 */
-	protected static $defaultName = 'wallee:settings:install';
 
 	/**
 	 * @var \WalleePayment\Core\Settings\Service\SettingsService
@@ -34,7 +31,7 @@ class SettingsCommand extends Command {
 	 */
 	public function __construct(SettingsService $settingsService)
 	{
-		parent::__construct(self::$defaultName);
+		parent::__construct();
 		$this->settingsService = $settingsService;
 	}
 

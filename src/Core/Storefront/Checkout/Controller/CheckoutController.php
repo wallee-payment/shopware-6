@@ -17,7 +17,7 @@ use Shopware\Core\{
 	Framework\DataAbstractionLayer\Search\Criteria,
 	Framework\DataAbstractionLayer\Search\Filter\EqualsFilter,
 	Framework\DataAbstractionLayer\Search\Sorting\FieldSorting,
-	Framework\Routing\Annotation\RouteScope,
+    Framework\Log\Package,
 	Framework\Routing\Exception\MissingRequestParameterException,
 	Framework\Uuid\Uuid,
 	Framework\Uuid\Exception\InvalidUuidException,
@@ -53,8 +53,9 @@ use WalleePayment\Core\{
  *
  * @package WalleePayment\Core\Storefront\Checkout\Controller
  *
- * @Route(defaults={"_routeScope"={"storefront"}})
  */
+#[Package('checkout')]
+#[Route(defaults: ['_routeScope' => ['storefront']])]
 class CheckoutController extends StorefrontController {
 
 	/**
@@ -145,13 +146,13 @@ class CheckoutController extends StorefrontController {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
-	 * @Route(
-	 *     "/wallee/checkout/pay",
-	 *     name="frontend.wallee.checkout.pay",
-	 *     options={"seo": "false"},
-	 *     methods={"GET"}
-	 *     )
 	 */
+    #[Route(
+        path: "/wallee/checkout/pay",
+        name: "frontend.wallee.checkout.pay",
+        options: ["seo" => false],
+        methods: ["GET"],
+    )]
 	public function pay(SalesChannelContext $salesChannelContext, Request $request): Response
 	{
 		$orderId = $request->query->get('orderId');
@@ -340,13 +341,13 @@ class CheckoutController extends StorefrontController {
 	 *
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 *
-	 * @Route(
-	 *     "/wallee/checkout/recreate-cart",
-	 *     name="frontend.wallee.checkout.recreate-cart",
-	 *     options={"seo": "false"},
-	 *     methods={"GET"}
-	 *     )
 	 */
+    #[Route(
+        path: "/wallee/checkout/recreate-cart",
+        name: "frontend.wallee.checkout.recreate-cart",
+        options: ["seo" => false],
+        methods: ["GET"],
+    )]
 	public function recreateCart(Request $request, SalesChannelContext $salesChannelContext)
 	{
 		$orderId = $request->query->get('orderId');
