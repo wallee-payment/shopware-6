@@ -102,10 +102,14 @@ trait WalleePaymentPluginTrait {
 	 * @param \Shopware\Core\Framework\Plugin\Context\UninstallContext $uninstallContext
 	 * @return void
 	 */
-	protected function deleteUserData(UninstallContext $uninstallContext): void
-	{
+	 protected function deleteUserData(UninstallContext $uninstallContext): void
+	 {
 		$connection = $this->container->get(Connection::class);
-		$query = 'ALTER TABLE `order` DROP COLUMN IF EXISTS `wallee_lock`;';
-		$connection->executeStatement($query);
-	}
+		// Check if the column exists before attempting to drop it
+		$columns = $connection->fetchAllAssociative("SHOW COLUMNS FROM `order` LIKE 'wallee_lock'");
+		if (!empty($columns)) {
+			$query = 'ALTER TABLE `order` DROP COLUMN `wallee_lock`;';
+			$connection->executeStatement($query);
+		}
+	 }
 }

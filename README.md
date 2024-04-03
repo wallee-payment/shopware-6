@@ -62,7 +62,7 @@ tail -f var/log/wallee_payment*.log
 
 ## Documentation
 
-[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/5.0.7/docs/en/documentation.html)
+[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/5.0.8/docs/en/documentation.html)
 
 ## License
 
