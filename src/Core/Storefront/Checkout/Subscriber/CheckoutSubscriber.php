@@ -149,13 +149,6 @@ class CheckoutSubscriber implements EventSubscriberInterface
             if (!$isOrderTransactionStateOpen) { // order payment status is open or in progress
                 return;
             }
-
-            $isWalleeEmail = isset($templateData[OrderMailService::EMAIL_ORIGIN_IS_WALLEE]);
-
-            if (!$isWalleeEmail) {
-                $this->logger->info('Email disabled for ', ['orderId' => $order->getId()]);
-                $event->stopPropagation();
-            }
         }
     }
 
