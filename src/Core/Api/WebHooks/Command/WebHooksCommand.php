@@ -5,7 +5,6 @@ namespace WalleePayment\Core\Api\WebHooks\Command;
 
 use Symfony\Component\{
 	Console\Command\Command,
-    Console\Attribute\AsCommand,
 	Console\Input\InputInterface,
 	Console\Output\OutputInterface};
 use WalleePayment\Core\Api\WebHooks\Service\WebHooksService;
@@ -15,8 +14,12 @@ use WalleePayment\Core\Api\WebHooks\Service\WebHooksService;
  *
  * @package WalleePayment\Core\Api\WebHooks\Command
  */
-#[AsCommand(name: 'wallee:webhooks:install')]
 class WebHooksCommand extends Command {
+
+	/**
+	 * @var string
+	 */
+	protected static $defaultName = 'wallee:webhooks:install';
 
 	/**
 	 * @var \WalleePayment\Core\Api\WebHooks\Service\WebHooksService
@@ -30,7 +33,7 @@ class WebHooksCommand extends Command {
 	 */
 	public function __construct(WebHooksService $webHooksService)
 	{
-		parent::__construct();
+		parent::__construct(self::$defaultName);
 		$this->webHooksService = $webHooksService;
 	}
 

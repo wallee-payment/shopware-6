@@ -3,7 +3,7 @@
 namespace WalleePayment\Core\Api\Transaction\Controller;
 
 use Psr\Log\LoggerInterface;
-use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\{
 	HttpFoundation\JsonResponse,
@@ -20,9 +20,8 @@ use WalleePayment\Core\Settings\Service\SettingsService;
  *
  * @package WalleePayment\Core\Api\Transaction\Controller
  *
+ * @Route(defaults={"_routeScope"={"api"}})
  */
-#[Package('sales-channel')]
-#[Route(defaults: ['_routeScope' => ['api']])]
 class TransactionCompletionController extends AbstractController {
 
 	/**
@@ -63,10 +62,12 @@ class TransactionCompletionController extends AbstractController {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
+	 * @Route(
+	 *     "/api/_action/wallee/transaction-completion/create-transaction-completion/",
+	 *     name="api.action.wallee.transaction-completion.create-transaction-completion",
+	 *     methods={"POST"}
+	 *     )
 	 */
-    #[Route("/api/_action/wallee/transaction-completion/create-transaction-completion/",
-    	name: "api.action.wallee.transaction-completion.create-transaction-completion",
-        methods: ['POST'])]
 	public function createTransactionCompletion(Request $request): JsonResponse
 	{
 		$salesChannelId = $request->request->get('salesChannelId');
