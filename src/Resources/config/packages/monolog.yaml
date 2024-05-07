@@ -1,0 +1,2 @@
+monolog:
+    channels: ['wallee_payment']
