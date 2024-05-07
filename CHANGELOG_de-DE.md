@@ -1,8 +1,9 @@
-# 6.1.2
-- Die Weiterleitung zur Bestätigungsseite nach dem Neuladen wurde behoben
+# 5.0.10
+- Unterstützung der Bonitätsprüfung für die Zahlungsmethoden Powerpay und MF Group Invoice
+- Verbesserte Handhabung abgebrochener Transaktionen
 
-# 6.1.1
-- Fixed deprecated OrderNotFoundException
+# 5.0.9
+- Die Weiterleitung zur Bestätigungsseite nach dem Neuladen wurde behoben
 
 # 5.0.8
 - Checkout-Probleme nach dem Deaktivieren/Aktivieren des Plugins behoben
