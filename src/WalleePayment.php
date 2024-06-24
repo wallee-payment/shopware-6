@@ -36,6 +36,16 @@ class WalleePayment extends Plugin {
 
 	use WalleePaymentPluginTrait;
 
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_READ = 'wallee_sales_channel:read';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_UPDATE = 'wallee_sales_channel:update';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_CREATE = 'wallee_sales_channel:create';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_DELETE = 'wallee_sales_channel:delete';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_READ = 'wallee_sales_channel_run:read';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_UPDATE = 'wallee_sales_channel_run:update';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_CREATE = 'wallee_sales_channel_run:create';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_DELETE = 'wallee_sales_channel_run:delete';
+	private const WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_LOG_READ = 'wallee_sales_channel_run_log:read';
+
 	/**
 	 * @param \Shopware\Core\Framework\Plugin\Context\UninstallContext $uninstallContext
 	 * @return void
@@ -68,22 +78,50 @@ class WalleePayment extends Plugin {
 		$this->disablePaymentMethods($deactivateContext->getContext());
 	}
 
-    public function build(ContainerBuilder $container): void
-    {
-        parent::build($container);
+	public function build(ContainerBuilder $container): void
+	{
+		parent::build($container);
 
-        $locator = new FileLocator('Resources/config');
+		$locator = new FileLocator('Resources/config');
 
-        $resolver = new LoaderResolver([
-            new YamlFileLoader($container, $locator),
-            new GlobFileLoader($container, $locator),
-            new DirectoryLoader($container, $locator),
-        ]);
+		$resolver = new LoaderResolver([
+			new YamlFileLoader($container, $locator),
+			new GlobFileLoader($container, $locator),
+			new DirectoryLoader($container, $locator),
+		]);
 
-        $configLoader = new DelegatingLoader($resolver);
+		$configLoader = new DelegatingLoader($resolver);
 
-        $confDir = \rtrim($this->getPath(), '/') . '/Resources/config';
+		$confDir = \rtrim($this->getPath(), '/') . '/Resources/config';
 
-        $configLoader->load($confDir . '/{packages}/*.yaml', 'glob');
-    }
+		$configLoader->load($confDir . '/{packages}/*.yaml', 'glob');
+	}
+
+	public function enrichPrivileges(): array
+	{
+		return [
+			'sales_channel.viewer' => [
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_READ,
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_READ,
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_UPDATE,
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_CREATE,
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_LOG_READ,
+				'sales_channel_payment_method:read',
+			],
+			'sales_channel.editor' => [
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_UPDATE,
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_RUN_DELETE,
+				'payment_method:update',
+			],
+			'sales_channel.creator' => [
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_CREATE,
+				'payment_method:create',
+				'shipping_method:create',
+				'delivery_time:create',
+			],
+			'sales_channel.deleter' => [
+				self::WALLEE_SALES_CHANNEL_PRIVILEGE_DELETE,
+			],
+		];
+	}
 }

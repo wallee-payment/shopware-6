@@ -9,7 +9,7 @@ use Symfony\Component\{
 	HttpFoundation\JsonResponse,
 	HttpFoundation\Request,
 	HttpFoundation\Response,
-	Routing\Annotation\Route};
+	Routing\Attribute\Route};
 use Wallee\Sdk\{
 	Model\TransactionState};
 use WalleePayment\Core\Settings\Service\SettingsService;

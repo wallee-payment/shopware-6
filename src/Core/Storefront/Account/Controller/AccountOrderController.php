@@ -14,7 +14,7 @@ use Symfony\Component\{
 	HttpFoundation\HeaderUtils,
 	HttpFoundation\RequestStack,
 	HttpFoundation\Response,
-	Routing\Annotation\Route,
+	Routing\Attribute\Route,
 	Security\Core\Exception\AccessDeniedException};
 use WalleePayment\Core\{
 	Api\Transaction\Service\TransactionService,

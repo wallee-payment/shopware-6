@@ -10,6 +10,10 @@ Component.register('sw-wallee-advanced-options', {
 
 	name: 'WalleeAdvancedOptions',
 
+	inject: [
+		'acl'
+	],
+
 	mixins: [
 		Mixin.getByName('notification')
 	],
@@ -36,9 +40,6 @@ Component.register('sw-wallee-advanced-options', {
 		return {
 			...constants
 		};
-	},
-
-	computed: {
 	},
 
 	methods: {
