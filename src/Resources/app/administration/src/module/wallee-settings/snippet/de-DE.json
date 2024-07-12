@@ -20,9 +20,7 @@
 	  "button": {
 		"description": "Klicken Sie auf diese Schaltfläche, um Wallee als Standard-Zahlungsabwickler im ausgewählten Vertriebskanal festzulegen",
 		"label": "Wallee als Standard-Zahlungsabwickler festlegen"
-	  },
-	  "messageDefaultPaymentError": "Wallee als Standard-Zahlungsabwickler konnte nicht festgelegt werden..",
-	  "messageDefaultPaymentUpdated": "Wallee als Standard-Zahlungsabwickler wurde festgelegt."
+	  }
 	},
 	"settingForm": {
 	  "credentials": {
