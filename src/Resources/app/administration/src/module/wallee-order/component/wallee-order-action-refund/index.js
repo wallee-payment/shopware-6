@@ -55,7 +55,7 @@ Component.register('wallee-order-action-refund', {
 				this.transactionData.transactions[0].metaData.salesChannelId,
 				this.transactionData.transactions[0].id,
 				this.refundQuantity,
-				this.$parent.currentLineItem
+				this.$parent.$parent.currentLineItem
 			).then(() => {
 				this.createNotificationSuccess({
 					title: this.$tc('wallee-order.refundAction.successTitle'),

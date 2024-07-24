@@ -3,13 +3,22 @@
 Wallee Payment for Shopware 6
 =============================
 
-The Wallee Payment plugin wraps around the Wallee API. This library facilitates your interaction with various services such as transactions. Please not this plugin is for version 6.5.
-For the 6.4 plugin please visit https://github.com/wallee-payment/shopware-6-4
+The Wallee Payment plugin wraps around the Wallee API. This library facilitates your interaction with various services such as transactions.
+Please note that this plugin is for versions 6.5 and 6.6. For the 6.4 plugin please visit [our Shopware 6.4 plugin](https://github.com/wallee-payment/shopware-6-4).
 
 ## Requirements
 
-- PHP 7.4 - 8.2
-- Shopware 6.5.x
+- Shopware 6.5.x or Shopware 6.6.x. See table below.
+- PHP minimum version supported by the each shop version.
+
+## Supported versions
+
+___________________________________________________________________________________
+| Shopware 6 version            | Plugin major version   | Supported until        |
+|-------------------------------|------------------------|------------------------|
+| Shopware 6.6.x                | 6.x                    | Further notice         |
+| Shopware 6.5.x                | 5.x                    | October 2024           |
+-----------------------------------------------------------------------------------
 
 ## Installation
 
@@ -44,7 +53,7 @@ Uncompress the zip file you download, and include the autoloader in your project
 
 ```bash
 # unzip to ShopwareInstallDir/custom/plugins/WalleePayment
-composer require wallee/sdk 4.2.2
+composer require wallee/sdk 4.4.0
 php bin/console plugin:refresh
 php bin/console plugin:install --activate --clearCache WalleePayment
 ```
@@ -62,7 +71,7 @@ tail -f var/log/wallee_payment*.log
 
 ## Documentation
 
-[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/5.0.11/docs/en/documentation.html)
+[Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.6/docs/en/documentation.html)
 
 ## License
 

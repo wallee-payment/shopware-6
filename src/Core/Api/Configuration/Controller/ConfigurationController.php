@@ -5,13 +5,13 @@ namespace WalleePayment\Core\Api\Configuration\Controller;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\{
 	Framework\Context,
-	Framework\Routing\Annotation\RouteScope,};
+    Framework\Log\Package};
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\{
 	HttpFoundation\JsonResponse,
 	HttpFoundation\Request,
 	HttpFoundation\Response,
-	Routing\Annotation\Route};
+	Routing\Attribute\Route};
 use WalleePayment\Core\{
 	Api\OrderDeliveryState\Service\OrderDeliveryStateService,
 	Api\PaymentMethodConfiguration\Service\PaymentMethodConfigurationService,
@@ -26,8 +26,9 @@ use WalleePayment\Core\{
  * This class handles web calls that are made via the WalleePayment settings page.
  *
  * @package WalleePayment\Core\Api\Config\Controller
- * @Route(defaults={"_routeScope"={"api"}})
  */
+#[Package('system-settings')]
+#[Route(defaults: ['_routeScope' => ['api']])]
 class ConfigurationController extends AbstractController {
 
 	/**
@@ -100,12 +101,10 @@ class ConfigurationController extends AbstractController {
 	 * @param \Shopware\Core\Framework\Context          $context
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 *
-	 * @Route(
-	 *     "/api/_action/wallee/configuration/set-wallee-as-sales-channel-payment-default",
-	 *     name="api.action.wallee.configuration.set-wallee-as-sales-channel-payment-default",
-	 *     methods={"POST"}
-	 *     )
 	 */
+    #[Route("/api/_action/wallee/configuration/set-wallee-as-sales-channel-payment-default",
+    	name: "api.action.wallee.configuration.set-wallee-as-sales-channel-payment-default",
+        methods: ['POST'])]
 	public function setWalleeAsSalesChannelPaymentDefault(Request $request, Context $context): JsonResponse
 	{
 		$salesChannelId = $request->request->get('salesChannelId');
@@ -124,12 +123,10 @@ class ConfigurationController extends AbstractController {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
-	 * @Route(
-	 *     "/api/_action/wallee/configuration/register-web-hooks",
-	 *     name="api.action.wallee.configuration.register-web-hooks",
-	 *     methods={"POST"}
-	 *   )
 	 */
+    #[Route("/api/_action/wallee/configuration/register-web-hooks",
+        name: "api.action.wallee.configuration.register-web-hooks",
+        methods: ['POST'])]
 	public function registerWebHooks(Request $request): JsonResponse
 	{
 		$settings = $this->settingsService->getSettings();
@@ -157,12 +154,10 @@ class ConfigurationController extends AbstractController {
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @throws \Wallee\Sdk\VersioningException
 	 *
-	 * @Route(
-	 *     "/api/_action/wallee/configuration/check-api-connection",
-	 *     name="api.action.wallee.configuration.check-api-connection",
-	 *     methods={"POST"}
-	 *   )
 	 */
+    #[Route("/api/_action/wallee/configuration/check-api-connection",
+        name: "api.action.wallee.configuration.check-api-connection",
+        methods: ['POST'])]
 	public function checkApiConnection(Request $request): JsonResponse
 	{
 		$spaceId = (int)$request->request->getInt('spaceId');
@@ -191,12 +186,10 @@ class ConfigurationController extends AbstractController {
 	 * @param \Shopware\Core\Framework\Context          $context
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 *
-	 * @Route(
-	 *     "/api/_action/wallee/configuration/synchronize-payment-method-configuration",
-	 *     name="api.action.wallee.configuration.synchronize-payment-method-configuration",
-	 *     methods={"POST"}
-	 *   )
 	 */
+    #[Route("/api/_action/wallee/configuration/synchronize-payment-method-configuration",
+        name: "api.action.wallee.configuration.synchronize-payment-method-configuration",
+        methods: ['POST'])]
 	public function synchronizePaymentMethodConfiguration(Request $request, Context $context): JsonResponse
 	{
 		$settings = $this->settingsService->getSettings();
@@ -228,12 +221,10 @@ class ConfigurationController extends AbstractController {
 	 * @param \Shopware\Core\Framework\Context $context
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 *
-	 * @Route(
-	 *     "/api/_action/wallee/configuration/install-order-delivery-states",
-	 *     name="api.action.wallee.configuration.install-order-delivery-states",
-	 *     methods={"POST"}
-	 *   )
 	 */
+    #[Route("/api/_action/wallee/configuration/install-order-delivery-states",
+        name: "api.action.wallee.configuration.install-order-delivery-states",
+        methods: ['POST'])]
 	public function installOrderDeliveryStates(Context $context): JsonResponse
 	{
 		/**
