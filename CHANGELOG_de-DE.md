@@ -1,3 +1,16 @@
+# 5.0.12
+- Meldung behoben, dass Liefer- und Rechnungsadresse immer identisch waren
+
+# 5.0.11
+- Plugin-Upgrade-Abhängigkeitsfehler behoben
+
+# 5.0.10
+- Unterstützung der Bonitätsprüfung für die Zahlungsmethoden Powerpay und MF Group Invoice
+- Verbesserte Handhabung abgebrochener Transaktionen
+
+# 5.0.9
+- Die Weiterleitung zur Bestätigungsseite nach dem Neuladen wurde behoben
+
 # 5.0.8
 - Checkout-Probleme nach dem Deaktivieren/Aktivieren des Plugins behoben
 - Plugin-Deinstallationsaktion behoben

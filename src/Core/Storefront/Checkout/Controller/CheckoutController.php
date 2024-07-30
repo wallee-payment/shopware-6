@@ -176,7 +176,6 @@ class CheckoutController extends StorefrontController {
 				TransactionState::AUTHORIZED,
 				TransactionState::COMPLETED,
 				TransactionState::FULFILL,
-				TransactionState::PROCESSING,
 			]
 		)) {
 			return $this->redirect($transaction->getSuccessUrl(), Response::HTTP_MOVED_PERMANENTLY);

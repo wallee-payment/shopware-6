@@ -1,3 +1,16 @@
+# 5.0.12
+- Fixed messaging which showed that shipping and billing address were always the same
+
+# 5.0.11
+- Fixed plugin upgrade dependency error
+
+# 5.0.10
+- Solvency check support for Powerpay and MF Group Invoice payment methods
+- Improved handling of abandoned transactions
+
+# 5.0.9
+- Fixed redirect to confirmation page after reload
+
 # 5.0.8
 - Fixed checkout issues after deactivating/activating plugin
 - Fixed plugin uninstall action
