@@ -15,8 +15,8 @@ Module.register('wallee-order', {
 	name: 'Wallee',
 	title: 'wallee-order.general.title',
 	description: 'wallee-order.general.descriptionTextModule',
-	version: '1.0.0',
-	targetVersion: '1.0.0',
+	version: '1.0.1',
+	targetVersion: '1.0.1',
 	color: '#2b52ff',
 
 	snippets: {
