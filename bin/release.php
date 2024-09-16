@@ -27,15 +27,15 @@ $composerJsonData['require']['shopware/storefront'] = SHOPWARE_VERSIONS;
 
 switch ($release_env) {
 	case RELEASE_GIT_ENV:
-		exec('composer require wallee/sdk 4.4.0 -d /var/www/html');
-		$composerJsonData['require']['wallee/sdk'] = '4.4.0';
+		exec('composer require wallee/sdk 4.6.0 -d /var/www/html');
+		$composerJsonData['require']['wallee/sdk'] = '4.6.0';
 		break;
 	case RELEASE_SW_ENV:
-		exec('composer require wallee/sdk 4.4.0 -d /var/www/html/custom/plugins/WalleePayment');
+		exec('composer require wallee/sdk 4.6.0 -d /var/www/html/custom/plugins/WalleePayment');
 		break;
 }
 
-$composerJsonData['version'] = '6.1.7';
+$composerJsonData['version'] = '6.1.8';
 
 $logger->info('Adding shopware/core and shopware/storefront to the composer.json.');
 file_put_contents(
