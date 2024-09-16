@@ -6,7 +6,6 @@ namespace WalleePayment\Core\Api\PaymentMethodConfiguration\Command;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\{
 	Console\Command\Command,
-    Console\Attribute\AsCommand,
 	Console\Input\InputInterface,
 	Console\Output\OutputInterface};
 use WalleePayment\Core\Util\PaymentMethodUtil;
@@ -16,8 +15,12 @@ use WalleePayment\Core\Util\PaymentMethodUtil;
  *
  * @package WalleePayment\Core\Api\PaymentMethodConfiguration\Command
  */
-#[AsCommand(name: 'wallee:payment-method:default')]
 class PaymentMethodDefaultCommand extends Command {
+
+	/**
+	 * @var string
+	 */
+	protected static $defaultName = 'wallee:payment-method:default';
 
 	/**
 	 * @var \WalleePayment\Core\Util\PaymentMethodUtil
@@ -31,7 +34,7 @@ class PaymentMethodDefaultCommand extends Command {
 	 */
 	public function __construct(PaymentMethodUtil $paymentMethodUtil)
 	{
-		parent::__construct();
+		parent::__construct(self::$defaultName);
 		$this->paymentMethodUtil = $paymentMethodUtil;
 	}
 

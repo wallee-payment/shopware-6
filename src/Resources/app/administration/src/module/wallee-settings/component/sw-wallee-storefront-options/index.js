@@ -38,6 +38,9 @@ Component.register('sw-wallee-storefront-options', {
 		};
 	},
 
+	computed: {
+	},
+
 	methods: {
 		checkTextFieldInheritance(value) {
 			if (typeof value !== 'string') {
