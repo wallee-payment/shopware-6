@@ -319,7 +319,10 @@ abstract class WebHookStrategyBase implements WebHookStrategyInterface {
 		try {
 			$order = $this->getOrderEntity($orderId, $context);
 			/** @var OrderDeliveryEntity $orderDelivery */
-			$orderDelivery = $order->getDeliveries()->last();
+			$orderDelivery = $order->getDeliveries()?->last();
+			if (null === $orderDelivery) {
+				return;
+			}
 			if ($orderDelivery->getStateMachineState()?->getTechnicalName() !== OrderDeliveryStateHandler::STATE_HOLD){
 				return;
 			}
