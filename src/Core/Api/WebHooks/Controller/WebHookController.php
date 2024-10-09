@@ -642,13 +642,19 @@ class WebHookController extends AbstractController {
 			 * @var OrderDeliveryStateHandler $orderDeliveryStateHandler
 			 */
 			$order = $this->getOrderEntity($orderId, $context);
+
 			/**
-			 * @var OrderDeliveryEntity $orderDelivery
-			 */
-			$orderDelivery = $order->getDeliveries()->last();
-			if ($orderDelivery->getStateMachineState()?->getTechnicalName() !== OrderDeliveryStateHandler::STATE_HOLD){
+			* @var OrderDeliveryEntity $orderDelivery
+			*/
+			$orderDelivery = $order->getDeliveries()?->last();
+			if (null === $orderDelivery) {
 				return;
 			}
+
+			if ($orderDelivery->getStateMachineState()?->getTechnicalName() !== OrderDeliveryStateHandler::STATE_HOLD) {
+				return;
+			}
+
 			$orderDeliveryStateHandler = $this->container->get(OrderDeliveryStateHandler::class);
 			$orderDeliveryStateHandler->unhold($orderDelivery->getId(), $context);
 		} catch (\Exception $exception) {
@@ -684,7 +690,11 @@ class WebHookController extends AbstractController {
 			/**
 			 * @var OrderDeliveryEntity $orderDelivery
 			 */
-			$orderDelivery = $order->getDeliveries()->last();
+			$orderDelivery = $order->getDeliveries()?->last();
+			if (null === $orderDelivery) {
+				return;
+			}
+
 			if ($orderDelivery->getStateMachineState()?->getTechnicalName() !== OrderDeliveryStateHandler::STATE_HOLD){
 				return;
 			}
