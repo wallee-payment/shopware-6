@@ -1,63 +1,63 @@
 {
-    "authors": [
-        {
-            "homepage": "https://www.wallee.com",
-            "name": "wallee"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "WalleePayment\\": "src/"
-        }
-    },
-    "description": "Wallee integration for Shopware 6",
-    "extra": {
-        "copyright": "(c) by wallee",
-        "description": {
-            "de-DE": "Wallee integration f\u00fcr Shopware 6",
-            "en-GB": "Wallee integration for Shopware 6",
-            "fr-FR": "Int\u00e9gration de Wallee pour Shopware 6",
-            "it-IT": "Integrazione Wallee per Shopware"
-        },
-        "label": {
-            "de-DE": "Wallee Produkte f\u00fcr Shopware 6",
-            "en-GB": "Wallee Products for Shopware 6",
-            "fr-FR": "Wallee Produits for Shopware 6",
-            "it-IT": "Wallee Prodotti per Shopware 6"
-        },
-        "manufacturerLink": {
-            "de-DE": "https://www.wallee.com",
-            "en-GB": "https://www.wallee.com",
-            "fr-FR": "https://www.wallee.com",
-            "it-IT": "https://www.wallee.com"
-        },
-        "supportLink": {
-            "de-DE": "https://app-wallee.com/space/select?target=/support",
-            "en-GB": "https://app-wallee.com/space/select?target=/support",
-            "fr-FR": "https://app-wallee.com/space/select?target=/support",
-            "it-IT": "https://app-wallee.com/space/select?target=/support"
-        },
-        "shopware-plugin-class": "WalleePayment\\WalleePayment"
-    },
-    "homepage": "https://www.wallee.com/",
-    "keywords": [
-        "wallee",
-        "payment",
-        "php",
-        "shopware"
-    ],
-    "license": "Apache-2.0",
-    "name": "wallee/shopware-6",
-    "require": {
-        "ext-curl": "*",
-        "ext-json": "*",
-        "ext-mbstring": "*",
-        "php": ">=8.2",
-        "shopware/core": "6.6.*",
-        "shopware/administration": "~6.6.0",
-        "shopware/storefront": "6.6.*",
-        "wallee/sdk": "4.6.0"
-    },
-    "type": "shopware-platform-plugin",
-    "version": "6.1.9"
+  "authors": [
+	{
+	  "homepage": "https://www.wallee.com",
+	  "name": "wallee"
+	}
+  ],
+  "autoload": {
+	"psr-4": {
+	  "WalleePayment\\": "src/"
+	}
+  },
+  "description": "Wallee integration for Shopware 6",
+  "extra": {
+	"copyright": "(c) by wallee",
+	"description": {
+	  "de-DE": "Wallee integration für Shopware 6",
+	  "en-GB": "Wallee integration for Shopware 6",
+	  "fr-FR": "Intégration de Wallee pour Shopware 6",
+      "it-IT": "Integrazione Wallee per Shopware"
+	},
+	"label": {
+	  "de-DE": "Wallee Produkte für Shopware 6",
+	  "en-GB": "Wallee Products for Shopware 6",
+	  "fr-FR": "Wallee Produits for Shopware 6",
+	  "it-IT": "Wallee Prodotti per Shopware 6"
+	},
+	"manufacturerLink": {
+	  "de-DE": "https://www.wallee.com",
+	  "en-GB": "https://www.wallee.com",
+	  "fr-FR": "https://www.wallee.com",
+      "it-IT": "https://www.wallee.com"
+	},
+	"supportLink": {
+	  "de-DE": "https://app-wallee.com/space/select?target=/support",
+	  "en-GB": "https://app-wallee.com/space/select?target=/support",
+	  "fr-FR": "https://app-wallee.com/space/select?target=/support",
+      "it-IT": "https://app-wallee.com/space/select?target=/support"
+	},
+	"shopware-plugin-class": "WalleePayment\\WalleePayment"
+  },
+  "homepage": "https://www.wallee.com/",
+  "keywords": [
+	"wallee",
+	"payment",
+	"php",
+	"shopware"
+  ],
+  "license": "Apache-2.0",
+  "name": "wallee/shopware-6",
+  "require": {
+	"ext-curl": "*",
+	"ext-json": "*",
+	"ext-mbstring": "*",
+	"php": ">=8.2",
+    "shopware/core": "~6.6.0",
+    "shopware/administration": "~6.6.0",
+    "shopware/storefront":"~6.6.0",
+    "wallee/sdk": "^4.0.0"
+  },
+  "type": "shopware-platform-plugin",
+  "version": "6.1.10"
 }
