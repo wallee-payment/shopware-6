@@ -4,7 +4,7 @@ import template from './index.html.twig';
 
 const {Component, Mixin, Filter, Utils} = Shopware;
 
-Component.register('wallee-order-action-refund', {
+Component.register('wallee-order-action-refund-partial', {
 	template,
 
 	inject: ['WalleeRefundService'],
@@ -27,9 +27,9 @@ Component.register('wallee-order-action-refund', {
 
 	data() {
 		return {
-			refundQuantity: 0,
 			isLoading: true,
-			currentLineItem: '',
+			currency: this.transactionData.transactions[0].currency,
+			refundAmount: 0.00,
 		};
 	},
 
@@ -44,18 +44,19 @@ Component.register('wallee-order-action-refund', {
 	},
 
 	methods: {
-		createdComponent() {
-			this.isLoading = false;
-			this.refundQuantity = 1;
-		},
+        createdComponent() {
+            this.isLoading = false;
+            this.currency = this.transactionData.transactions[0].currency;
+            this.refundAmount = this.$parent.$parent.itemRefundableAmount;
+        },
 
-		refund() {
+		createPartialRefund(itemUniqueId) {
 			this.isLoading = true;
-			this.WalleeRefundService.createRefund(
+			this.WalleeRefundService.createPartialRefund(
 				this.transactionData.transactions[0].metaData.salesChannelId,
 				this.transactionData.transactions[0].id,
-				this.refundQuantity,
-				this.$parent.$parent.currentLineItem
+				this.refundAmount,
+				itemUniqueId
 			).then(() => {
 				this.createNotificationSuccess({
 					title: this.$tc('wallee-order.refundAction.successTitle'),
@@ -88,5 +89,13 @@ Component.register('wallee-order-action-refund', {
 				}
 			});
 		}
-	}
+	},
+
+    watch: {
+        refundAmount(newValue) {
+            if (newValue !== null) {
+                this.refundAmount = Math.round(newValue * 100) / 100;
+            }
+        }
+    }
 });
