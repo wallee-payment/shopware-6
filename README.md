@@ -44,7 +44,7 @@ Uncompress the zip file you download, and include the autoloader in your project
 
 ```bash
 # unzip to ShopwareInstallDir/custom/plugins/WalleePayment
-composer require wallee/sdk 4.4.0
+composer require wallee/sdk 4.5.0
 php bin/console plugin:refresh
 php bin/console plugin:install --activate --clearCache WalleePayment
 ```
