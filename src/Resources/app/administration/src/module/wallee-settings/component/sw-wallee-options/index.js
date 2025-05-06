@@ -42,12 +42,12 @@ Component.register('sw-wallee-options', {
 		integrationOptions() {
 			return [
 				{
-					id: 'iframe',
-					name: this.$tc('wallee-settings.settingForm.options.integration.options.iframe')
-				},
-				{
 					id: 'payment_page',
 					name: this.$tc('wallee-settings.settingForm.options.integration.options.payment_page')
+				},
+				{
+					id: 'iframe',
+					name: this.$tc('wallee-settings.settingForm.options.integration.options.iframe')
 				}
 			];
 		}
