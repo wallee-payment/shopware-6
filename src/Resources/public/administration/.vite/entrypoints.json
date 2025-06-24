@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/walleepayment/administration/",
+  "entryPoints": {
+    "wallee-payment": {
+      "css": [
+        "/bundles/walleepayment/administration/assets/wallee-payment-CdzaYqfE.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/walleepayment/administration/assets/wallee-payment-Cc6JQW6u.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}
