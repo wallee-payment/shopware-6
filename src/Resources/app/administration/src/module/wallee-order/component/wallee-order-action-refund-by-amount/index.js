@@ -70,18 +70,9 @@ Component.register('wallee-order-action-refund-by-amount', {
 				});
 			}).catch((errorResponse) => {
 				try {
-					var errorTitle;
-					var errorMessage;
-					if (errorResponse.response.data == 'refundExceedsAmount') {
-						errorTitle = this.$tc('wallee-order.refundAction.refundExceedsTotalError.title');
-						errorMessage = this.$tc('wallee-order.refundAction.refundExceedsTotalError.messageRefundAmountExceedsAvailableBalance');
-					} else {
-						errorTitle = errorResponse.response.data.errors[0].title;
-						errorMessage = errorResponse.response.data.errors[0].detail;
-					}
 					this.createNotificationError({
-						title: errorTitle,
-						message: errorMessage,
+						title: errorResponse.response.data.errors[0].title,
+						message: errorResponse.response.data.errors[0].detail,
 						autoClose: false
 					});
 				} catch (e) {
