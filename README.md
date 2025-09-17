@@ -3,21 +3,20 @@
 wallee Integration for Shopware 6
 =============================
 
-## **Overview**  
-The wallee Payment Plugin integrates modern payment processing into Shopware 6, offering features like iFrame-based payments, refunds, captures, and PCI compliance. It supports seamless integration with the [wallee Portal](https://app-wallee.com/) for managing transactions and payment methods.
+The wallee plugin wraps around the wallee API. This library facilitates your interaction with various services such as transactions.
+Please note that this plugin is for versions 6.5, 6.6 or 6.7. For the 6.4 plugin please visit [our Shopware 6.4 plugin](https://github.com/wallee-payment/shopware-6-4).
 
 ## Requirements
 
-- **Shopware Version:** 6.5.x or 6.6.x (see [compatibility table](#compatibility)).  
-- **PHP:** Minimum version as required by your Shopware installation (e.g., 7.4+).  
-- **wallee Account:** Obtain `Space ID`, `User ID`, and `API Key` from the [wallee Dashboard](https://app-wallee.com/).
+- Shopware 6.7.x, 6.6.x or 6.5.x. See table below.
+- PHP minimum version supported by the each shop version.
 
 ## Documentation
 
-- For English documentation click [here](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.15/docs/en/documentation.html)
-- Für die deutsche Dokumentation klicken Sie [hier](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.15/docs/de/documentation.html)
-- Pour la documentation Française, cliquez [ici](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.15/docs/fr/documentation.html)
-- Per la documentazione in tedesco, clicca [qui](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.15/docs/it/documentation.html)
+- For English documentation click [here](@WalleeDocPath(/docs/en/documentation.html))
+- Für die deutsche Dokumentation klicken Sie [hier](@WalleeDocPath(/docs/de/documentation.html))
+- Pour la documentation Française, cliquez [ici](@WalleeDocPath(/docs/fr/documentation.html))
+- Per la documentazione in tedesco, clicca [qui](@WalleeDocPath(/docs/it/documentation.html))
 
 ## Installation
 
@@ -62,12 +61,15 @@ Configure supported methods (e.g., credit cards, Apple Pay) via the [wallee Port
 
 **Automatic Updates**: Payment methods sync dynamically via the Wallee API.
 
+**Subscriptions**: Make recurring payments with Subscriptions (Shopware Commercial) and Wallee.
+
 ## Compatibiliity
 
 ___________________________________________________________________________________
 | Shopware 6 version            | Plugin major version   | Supported until        |
 |-------------------------------|------------------------|------------------------|
-| Shopware 6.6.x                | 6.x                    | Further notice         |
+| Shopware 6.7.x                | 7.x                    | Further notice         |
+| Shopware 6.6.x                | 6.x                    | December 2025          |
 | Shopware 6.5.x                | 5.x                    | October 2024           |
 -----------------------------------------------------------------------------------
 
