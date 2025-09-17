@@ -14,10 +14,10 @@ The wallee Payment Plugin integrates modern payment processing into Shopware 6, 
 
 ## Documentation
 
-- For English documentation click [here](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.14/docs/en/documentation.html)
-- Für die deutsche Dokumentation klicken Sie [hier](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.14/docs/de/documentation.html)
-- Pour la documentation Française, cliquez [ici](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.14/docs/fr/documentation.html)
-- Per la documentazione in tedesco, clicca [qui](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/6.1.14/docs/it/documentation.html)
+- For English documentation click [here](@WalleeDocPath(/docs/en/documentation.html))
+- Für die deutsche Dokumentation klicken Sie [hier](@WalleeDocPath(/docs/de/documentation.html))
+- Pour la documentation Française, cliquez [ici](@WalleeDocPath(/docs/fr/documentation.html))
+- Per la documentazione in tedesco, clicca [qui](@WalleeDocPath(/docs/it/documentation.html))
 
 ## Installation
 
