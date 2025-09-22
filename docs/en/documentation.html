@@ -39,7 +39,7 @@
 	</div>
 	<div class="chapter-body">
 					<div class="paragraph">
-<p>The wallee Payment Plugin integrates modern payment processing into Shopware 6, offering features like iFrame-based payments, refunds, captures, and PCI compliance. It supports seamless integration with the wallee Portal for managing transactions and payment methods.</p>
+<p>The wallee Plugin integrates modern payment processing into Shopware 6, offering features like iFrame-based payments, refunds, captures, and PCI compliance. It supports seamless integration with the wallee Portal for managing transactions and payment methods.</p>
 </div><div class="paragraph">
 <p>Important: Please note that only Major (e.g. 6.x.0.0) and Minor (e.g. 6.0.x.0) update will be tested for compatibility within a 2 weeks after release.</p>
 </div>					</div>
@@ -127,7 +127,7 @@
 </div>
 </li>
 <li>
-<p>Activate the wallee Payment plugin from the Plugin Manager.</p>
+<p>Activate the wallee plugin from the Plugin Manager.</p>
 </li>
 </ol>
 </div>					</div>
@@ -148,7 +148,7 @@
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">composer require wallee/shopware-6
 php bin/console plugin:refresh
-php bin/console plugin:install --activate --clearCache WalleePayment</code></pre>
+php bin/console plugin:install --activate --clearCache Wallee</code></pre>
 </div>
 </div>
 </li>
@@ -173,7 +173,7 @@ php bin/console plugin:install --activate --clearCache WalleePayment</code></pre
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">php bin/console plugin:refresh
-php bin/console plugin:install --activate --clearCache WalleePayment</code></pre>
+php bin/console plugin:install --activate --clearCache Wallee</code></pre>
 </div>
 </div>
 </li>
@@ -360,7 +360,7 @@ Please note that the connectors seems duplicated but it because one is for Physi
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Navigate to <strong>Shopware Admin</strong> → <strong>Settings</strong> → <strong>Extensions</strong> → <strong>wallee Payment</strong> and click on <strong>Save</strong>.</p>
+<p>Navigate to <strong>Shopware Admin</strong> → <strong>Settings</strong> → <strong>Extensions</strong> → <strong>wallee</strong> and click on <strong>Save</strong>.</p>
 </li>
 <li>
 <p>Enter your <code>Space ID</code>, <code>User ID</code>, and <code>API Key</code></p>
@@ -782,7 +782,7 @@ tokenization, it can be used for subscriptions. The recurring payment is fully m
 <p>Logs: Check payment logs with:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">tail -f var/log/whitelabelname_payment*.log</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">tail -f var/log/whitelabelname*.log</code></pre>
 </div>
 </div>
 </li>

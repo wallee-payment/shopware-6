@@ -28,24 +28,24 @@ Please note that this plugin is for versions 6.5, 6.6 or 6.7. For the 6.4 plugin
 Copy
 composer require wallee/shopware-6
 php bin/console plugin:refresh
-php bin/console plugin:install --activate --clearCache WalleePayment
+php bin/console plugin:install --activate --clearCache Wallee
 ```
 
 ### Manual Installation
 
 1. Download the latest [Release](../../releases)
-2. Extract the ZIP to custom/plugins/WalleePayment.
+2. Extract the ZIP to custom/plugins/Wallee.
 
 ```bash
 Copy
 bin/console plugin:refresh  
-bin/console plugin:install --activate --clearCache WalleePayment  
+bin/console plugin:install --activate --clearCache Wallee
 ```
 
 ## Configuration
 ### API Credentials
 
-1. Navigate to Shopware Admin > Settings > Wallee Payment.
+1. Navigate to Shopware Admin > Settings > Wallee.
 2. Enter your Space ID, User ID, and API Key (obtained from the [wallee Portal](https://app-wallee.com/)).
 
 ### Payment Methods
@@ -78,7 +78,7 @@ ________________________________________________________________________________
 
 ```bash
 Copy
-tail -f var/log/wallee_payment*.log
+tail -f var/log/wallee*.log
 ```
 ### Common Issues:
 
