@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/wallee-payment-D5eZ-4U1.js",
+    "name": "wallee-payment",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/wallee-payment-CdzaYqfE.css"
+    ]
+  }
+}
