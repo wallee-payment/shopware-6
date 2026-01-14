@@ -13,10 +13,10 @@ Please note that this plugin is for versions 6.5, 6.6 or 6.7. For the 6.4 plugin
 
 ## Documentation
 
-- For English documentation click [here](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.1.6/docs/en/documentation.html)
-- Für die deutsche Dokumentation klicken Sie [hier](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.1.6/docs/de/documentation.html)
-- Pour la documentation Française, cliquez [ici](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.1.6/docs/fr/documentation.html)
-- Per la documentazione in tedesco, clicca [qui](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.1.6/docs/it/documentation.html)
+- For English documentation click [here](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.2.0/docs/en/documentation.html)
+- Für die deutsche Dokumentation klicken Sie [hier](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.2.0/docs/de/documentation.html)
+- Pour la documentation Française, cliquez [ici](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.2.0/docs/fr/documentation.html)
+- Per la documentazione in tedesco, clicca [qui](https://plugin-documentation.wallee.com/wallee-payment/shopware-6/7.2.0/docs/it/documentation.html)
 
 ## Installation
 
@@ -40,6 +40,22 @@ php bin/console plugin:install --activate --clearCache Wallee
 Copy
 bin/console plugin:refresh  
 bin/console plugin:install --activate --clearCache Wallee
+```
+
+## Update
+
+### Via Administration
+1. Go to Shopware Admin > Extensions > My extensions.
+2. Find WalleePayment.
+3. Click Update.
+
+### Via CLI
+1. Deploy the new plugin files (replace the folder in custom/plugins/WalleePayment or upload/install a new ZIP).
+2. Run:
+```bash
+bin/console plugin:refresh
+bin/console plugin:update --clearCache WalleePayment
+bin/console cache:clear
 ```
 
 ## Configuration
@@ -78,7 +94,7 @@ ________________________________________________________________________________
 | Shopware 6 version            | Plugin major version   | Supported until        |
 |-------------------------------|------------------------|------------------------|
 | Shopware 6.7.x                | 7.x                    | Further notice         |
-| Shopware 6.6.x                | 6.x                    | December 2025          |
+| Shopware 6.6.x                | 6.x                    | March 2026             |
 | Shopware 6.5.x                | 5.x                    | October 2024           |
 -----------------------------------------------------------------------------------
 
