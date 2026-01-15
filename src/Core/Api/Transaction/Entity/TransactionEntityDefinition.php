@@ -32,7 +32,7 @@ use WalleePayment\Core\Api\Refund\Entity\RefundEntityDefinition;
  */
 class TransactionEntityDefinition extends EntityDefinition {
 
-	public const ENTITY_NAME = 'wallee_transaction';
+	public const ENTITY_NAME = 'wallee_transaction_data';
 
 	/**
 	 * @return string

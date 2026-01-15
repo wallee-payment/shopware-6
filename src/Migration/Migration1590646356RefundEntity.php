@@ -42,7 +42,7 @@ class Migration1590646356RefundEntity extends MigrationStep {
               PRIMARY KEY (`id`),
               UNIQUE KEY `refund_id_UNIQUE` (`refund_id`),
               KEY `fk.wle_refund.transaction_id` (`transaction_id`),
-              CONSTRAINT `fk.wle_refund.transaction_id` FOREIGN KEY (`transaction_id`) REFERENCES `wallee_transaction` (`transaction_id`) ON DELETE CASCADE
+              CONSTRAINT `fk.wle_refund.transaction_id` FOREIGN KEY (`transaction_id`) REFERENCES `wallee_transaction_tmp` (`transaction_id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');
 	}
