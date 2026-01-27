@@ -1,0 +1,20 @@
+{% sw_extends '@Storefront/storefront/component/payment/payment-method.html.twig' %}
+
+{% block component_payment_method_description %}
+    {{ parent() }}
+
+    {# Check if the payment method handler belongs to WhitelabelMachineName #}
+    {% if payment.handlerIdentifier == 'WalleePayment\\Core\\Checkout\\PaymentHandler\\WalleePaymentHandler' %}
+        {# Retrieve the runtime-attached configuration from the extension #}
+        {% set wleConfig = payment.extensions.wallee_config %}
+
+        {% if wleConfig %}
+            {% set paymentMethodConfigurationId = wleConfig.paymentMethodConfigurationId %}
+
+            {# Include the iframe container template #}
+            {% sw_include '@WalleePayment/storefront/component/payment/wallee_iframe.html.twig' with {
+                'paymentMethodConfigurationId': paymentMethodConfigurationId
+            } %}
+        {% endif %}
+    {% endif %}
+{% endblock %}
