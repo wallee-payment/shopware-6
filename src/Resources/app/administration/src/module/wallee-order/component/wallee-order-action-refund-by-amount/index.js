@@ -79,6 +79,9 @@ Component.register('wallee-order-action-refund-by-amount', {
 						case 'refundExceedsAmount':
 							errorMessage = this.$tc('wallee-order.refundAction.refundCreateError.messageRefundAmountExceedsAvailableBalance');
 						break;
+						case 'methodDoesNotSupportRefund':
+							errorMessage = this.$tc('wallee-order.refundAction.refundCreateError.messagePaymentMethodDoesNotSupportRefund');
+						break;
 						default:
 							errorMessage = errorResponse.response.data.errors[0].detail;
 					}
