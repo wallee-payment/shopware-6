@@ -41,6 +41,7 @@ Component.register('wallee-settings', {
 
             isSetDefaultPaymentSuccessful: false,
             isSettingDefaultPaymentMethods: false,
+            selectedSalesChannelId: null,
 
             configIntegrationDefaultValue: 'payment_page',
             configEmailEnabledDefaultValue: true,
@@ -70,7 +71,7 @@ Component.register('wallee-settings', {
         config: {
             handler(configData) {
                 const defaultConfig = (this.$refs.configComponent.allConfigs || {}).null || {};
-                const salesChannelId = this.$refs.configComponent.selectedSalesChannelId;
+                const salesChannelId = this.selectedSalesChannelId;
                 if (salesChannelId === null) {
 
                     this.applicationKeyFilled = !!this.config[this.CONFIG_APPLICATION_KEY];
@@ -137,6 +138,16 @@ Component.register('wallee-settings', {
                 this.$emit('update:value', configData);
             },
             deep: true
+        },
+
+        selectedSalesChannelId: {
+            handler(newValue) {
+                this.$nextTick(() => {
+                    if (this.$refs.channelSwitch) {
+                        this.$refs.channelSwitch.salesChannelId = newValue || '';
+                    }
+                });
+            }
         }
     },
 
@@ -198,7 +209,7 @@ Component.register('wallee-settings', {
         },
 
         async validateHeadlessIntegration() {
-            const salesChannelId = this.$refs.configComponent.selectedSalesChannelId;
+            const salesChannelId = this.selectedSalesChannelId;
             const currentIntegration = this.config[this.CONFIG_INTEGRATION];
 
             // If integration is 'payment_page', it is always valid.
@@ -270,7 +281,7 @@ Component.register('wallee-settings', {
                 return false;
             }
 
-            this.WalleeConfigurationService.registerWebHooks(this.$refs.configComponent.selectedSalesChannelId)
+            this.WalleeConfigurationService.registerWebHooks(this.selectedSalesChannelId)
                 .then(() => {
                     this.createNotificationSuccess({
                         title: this.$tc('wallee-settings.settingForm.titleSuccess'),
@@ -291,7 +302,7 @@ Component.register('wallee-settings', {
                 return false;
             }
 
-            this.WalleeConfigurationService.synchronizePaymentMethodConfiguration(this.$refs.configComponent.selectedSalesChannelId)
+            this.WalleeConfigurationService.synchronizePaymentMethodConfiguration(this.selectedSalesChannelId)
                 .then(() => {
                     this.createNotificationSuccess({
                         title: this.$tc('wallee-settings.settingForm.titleSuccess'),
@@ -328,7 +339,7 @@ Component.register('wallee-settings', {
         onSetPaymentMethodDefault() {
             this.isSettingDefaultPaymentMethods = true;
             this.WalleeConfigurationService.setWalleeAsSalesChannelPaymentDefault(
-                this.$refs.configComponent.selectedSalesChannelId
+                this.selectedSalesChannelId
             ).then(() => {
                 this.isSettingDefaultPaymentMethods = false;
                 this.isSetDefaultPaymentSuccessful = true;
@@ -385,6 +396,13 @@ Component.register('wallee-settings', {
                     });
                     this.isTesting = false;
                 });
+        },
+
+        onSalesChannelSwitchChange(id, onInput) {
+            this.selectedSalesChannelId = id;
+            if (typeof onInput === 'function') {
+                onInput(id);
+            }
         }
     }
 });
