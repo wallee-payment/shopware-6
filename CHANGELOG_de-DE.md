@@ -1,3 +1,6 @@
+# 6.2.2
+- Problem behoben, bei dem die Verfügbarkeitsregeln für Zahlungsmethoden ignoriert wurden
+
 # 6.2.1
 - Problem mit mehreren Rabattcodes behoben
 

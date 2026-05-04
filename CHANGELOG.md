@@ -1,3 +1,6 @@
+# 6.2.2
+- Fixed issue with payment method availability rules being ignored
+
 # 6.2.1
 - Fixed issue with multiple discount codes
 
