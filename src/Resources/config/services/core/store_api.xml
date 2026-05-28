@@ -18,6 +18,7 @@
 
 		<service id="WalleePayment\Core\Checkout\StoreApi\Route\CartRecoveryRoute">
 			<argument type="service" id="WalleePayment\Core\Checkout\Service\CartRecoveryService"/>
+			<argument type="service" id="WalleePayment\Core\Api\Transaction\Service\TransactionService"/>
 		</service>
 
 		<service id="WalleePayment\Core\Checkout\StoreApi\Route\InvoiceRoute">
