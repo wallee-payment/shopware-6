@@ -1,5 +1,6 @@
-# 6.2.2
-- Problem behoben, bei dem die Verfügbarkeitsregeln für Zahlungsmethoden ignoriert wurden
+# 6.2.3
+- Problem mit dem Leeren des Warenkorbs bei Änderung der Zahlungsmethode behoben
+- Problem mit fehlenden Zahlungsmethoden behoben
 
 # 6.2.1
 - Problem mit mehreren Rabattcodes behoben
