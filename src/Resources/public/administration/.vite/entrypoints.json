@@ -3,11 +3,11 @@
   "entryPoints": {
     "wallee-payment": {
       "css": [
-        "/bundles/walleepayment/administration/assets/wallee-payment-CdzaYqfE.css"
+        "/bundles/walleepayment/administration/css/wallee-payment.css"
       ],
       "dynamic": [],
       "js": [
-        "/bundles/walleepayment/administration/assets/wallee-payment-BxhGNSPp.js"
+        "/bundles/walleepayment/administration/js/wallee-payment.js"
       ],
       "legacy": false,
       "preload": []
@@ -16,10 +16,10 @@
   "legacy": false,
   "metadatas": {},
   "version": [
-    "7.1.0",
+    "7.0.4",
     7,
-    1,
-    0
+    0,
+    4
   ],
   "viteServer": null
 }
