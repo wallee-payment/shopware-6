@@ -80,6 +80,10 @@
           "label": "Line item consistency",
           "tooltipText": "If this option is enabled line item totals in WalleePayment will always match Shopware order total"
         },
+        "productCustomFieldsAllowList": {
+          "label": "Product custom fields (allow list)",
+          "tooltipText": "Select the product custom fields that are transmitted as line item attributes to WalleePayment. No selection = no custom fields are transmitted."
+        },
         "spaceViewId": {
           "label": "Space View ID",
           "tooltipText": "Space View ID"

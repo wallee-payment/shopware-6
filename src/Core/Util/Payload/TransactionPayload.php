@@ -17,6 +17,7 @@ use Shopware\Core\{
     System\SalesChannel\SalesChannelContext
 };
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Api\Context\SalesChannelApiSource;
 
@@ -42,8 +43,9 @@ use WalleePayment\Core\{
     Settings\Struct\Settings,
     Util\Exception\InvalidPayloadException,
     Util\LocaleCodeProvider,
+    Util\Payload\CustomFields\ProductCustomFieldAttributeService,
     Util\Payload\CustomProducts\CustomProductsLineItems,
-    Util\Payload\CustomProducts\CustomProductsLineItemTypes
+    Util\Payload\CustomProducts\CustomProductsLineItemTypes,
 };
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
@@ -109,6 +111,16 @@ class TransactionPayload extends AbstractPayload
      */
     protected $transactionId;
 
+    protected $productCustomFieldAttributes = null;
+
+    /**
+     * Technical custom field name => resolved label. Lazily loaded and cached
+     * for the lifetime of this payload instance.
+     *
+     * @var array<string, string>|null
+     */
+    protected ?array $productCustomFieldLabels = null;
+
     public function setTransactionId(int $transactionId): void
     {
         $this->transactionId = $transactionId;
@@ -147,12 +159,24 @@ class TransactionPayload extends AbstractPayload
         $criteria = new Criteria([$orderId]);
         $criteria
             ->addAssociation('lineItems')
+            ->addAssociation('lineItems.product')
             ->addAssociation('orderCustomer')
             ->addAssociation('transactions')
             ->addAssociation('currency')
         ;
 
         $this->order = $this->container->get('order.repository')->search($criteria, $this->salesChannelContext->getContext())->getEntities()->first();
+
+        if (!empty($this->settings->getProductCustomFieldsAllowList())) {
+            $this->productCustomFieldAttributes = new ProductCustomFieldAttributeService(
+                $this->container,
+                $this->logger,
+                $this->salesChannelContext,
+                $this->localeCodeProvider,
+                $this->order,
+                $this->settings->getProductCustomFieldsAllowList()
+            );
+        }
     }
 
     /**
@@ -416,13 +440,21 @@ class TransactionPayload extends AbstractPayload
 
         $roundedAmount = self::round($amount);
 
+        // Truncate the name part only, so the discount id keeps the unique id unique.
+        $uniqueIdPrefix = 'coupon-';
+        $uniqueIdSuffix = '-' . $discountId;
+        $uniqueId = $uniqueIdPrefix . $this->fixLength(
+                $discountSkuName,
+                max(1, PayloadLimits::LINE_ITEM_UNIQUE_ID - mb_strlen($uniqueIdPrefix . $uniqueIdSuffix, 'UTF-8'))
+            ) . $uniqueIdSuffix;
+
         $lineItem->setAmountIncludingTax($roundedAmount)
-            ->setName($discountTitle)
+            ->setName($this->fixLength($discountTitle, PayloadLimits::LINE_ITEM_NAME))
             ->setQuantity(1)
             ->setShippingRequired(false)
-            ->setSku($discountSkuName, 200)
+            ->setSku($this->fixLength($discountSkuName, PayloadLimits::LINE_ITEM_SKU))
             ->setType(LineItemType::DISCOUNT)
-            ->setUniqueId('coupon-' . $discountSkuName . '-' . $discountId);
+            ->setUniqueId($uniqueId);
 
         $taxRate = new TaxCreate([
             'title' => 'Discount Tax: ' . $rate,
@@ -530,7 +562,7 @@ class TransactionPayload extends AbstractPayload
         if (!empty($payLoad) && !empty($payLoad['productNumber'])) {
             $sku = $payLoad['productNumber'];
         }
-        $sku = $this->fixLength($sku, 200);
+        $sku = $this->fixLength($sku, PayloadLimits::LINE_ITEM_SKU);
 
         $amount = $shopLineItem->getTotalPrice() ? self::round($shopLineItem->getTotalPrice()) : 0;
 
@@ -542,8 +574,8 @@ class TransactionPayload extends AbstractPayload
         $roundedAmount = self::round($amount);
 
         $lineItem = (new LineItemCreate())
-            ->setName($this->fixLength($shopLineItem->getLabel(), 150))
-            ->setUniqueId($uniqueId)
+            ->setName($this->fixLength($shopLineItem->getLabel(), PayloadLimits::LINE_ITEM_NAME))
+            ->setUniqueId($this->fixLength($uniqueId, PayloadLimits::LINE_ITEM_UNIQUE_ID))
             ->setSku($sku)
             ->setQuantity($shopLineItem->getQuantity() ?? 1)
             ->setAmountIncludingTax($roundedAmount);
@@ -566,6 +598,14 @@ class TransactionPayload extends AbstractPayload
             );
         }
 
+        if (!empty($this->settings->getProductCustomFieldsAllowList()) && $this->productCustomFieldAttributes !== null) {
+            $customFieldAttributes = [];
+            $this->productCustomFieldAttributes->setLogger($this->logger);
+            $customFieldAttributes = $this->productCustomFieldAttributes->buildProductCustomFieldAttributes()[$shopLineItem->getId()] ?? [];
+            if (!empty($customFieldAttributes)) {
+                $productAttributes = array_merge($productAttributes ?? [], $customFieldAttributes);
+            }
+        }
 
         if (!empty($productAttributes)) {
             $lineItem->setAttributes($productAttributes);
@@ -599,7 +639,7 @@ class TransactionPayload extends AbstractPayload
 
             $tax = (new TaxCreate())
                 ->setRate($calculatedTax->getTaxRate())
-                ->setTitle($this->fixLength($title . ' : ' . $calculatedTax->getTaxRate(), 40));
+                ->setTitle($this->fixLength($title . ' : ' . $calculatedTax->getTaxRate(), PayloadLimits::TAX_TITLE));
 
             if (!$tax->valid()) {
                 $this->logger->critical('Tax payload invalid:', $tax->listInvalidProperties());
@@ -627,8 +667,8 @@ class TransactionPayload extends AbstractPayload
 
                 $label = $option['group'];
                 $lineItemAttributeCreate = (new LineItemAttributeCreate())
-                    ->setLabel($this->fixLength($label, 512))
-                    ->setValue($this->fixLength((string)$option['option'], 512));
+                    ->setLabel($this->fixLength($label, PayloadLimits::LINE_ITEM_ATTRIBUTE_LABEL))
+                    ->setValue($this->fixLength((string)$option['option'], PayloadLimits::LINE_ITEM_ATTRIBUTE_VALUE));
 
                 if ($lineItemAttributeCreate->valid()) {
                     $key = $this->fixLength('option_' . md5($label), 40);
@@ -668,12 +708,12 @@ class TransactionPayload extends AbstractPayload
 
                 $lineItem = (new LineItemCreate())
                     ->setAmountIncludingTax($roundedAmount)
-                    ->setName($this->fixLength($shippingName . ' ' . $this->translator->trans('wallee.payload.shipping.lineItem'), 150))
+                    ->setName($this->fixLength($shippingName . ' ' . $this->translator->trans('wallee.payload.shipping.lineItem'), PayloadLimits::LINE_ITEM_NAME))
                     ->setQuantity($this->order->getShippingCosts()->getQuantity() ?? 1)
-                    ->setSku($this->fixLength($shippingName . '-Shipping', 200))
+                    ->setSku($this->fixLength($shippingName . '-Shipping', PayloadLimits::LINE_ITEM_SKU))
                     /** @noinspection PhpParamsInspection */
                     ->setType(LineItemType::SHIPPING)
-                    ->setUniqueId($this->fixLength($shippingName . '-Shipping', 200));
+                    ->setUniqueId($this->fixLength($shippingName . '-Shipping', PayloadLimits::LINE_ITEM_UNIQUE_ID));
 
                 if ($this->order->getTaxStatus() !== 'tax-free') {
                     $lineItem->setTaxes($taxes);
@@ -719,11 +759,11 @@ class TransactionPayload extends AbstractPayload
                     $name = $taxRate . '%-' . $shippingName;
                     $lineItem = (new LineItemCreate())
                         ->setAmountIncludingTax($roundedAmount)
-                        ->setName($this->fixLength($name . ' ' . $this->translator->trans('wallee.payload.shipping.lineItem'), 150))
+                        ->setName($this->fixLength($name . ' ' . $this->translator->trans('wallee.payload.shipping.lineItem'), PayloadLimits::LINE_ITEM_NAME))
                         ->setQuantity($this->order->getShippingCosts()->getQuantity() ?? 1)
-                        ->setSku($this->fixLength($name . '-Shipping', 200))
+                        ->setSku($this->fixLength($name . '-Shipping', PayloadLimits::LINE_ITEM_SKU))
                         ->setType($isFirst ? LineItemType::SHIPPING : LineItemType::FEE) // First item as SHIPPING, rest as FEE
-                        ->setUniqueId($this->fixLength($name . '-Shipping', 200));
+                        ->setUniqueId($this->fixLength($name . '-Shipping', PayloadLimits::LINE_ITEM_UNIQUE_ID));
 
                     if ($this->order->getTaxStatus() !== 'tax-free') {
                         $lineItem->setTaxes([$tax]);
@@ -783,7 +823,7 @@ class TransactionPayload extends AbstractPayload
                 throw new \Exception($error);
             } else {
                 $lineItem = (new LineItemCreate())
-                    ->setName($this->translator->trans('wallee.payload.adjustmentLineItem'))
+                    ->setName($this->fixLength($this->translator->trans('wallee.payload.adjustmentLineItem'), PayloadLimits::LINE_ITEM_NAME))
                     ->setUniqueId('Adjustment-Line-Item')
                     ->setSku('Adjustment-Line-Item')
                     ->setQuantity(1);
@@ -878,6 +918,31 @@ class TransactionPayload extends AbstractPayload
             $postalState = $customerAddressEntity?->getCountryState()?->getShortCode() ?? '';
         }
 
+        // Street incl. additional address lines - the SDK AddressCreate has no dedicated
+        // field for them, so they are appended to the (multi-line capable) street field.
+        $streetLines = array_filter(
+            [
+                $customerAddressEntity->getStreet(),
+                $customerAddressEntity->getAdditionalAddressLine1(),
+                $customerAddressEntity->getAdditionalAddressLine2(),
+            ],
+            static fn ($line) => $line !== null && trim((string) $line) !== ''
+        );
+        $combinedStreet = implode("\n", $streetLines);
+
+        // AddressCreate::setStreet() rejects values over 300 characters, so the
+        // combined value is always cut to fit. Log it so a truncation (e.g. a very
+        // long additional address line) doesn't silently drop data unnoticed.
+        if (mb_strlen($combinedStreet, 'UTF-8') > 300) {
+            $this->logger->warning(sprintf(
+                'Street plus additional address lines exceed 300 characters (%d) and will be truncated for customer address %s.',
+                mb_strlen($combinedStreet, 'UTF-8'),
+                $customerAddressEntity->getId()
+            ));
+        }
+
+        $street = !empty($streetLines) ? $this->fixLength($combinedStreet, 300) : null;
+
         $addressData = [
             'city' => $customerAddressEntity->getCity() ? $this->fixLength($customerAddressEntity->getCity(), 100) : null,
             'country' => $customerAddressEntity->getCountry() ? $customerAddressEntity->getCountry()->getIso() : null,
@@ -889,7 +954,7 @@ class TransactionPayload extends AbstractPayload
             'postcode' => $customerAddressEntity->getZipcode() ? $this->fixLength($customerAddressEntity->getZipcode(), 40) : null,
             'postal_state' => $postalState,
             'salutation' => $salutation,
-            'street' => $customerAddressEntity->getStreet() ? $this->fixLength($customerAddressEntity->getStreet(), 300) : null,
+            'street' => $street,
             'birthday' => $birthday
         ];
 

@@ -78,6 +78,10 @@
 		  "label": "Konsistenz der Einzelposten",
 		  "tooltipText": "Wenn diese Option aktiviert ist, stimmen die Summen der Einzelposten in WalleePayment immer mit der Shopware-Bestellsumme überein."
 		},
+		"productCustomFieldsAllowList": {
+		  "label": "Produkt-Zusatzfelder (Allow-List)",
+		  "tooltipText": "Wählen Sie die Produkt-Zusatzfelder aus, die als Positions-Attribute an WalleePayment übertragen werden. Keine Auswahl = es werden keine Zusatzfelder übertragen."
+		},
 		"spaceViewId": {
 		  "label": "Space View ID",
 		  "tooltipText": "Space View ID"

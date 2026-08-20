@@ -29,6 +29,7 @@ class SettingsService {
 	public const CONFIG_STOREFRONT_WEBHOOKS_UPDATE_ENABLED  = 'storefrontWebhooksUpdateEnabled';
 	public const CONFIG_STOREFRONT_PAYMENTS_UPDATE_ENABLED  = 'storefrontPaymentsUpdateEnabled';
 	public const CONFIG_KEEP_FAILED_PAYMENTS_ORDER_OPEN     = 'keepFailedPaymentsOrderOpen';
+	public const CONFIG_PRODUCT_CUSTOM_FIELDS_ALLOW_LIST    = 'productCustomFieldsAllowList';
 
 	/**
 	 * List of config properties whose values allowed to be empty without triggering a warning in logger.
@@ -53,7 +54,10 @@ class SettingsService {
 		// Advanced Options
 		self::CONFIG_STOREFRONT_WEBHOOKS_UPDATE_ENABLED,
 		self::CONFIG_STOREFRONT_PAYMENTS_UPDATE_ENABLED,
-		self::CONFIG_KEEP_FAILED_PAYMENTS_ORDER_OPEN
+		self::CONFIG_KEEP_FAILED_PAYMENTS_ORDER_OPEN,
+
+		// Line Items
+		self::CONFIG_PRODUCT_CUSTOM_FIELDS_ALLOW_LIST
 	];
 
 	/**
@@ -68,6 +72,13 @@ class SettingsService {
 
 	/**
 	 * SettingsService constructor.
+	 *
+	 * NOTE: settings are deliberately NOT memoized here. Settings::getApiClient() lazily builds and
+	 * holds an SDK ApiClient, and callers mutate that client persistently - see
+	 * TransactionService::createRecurringTransaction(), which stamps a subscription header onto it
+	 * via Analytics::addHeaders(). Sharing one struct across a request would leak that header into
+	 * every later API call. Building a fresh struct is cheap; the SDK opens a new connection per
+	 * call regardless, so there is nothing to reuse.
 	 *
 	 * @param \Shopware\Core\System\SystemConfig\SystemConfigService $systemConfigService
 	 */

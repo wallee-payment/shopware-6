@@ -40,6 +40,7 @@ use Symfony\Component\{
 };
 use Wallee\Sdk\Model\TransactionState;
 use WalleePayment\Core\Api\Transaction\Service\TransactionService as PluginTransactionService;
+use WalleePayment\Core\Util\Payload\PayloadLimits;
 use WalleePayment\Core\Util\Payload\TransactionPayload;
 
 
@@ -145,10 +146,8 @@ class WalleePaymentHandler extends AbstractPaymentHandler
 
             if ($orderTransaction->getOrder()->getAmountTotal() > 0) {
                 $sessionKey = $this->pluginTransactionService->getSessionTransactionKey($salesChannelContext);
-                $transactionId = $sessionKey !== null ? $request->getSession()->get($sessionKey) : null;
-                if ($transactionId === null) {
-                    $this->pluginTransactionService->createPendingTransaction($salesChannelContext);
-                }
+                // create() resolves the pending transaction itself and creates one when it is
+                // missing or no longer usable, so no separate pre-flight call is needed here.
                 $redirectUrl = $this->pluginTransactionService->create($transaction, $salesChannelContext);
                 $orderId = $orderTransaction->getOrder()->getId();
                 $request->getSession()->set('walleeActivePaymentOrderId', $orderId);
@@ -493,8 +492,8 @@ class WalleePaymentHandler extends AbstractPaymentHandler
         $attributesCreate = [];
         foreach ($attributes as $id => $attribute) {
             $attributeCreate = new \Wallee\Sdk\Model\LineItemAttributeCreate();
-            $attributeCreate->setLabel($attribute->getLabel());
-            $attributeCreate->setValue($attribute->getValue());
+            $attributeCreate->setLabel(PayloadLimits::fixLength($attribute->getLabel(), PayloadLimits::LINE_ITEM_ATTRIBUTE_LABEL));
+            $attributeCreate->setValue(PayloadLimits::fixLength($attribute->getValue(), PayloadLimits::LINE_ITEM_ATTRIBUTE_VALUE));
             $attributesCreate[$id] = $attributeCreate;
         }
         if (count($attributesCreate) > 0) {
@@ -502,17 +501,17 @@ class WalleePaymentHandler extends AbstractPaymentHandler
         }
 
         $lineItemCreate->setDiscountIncludingTax($lineItem->getDiscountIncludingTax());
-        $lineItemCreate->setName($lineItem->getName());
+        $lineItemCreate->setName(PayloadLimits::fixLength($lineItem->getName(), PayloadLimits::LINE_ITEM_NAME));
         $lineItemCreate->setQuantity($lineItem->getQuantity());
         $lineItemCreate->setShippingRequired($lineItem->getShippingRequired());
-        $lineItemCreate->setSku($lineItem->getSku());
+        $lineItemCreate->setSku(PayloadLimits::fixLength($lineItem->getSku(), PayloadLimits::LINE_ITEM_SKU));
 
         $taxes = $lineItem->getTaxes();
         $taxesCreate = [];
         foreach ($taxes as $tax) {
             $taxCreate = new \Wallee\Sdk\Model\TaxCreate();
             $taxCreate->setRate($tax->getRate());
-            $taxCreate->setTitle($tax->getTitle());
+            $taxCreate->setTitle(PayloadLimits::fixLength($tax->getTitle(), PayloadLimits::TAX_TITLE));
             $taxesCreate[] = $taxCreate;
         }
         if (count($taxesCreate) > 0) {
@@ -520,7 +519,7 @@ class WalleePaymentHandler extends AbstractPaymentHandler
         }
 
         $lineItemCreate->setType($lineItem->getType());
-        $lineItemCreate->setUniqueId($lineItem->getUniqueId());
+        $lineItemCreate->setUniqueId(PayloadLimits::fixLength($lineItem->getUniqueId(), PayloadLimits::LINE_ITEM_UNIQUE_ID));
 
         return $lineItemCreate;
     }
