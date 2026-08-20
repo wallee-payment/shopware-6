@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace WalleePayment\Core\Checkout\Service;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Struct\ArrayEntity;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use WalleePayment\Core\Api\Transaction\Service\TransactionService;
 use WalleePayment\Core\Settings\Service\SettingsService;
 use Wallee\Sdk\Model\TransactionState;
+use Wallee\Sdk\VersioningException;
 
 /**
  * This service manages the lifecycle of WhitelabelMachineName transactions and their state within the Shopware context.
@@ -36,6 +38,11 @@ class TransactionManagementService
     private CacheItemPoolInterface $cache;
 
     /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
+    /**
      * @param TransactionService $transactionService
      * @param SettingsService $settingsService
      * @param CacheItemPoolInterface $cache
@@ -48,6 +55,14 @@ class TransactionManagementService
         $this->transactionService = $transactionService;
         $this->settingsService = $settingsService;
         $this->cache = $cache;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -125,7 +140,21 @@ class TransactionManagementService
         if ($needsUpdate) {
             // Update the transaction in WhitelabelMachineName to reflect current cart and customer data.
             if ($transactionId) {
-                $this->transactionService->updateTempTransaction($salesChannelContext, $transactionId, $lineItems);
+                try {
+                    $this->transactionService->updateTempTransaction($salesChannelContext, $transactionId, $lineItems);
+                } catch (VersioningException $e) {
+                    // A concurrent request (e.g. a double tap or reload on the confirm page)
+                    // has already updated the same pending transaction with the current cart
+                    // data. The transaction is consistent on the portal side, so this request
+                    // can safely continue rendering instead of failing the whole page.
+                    $this->logger->info(
+                        sprintf(
+                            'Pending transaction %d was updated by a concurrent request, continuing: %s',
+                            $transactionId,
+                            $e->getMessage()
+                        )
+                    );
+                }
             }
 
             // Clear payment method cache as options might have changed due to address/currency change.

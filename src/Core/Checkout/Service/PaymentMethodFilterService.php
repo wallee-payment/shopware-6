@@ -121,6 +121,21 @@ class PaymentMethodFilterService
             return $paymentMethodCollection;
         }
 
+        // If the available methods were already resolved during this request (e.g. the
+        // payment method route decorator ran before the storefront page event), reuse the
+        // cached result instead of repeating the same synchronous API calls. The cache is
+        // reset with an empty id list whenever cart or customer data changes
+        // (see TransactionManagementService::updateTempTransactionIfNeeded()).
+        $possibleMethods = $salesChannelContext->getContext()->getExtension('possibleMethods');
+        if ($possibleMethods instanceof ArrayEntity && !empty($possibleMethods->get('ids'))) {
+            return $this->buildFilteredCollection(
+                $paymentMethodCollection,
+                $possibleMethods->get('ids'),
+                $settings->getSpaceId(),
+                $salesChannelContext
+            );
+        }
+
         $source = $event;
         if ($source === null) {
             // In headless (Store API) flow, event is null. We explicitly fetch the cart to get line items.

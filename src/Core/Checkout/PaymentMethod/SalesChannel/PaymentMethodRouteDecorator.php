@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WalleePayment\Core\Checkout\PaymentMethod\SalesChannel;
 
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Payment\PaymentMethodDefinition;
 use Shopware\Core\Checkout\Payment\SalesChannel\AbstractPaymentMethodRoute;
 use Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRouteResponse;
@@ -35,6 +36,11 @@ class PaymentMethodRouteDecorator extends AbstractPaymentMethodRoute
     private PaymentMethodFilterService $paymentMethodFilterService;
 
     /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
+    /**
      * @param AbstractPaymentMethodRoute $decorated
      * @param PaymentMethodFilterService $paymentMethodFilterService
      */
@@ -44,6 +50,14 @@ class PaymentMethodRouteDecorator extends AbstractPaymentMethodRoute
     ) {
         $this->decorated = $decorated;
         $this->paymentMethodFilterService = $paymentMethodFilterService;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -83,10 +97,20 @@ class PaymentMethodRouteDecorator extends AbstractPaymentMethodRoute
         $paymentMethods = $response->getPaymentMethods();
 
         // Apply WhitelabelMachineName-specific filtering logic via the dedicated service.
-        $filteredCollection = $this->paymentMethodFilterService->filterPaymentMethods(
-            $paymentMethods,
-            $context
-        );
+        try {
+            $filteredCollection = $this->paymentMethodFilterService->filterPaymentMethods(
+                $paymentMethods,
+                $context
+            );
+        } catch (\Exception $e) {
+            // If the portal API cannot be reached, the customer must still be able to
+            // check out with the unfiltered method list - a possibly too broad list is
+            // better than failing the whole checkout page with an error.
+            $this->logger->error(
+                'Payment method filtering failed, returning unfiltered methods: ' . $e->getMessage()
+            );
+            return $response;
+        }
 
         // Return the filtered results as a new response.
         return new PaymentMethodRouteResponse(
