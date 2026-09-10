@@ -1,3 +1,20 @@
+## Security Update (v 7.3.7)
+- This release addresses a security vulnerability affecting earlier versions of the integration plugin. 
+All merchants are strongly advised to update to version x.x.x immediately to ensure the security of their integration.
+
+### What's Changed
+- Security: Resolved an issue that could allow unauthorized access to certain data under specific configurations.
+
+### Required Action
+- Download and install this update as soon as possible. No configuration changes are required after upgrading.
+For full installation instructions or support, please refer to our documentation or reach out to our integration team.
+
+# 7.3.6
+- Shopware 6.7.13.1 compatible
+- Custom fields are now transmitted as Line Item Attributes
+- Improvements to checkout confirm page load times
+- Trim line item names that exceed 150 chars to prevent API rejection
+
 # 7.3.5
 - Shopware 6.7.12.1 compatible
 - Fix cart recreation and redirection when back button is used from payment page

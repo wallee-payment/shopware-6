@@ -67,26 +67,26 @@ class ProductCustomFieldAttributeService
      * ProductCustomFieldAttributeService constructor.
      *
      * @param \Psr\Container\ContainerInterface $container
-     * @param \Psr\Log\LoggerInterface|null $logger
      * @param \Shopware\Core\System\SalesChannel\SalesChannelContext $salesChannelContext
      * @param \WalleePayment\Core\Util\LocaleCodeProvider $localeCodeProvider
-     * @param \Shopware\Core\Checkout\Order\OrderEntity|null $order
      * @param array $allowFields
+     * @param \Psr\Log\LoggerInterface|null $logger
+     * @param \Shopware\Core\Checkout\Order\OrderEntity|null $order
      */
     public function __construct(
         ContainerInterface $container,
-        ?LoggerInterface $logger = null,
         SalesChannelContext $salesChannelContext,
         LocaleCodeProvider $localeCodeProvider,
+        array $allowFields,
+        ?LoggerInterface $logger = null,
         ?OrderEntity $order = null,
-        array $allowFields
     ) {
         $this->container = $container;
-        $this->logger = $logger;
         $this->salesChannelContext = $salesChannelContext;
         $this->localeCodeProvider = $localeCodeProvider;
-        $this->order = $order;
         $this->allowFields = $allowFields;
+        $this->logger = $logger;
+        $this->order = $order;
     }
 
     /**

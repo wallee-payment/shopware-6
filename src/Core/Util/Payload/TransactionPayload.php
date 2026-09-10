@@ -170,11 +170,11 @@ class TransactionPayload extends AbstractPayload
         if (!empty($this->settings->getProductCustomFieldsAllowList())) {
             $this->productCustomFieldAttributes = new ProductCustomFieldAttributeService(
                 $this->container,
-                $this->logger,
                 $this->salesChannelContext,
                 $this->localeCodeProvider,
+                $this->settings->getProductCustomFieldsAllowList(),
+                $this->logger,
                 $this->order,
-                $this->settings->getProductCustomFieldsAllowList()
             );
         }
     }
