@@ -354,18 +354,18 @@ class CheckoutController extends StorefrontController {
 			throw new MissingRequestParameterException('orderId');
 		}
 
-        // Adoption for Headless Storefronts
-        $orderRepo = $this->container->get('order.repository');
-        $criteria = new Criteria([$orderId]);
+		// Adoption for Headless Storefronts
+		$orderRepo = $this->container->get('order.repository');
+		$criteria = new Criteria([$orderId]);
 
-        $orderEntity = $orderRepo->search($criteria, $salesChannelContext->getContext())->first();
+		$orderEntity = $orderRepo->search($criteria, $salesChannelContext->getContext())->first();
 
-        if($orderEntity->getSalesChannelId() !== $salesChannelContext->getSalesChannelId()) {
-            $this->settings = $this->settingsService->getSettings($orderEntity->getSalesChannelId());
-            $trans = $this->getTransaction($orderId, $salesChannelContext->getContext());
-            return $this->redirect($trans->getSuccessUrl());
-        }
-        // End Adoption for Headless Storefronts
+		if($orderEntity->getSalesChannelId() !== $salesChannelContext->getSalesChannelId()) {
+			$this->settings = $this->settingsService->getSettings($orderEntity->getSalesChannelId());
+			$trans = $this->getTransaction($orderId, $salesChannelContext->getContext());
+			return $this->redirect($trans->getSuccessUrl());
+		}
+		// End Adoption for Headless Storefronts
 
 		try {
 			$this->cartService->deleteCart($salesChannelContext);
