@@ -4,6 +4,7 @@ namespace WalleePayment\Core\Settings\Struct;
 
 use Shopware\Core\Framework\Struct\Struct;
 use Wallee\Sdk\ApiClient;
+use WalleePayment\Core\Settings\Options\Integration;
 use WalleePayment\Core\Util\Analytics\Analytics;
 
 /**
@@ -37,14 +38,14 @@ class Settings extends Struct {
 	 *
 	 * @var string
 	 */
-	protected $integration;
+	protected $integration = Integration::PAYMENT_PAGE;
 
 	/**
 	 * Enforce line item consistency
 	 *
 	 * @var bool
 	 */
-	protected $lineItemConsistencyEnabled;
+	protected $lineItemConsistencyEnabled = true;
 
 	/**
 	 * Enable storefront invoice download
